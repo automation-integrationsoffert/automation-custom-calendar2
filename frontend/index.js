@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { initializeBlock, useBase, useRecords, expandRecord } from '@airtable/blocks/interface/ui';
 import {
     DndContext,
@@ -39,7 +39,7 @@ function StatusIcon({ iconName, size = 20 }) {
 }
 
 // Order Detail Card Component
-function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
+function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, showVisualization = true }) {
 
     // Early return if eventsTable is not available
     if (!eventsTable || !eventsTable.fields) {
@@ -278,8 +278,12 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
             {/* Horizontal scrollable list of matching events */}
             <div className="flex-1">
                 {matchingEvents.length > 0 ? (
-                    <div className="flex gap-3" style={{ margin: 'auto' }}>
-                        {matchingEvents.map((event, index) => {
+                    <SortableContext
+                        items={matchingEvents.map(ev => `order-detail-${orderNo}-${ev.id}`)}
+                        strategy={verticalListSortingStrategy}
+                    >
+                        <div className="flex gap-3" style={{ margin: 'auto' }}>
+                            {matchingEvents.map((event, index) => {
                             // Get image from event using exact field name "Attachments"
                             let imageUrl = null;
                                 if (event && eventsTable) {
@@ -391,20 +395,18 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
                                     backgroundColor={backgroundColor}
                                     isUpdating={updatingRecords && updatingRecords.has(event.id)}
                                     isRecentlyUpdated={recentlyUpdatedRecords && recentlyUpdatedRecords.has(event.id)}
+                                    orderNo={orderNo}
+                                    orderRecord={orderRecord}
+                                    onClose={onClose}
+                                    showVisualization={showVisualization}
                                 />
                             );
                         })}
-                    </div>
+                        </div>
+                    </SortableContext>
                 ) : (
                     <div className="text-xs text-gray-500 mt-4 p-4 text-center">
-                        <div className="mb-2 font-semibold">No matching calendar events found</div>
-                        <div className="text-xs text-gray-400">
-                            {!orderField && <div>⚠️ Order field not found in Calendar Events table</div>}
-                            {orderField && <div>No events found where Order field matches "{orderNo}"</div>}
-                            <div className="mt-2 text-xs">
-                                Check console (F12) for debugging information
-                            </div>
-                        </div>
+                        <div className="mb-2 font-semibold">No Orders found</div>
                     </div>
                 )}
             </div>
@@ -535,8 +537,333 @@ function CalendarImagesGallery({ events, eventsTable }) {
     );
 }
 
+// Left Side Order Detail Card Component (vertical layout for events, no Visualization)
+function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
+    // Early return if eventsTable is not available
+    if (!eventsTable || !eventsTable.fields) {
+        return (
+            <div 
+                className="left-side-order-detail-card flex-shrink-0"
+                style={{ 
+                    width: '280px',
+                    minWidth: '280px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    position: 'relative'
+                }}
+            >
+                <div className="text-xs text-red-600">Error: Events table not available</div>
+            </div>
+        );
+    }
+    
+    // Find Calendar Events that match this order number
+    const orderField = eventsTable.fields.find(field => field.name === 'Order');
+    const orderNoFieldInOrders = orderRecord?.table?.fields?.find(field => 
+        field.name === 'Order No' || 
+        field.name === 'Order No.' ||
+        field.name.toLowerCase().includes('order no')
+    );
+    
+    const matchingEvents = calendarEvents ? calendarEvents.filter(event => {
+        if (!orderField) return false;
+        const eventOrderValue = event.getCellValue(orderField.name);
+        if (!eventOrderValue) return false;
+        if (Array.isArray(eventOrderValue)) {
+            return eventOrderValue.some(linkedRecord => {
+                if (linkedRecord.id === orderRecord.id) return true;
+                if (orderNoFieldInOrders) {
+                    try {
+                        let linkedOrderNo = null;
+                        if (typeof linkedRecord.getCellValueAsString === 'function') {
+                            linkedOrderNo = linkedRecord.getCellValueAsString(orderNoFieldInOrders.name);
+                        } else if (typeof linkedRecord.getCellValue === 'function') {
+                            const cellValue = linkedRecord.getCellValue(orderNoFieldInOrders.name);
+                            linkedOrderNo = cellValue ? cellValue.toString() : null;
+                        } else if (linkedRecord[orderNoFieldInOrders.name]) {
+                            linkedOrderNo = linkedRecord[orderNoFieldInOrders.name].toString();
+                        } else {
+                            linkedOrderNo = linkedRecord.name || linkedRecord.id;
+                        }
+                        if (linkedOrderNo) {
+                            const orderNoStr = orderNo.toString().trim();
+                            const linkedOrderNoStr = linkedOrderNo.toString().trim();
+                            return linkedOrderNoStr === orderNoStr;
+                        }
+                    } catch (e) {
+                        console.log('Error getting Order No from linked record:', e);
+                    }
+                }
+                return false;
+            });
+        }
+        const eventOrderNo = eventOrderValue.toString().trim();
+        const orderNoStr = orderNo.toString().trim();
+        return eventOrderNo === orderNoStr;
+    }) : [];
+    
+    const visualizationField = eventsTable.fields.find(f => f.name === 'Visualization');
+    const arbetsorderField = eventsTable.fields.find(f => 
+        f.name === 'Arbetsorder' ||
+        f.name === 'Arbetsorder beskrivning' ||
+        f.name.toLowerCase() === 'arbetsorder'
+    );
+    const mekanikerField = eventsTable.fields.find(f => f.name === 'Mekaniker');
+    
+    // Get Fordon from Orders table
+    let fordon = '';
+    const ordersTable = orderTable || orderRecord?.table;
+    if (ordersTable && orderRecord) {
+        const fordonField = ordersTable.fields?.find(f => 
+            f.name === 'Fordon'
+        ) || ordersTable.fields?.find(f => 
+            f.name.toLowerCase() === 'fordon' || f.name.toLowerCase().includes('fordon')
+        ) || null;
+        if (fordonField) {
+            try {
+                fordon = orderRecord.getCellValueAsString(fordonField.name) || '';
+                if (!fordon) {
+                    const fordonValue = orderRecord.getCellValue(fordonField.name);
+                    if (fordonValue) {
+                        fordon = String(fordonValue);
+                    }
+                }
+            } catch (e) {
+                console.error('Error getting Fordon:', e);
+            }
+        }
+    }
+    
+    // Don't render the component if there are no matching events
+    if (matchingEvents.length === 0) {
+        return null;
+    }
+    
+    return (
+        <div 
+            className="left-side-order-detail-card p-3 flex-shrink-0"
+            style={{ 
+                flexDirection: 'column',
+                position: 'relative',
+                overflow: 'hidden',
+                width: '280px'
+            }}
+        >
+            {/* Vertical list of matching events */}
+            <div className="flex-1">
+                {matchingEvents.length > 0 ? (
+                    <SortableContext
+                        items={matchingEvents.map(ev => `order-detail-${orderNo}-${ev.id}`)}
+                        strategy={verticalListSortingStrategy}
+                    >
+                        <div className="flex flex-col gap-3" style={{ margin: 'auto' }}>
+                            {matchingEvents.map((event, index) => {
+                                let imageUrl = null;
+                                if (event && eventsTable) {
+                                    try {
+                                        const attachmentField = eventsTable.fields.find(
+                                            f => f.name.toLowerCase().trim() === 'attachments'
+                                        );
+                                        if (attachmentField) {
+                                            const attachments = event.getCellValue(attachmentField.name);
+                                            if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+                                                imageUrl = attachments[0].url ||
+                                                    attachments[0].thumbnails?.large?.url ||
+                                                    attachments[0].thumbnails?.small?.url;
+                                            }
+                                        }
+                                    } catch (e) {
+                                        console.error('Error getting image:', e);
+                                    }
+                                }
+                                
+                                let visualization = '';
+                                let arbetsorder = '';
+                                let mekanikerNames = '';
+                                
+                                try {
+                                    if (event && visualizationField) {
+                                        visualization = event.getCellValueAsString(visualizationField.name) || '';
+                                    }
+                                } catch (e) {
+                                    console.error('Error getting Visualization:', e);
+                                }
+                                
+                                try {
+                                    if (event && arbetsorderField) {
+                                        arbetsorder = event.getCellValueAsString(arbetsorderField.name) || '';
+                                    }
+                                } catch (e) {
+                                    console.error('Error getting Arbetsorder:', e);
+                                }
+                                
+                                try {
+                                    if (event && mekanikerField) {
+                                        const mekaniker = event.getCellValue(mekanikerField.name) || [];
+                                        if (Array.isArray(mekaniker)) {
+                                            mekanikerNames = mekaniker.map(m => {
+                                                if (typeof m === 'string') return m;
+                                                if (m && m.name) return m.name;
+                                                if (m && m.value) return m.value;
+                                                return String(m);
+                                            }).filter(Boolean).join(', ');
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error('Error getting Mekaniker:', e);
+                                }
+                                
+                                let status = 'Inget';
+                                let statusIcon = '❓';
+                                let backgroundColor = '#6b7280';
+                                
+                                try {
+                                    const orderStatus = event.getCellValue('Order Status');
+                                    if (orderStatus && Array.isArray(orderStatus) && orderStatus.length > 0) {
+                                        status = orderStatus[0]?.value || orderStatus[0]?.name || 'Inget';
+                                    } else if (orderStatus && typeof orderStatus === 'string') {
+                                        status = orderStatus;
+                                    }
+                                    
+                                    if (statusColors && statusColors[status]) {
+                                        backgroundColor = statusColors[status];
+                                    }
+                                    if (statusIcons && statusIcons[status]) {
+                                        statusIcon = statusIcons[status];
+                                    }
+                                } catch (e) {
+                                    console.error('Error getting Order Status:', e);
+                                }
+                                
+                                return (
+                                    <DraggableOrderEvent
+                                        key={event.id || index}
+                                        event={event}
+                                        imageUrl={imageUrl}
+                                        visualization={visualization}
+                                        fordon={fordon}
+                                        mekanikerNames={mekanikerNames}
+                                        status={status}
+                                        statusIcon={statusIcon}
+                                        backgroundColor={backgroundColor}
+                                        isUpdating={updatingRecords && updatingRecords.has(event.id)}
+                                        isRecentlyUpdated={recentlyUpdatedRecords && recentlyUpdatedRecords.has(event.id)}
+                                        orderNo={orderNo}
+                                        orderRecord={orderRecord}
+                                        onClose={onClose}
+                                        showVisualization={false}
+                                    />
+                                );
+                            })}
+                        </div>
+                    </SortableContext>
+                ) : null}
+            </div>
+        </div>
+    );
+}
+
+// Left Side Order Details Panel Component (vertical layout for events, no Visualization)
+function LeftSideOrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
+    console.log('LeftSideOrderDetailsPanel - selectedOrderNumbers:', Array.from(selectedOrderNumbers));
+    console.log('LeftSideOrderDetailsPanel - orders count:', orders?.length);
+    
+    if (selectedOrderNumbers.size === 0) {
+        return null;
+    }
+    
+    // Early return if required props are missing
+    if (!orderTable || !eventsTable) {
+        console.log('LeftSideOrderDetailsPanel - Missing orderTable or eventsTable');
+        return null;
+    }
+    
+    // Get selected order records
+    const orderNoField = orderTable?.fields?.find(field => 
+        field.name === 'Order No' || 
+        field.name === 'Order No.' ||
+        field.name.toLowerCase().includes('order no')
+    );
+    
+    const selectedOrders = orders ? orders.filter(order => {
+        if (!orderNoField) return false;
+        const orderNo = order.getCellValueAsString(orderNoField.name);
+        const orderNoTrimmed = orderNo ? orderNo.toString().trim() : '';
+        const isSelected = selectedOrderNumbers.has(orderNoTrimmed);
+        return isSelected;
+    }) : [];
+    
+    console.log('LeftSideOrderDetailsPanel - selectedOrders count:', selectedOrders.length);
+    
+    if (selectedOrders.length === 0) {
+        return null;
+    }
+    
+    // Find Calendar Events that match order numbers
+    const orderField = eventsTable.fields.find(field => field.name === 'Order');
+    
+    // Filter orders that have matching events
+    const ordersWithEvents = selectedOrders.filter(order => {
+        const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
+        if (!orderField || !calendarEvents) return false;
+        
+        const matchingEvents = calendarEvents.filter(event => {
+            const eventOrderValue = event.getCellValue(orderField.name);
+            if (!eventOrderValue) return false;
+            if (Array.isArray(eventOrderValue)) {
+                return eventOrderValue.some(linkedRecord => linkedRecord.id === order.id);
+            }
+            const eventOrderNo = eventOrderValue.toString().trim();
+            const orderNoStr = orderNo.toString().trim();
+            return eventOrderNo === orderNoStr;
+        });
+        
+        return matchingEvents.length > 0;
+    });
+    
+    // Don't render the panel if no orders have matching events
+    if (ordersWithEvents.length === 0) {
+        return null;
+    }
+    
+    return (
+        <div 
+            className="left-side-order-details-panel"
+            style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '16px',
+                gap: '16px',
+                overflowY: 'auto',
+                alignItems: 'center'
+            }}
+        >
+            {ordersWithEvents.map(order => {
+                const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
+                return (
+                    <LeftSideOrderDetailCard
+                        key={order.id}
+                        orderNo={orderNo}
+                        orderRecord={order}
+                        orderTable={orderTable}
+                        calendarEvents={calendarEvents || []}
+                        eventsTable={eventsTable}
+                        onClose={() => onCloseOrder(orderNo)}
+                        statusColors={statusColors}
+                        statusIcons={statusIcons}
+                        updatingRecords={updatingRecords}
+                        recentlyUpdatedRecords={recentlyUpdatedRecords}
+                    />
+                );
+            })}
+        </div>
+    );
+}
+
 // Order Details Panel Component (shows at top)
-function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
+function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, showVisualization = true }) {
     console.log('OrderDetailsPanel - selectedOrderNumbers:', Array.from(selectedOrderNumbers));
     console.log('OrderDetailsPanel - orders count:', orders?.length);
     
@@ -560,7 +887,16 @@ function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarE
     const selectedOrders = orders ? orders.filter(order => {
         if (!orderNoField) return false;
         const orderNo = order.getCellValueAsString(orderNoField.name);
-        return selectedOrderNumbers.has(orderNo);
+        const orderNoTrimmed = orderNo ? orderNo.toString().trim() : '';
+        const isSelected = selectedOrderNumbers.has(orderNoTrimmed);
+        console.log('Checking order:', {
+            orderId: order.id,
+            orderNo: orderNo,
+            orderNoTrimmed: orderNoTrimmed,
+            selectedOrderNumbers: Array.from(selectedOrderNumbers),
+            isSelected: isSelected
+        });
+        return isSelected;
     }) : [];
     
     console.log('OrderDetailsPanel - selectedOrders count:', selectedOrders.length);
@@ -568,6 +904,7 @@ function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarE
         const no = orderNoField ? o.getCellValueAsString(orderNoField.name) : o.id;
         return no;
     }));
+    console.log('OrderDetailsPanel - selectedOrderNumbers Set:', Array.from(selectedOrderNumbers));
     
     if (selectedOrders.length === 0) {
         return null;
@@ -583,7 +920,16 @@ function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarE
                 alignItems: 'center'
             }}
         >
-            <div className="flex gap-3" style={{ alignItems: 'flex-start', justifyContent: 'center' }}>
+            <div 
+                className="flex gap-3" 
+                style={{ 
+                    alignItems: 'flex-start', 
+                    justifyContent: 'center',
+                    flexDirection: 'row',
+                    flexWrap: 'nowrap',
+                    overflowX: 'auto'
+                }}
+            >
                 {selectedOrders.map(order => {
                     const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
                     console.log('Rendering OrderDetailCard for:', orderNo);
@@ -600,6 +946,7 @@ function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarE
                             statusIcons={statusIcons}
                             updatingRecords={updatingRecords}
                             recentlyUpdatedRecords={recentlyUpdatedRecords}
+                            showVisualization={showVisualization}
                         />
                     );
                 })}
@@ -636,7 +983,7 @@ function OrderList({ orders, orderTable, selectedOrderNumbers = new Set(), onOrd
                 }}
             >
                 <div className="px-4 py-3 border-b-2 border-red-300 bg-red-50 flex-shrink-0">
-                    <h3 className="text-sm font-bold text-red-700">Order No.</h3>
+                    <h3 className="text-sm font-bold text-red-700">Orders</h3>
                     <div className="text-xs text-red-600 mt-1">⚠️ DEBUG MODE</div>
                 </div>
                 <div className="flex-1 flex items-center justify-center p-4">
@@ -672,7 +1019,7 @@ function OrderList({ orders, orderTable, selectedOrderNumbers = new Set(), onOrd
                 }}
             >
                 <div className="px-4 py-3 border-b border-gray-200 bg-blue-50 flex-shrink-0">
-                    <h3 className="text-sm font-semibold text-gray-700">Order No.</h3>
+                    <h3 className="text-sm font-semibold text-gray-700">Orders</h3>
                     <div className="text-xs text-gray-500 mt-1">0 orders</div>
                 </div>
                 <div className="flex-1 flex items-center justify-center p-4">
@@ -696,15 +1043,29 @@ function OrderList({ orders, orderTable, selectedOrderNumbers = new Set(), onOrd
         field.name.toLowerCase().includes('order no')
     );
     
+    // Find Fordon field in Orders table
+    const fordonField = orderTable.fields?.find(f => 
+        f.name === 'Fordon'
+    ) || orderTable.fields?.find(f => 
+        f.name.toLowerCase() === 'fordon' ||
+        f.name.toLowerCase().includes('fordon')
+    ) || null;
+    
     // Log field search for debugging
     if (!orderNoField) {
         console.log('Order No field not found. Available fields:', orderTable.fields.map(f => f.name));
     } else {
         console.log('Order No field found:', orderNoField.name);
     }
+    
+    if (!fordonField) {
+        console.log('Fordon field not found. Available fields:', orderTable.fields.map(f => f.name));
+    } else {
+        console.log('Fordon field found:', fordonField.name);
+    }
 
-    // Get order numbers with record reference
-    const orderData = orders.map(order => {
+    // Get order data with sequential number, order number, and Fordon
+    const orderData = orders.map((order, index) => {
         let orderNo;
         if (orderNoField) {
             orderNo = order.getCellValueAsString(orderNoField.name) || order.id;
@@ -713,7 +1074,29 @@ function OrderList({ orders, orderTable, selectedOrderNumbers = new Set(), onOrd
             const textField = orderTable.fields.find(f => f.type === 'singleLineText' || f.type === 'multilineText');
             orderNo = textField ? order.getCellValueAsString(textField.name) : order.id;
         }
-        return { orderNo, record: order };
+        
+        // Get Fordon value
+        let fordon = '';
+        if (fordonField) {
+            try {
+                fordon = order.getCellValueAsString(fordonField.name) || '';
+                if (!fordon) {
+                    const fordonValue = order.getCellValue(fordonField.name);
+                    if (fordonValue) {
+                        fordon = String(fordonValue);
+                    }
+                }
+            } catch (e) {
+                console.error('Error getting Fordon for order:', order.id, e);
+            }
+        }
+        
+        return { 
+            sequentialNumber: index + 1,
+            orderNo, 
+            fordon: fordon || 'N/A',
+            record: order 
+        };
     }).filter(item => item.orderNo);
 
     return (
@@ -734,7 +1117,7 @@ function OrderList({ orders, orderTable, selectedOrderNumbers = new Set(), onOrd
             }}
         >
             <div className="px-4 py-3 border-b border-gray-200 bg-green-50 sticky top-0 z-40 flex-shrink-0">
-                <h3 className="text-sm font-semibold text-gray-700">Order No.</h3>
+                <h3 className="text-sm font-semibold text-gray-700">Orders</h3>
                 {orderData.length > 0 && (
                     <div className="text-xs text-gray-500 mt-1">{orderData.length} orders</div>
                 )}
@@ -742,12 +1125,25 @@ function OrderList({ orders, orderTable, selectedOrderNumbers = new Set(), onOrd
             <div className="flex-1 overflow-y-auto" style={{ minHeight: 0 }}>
                 {orderData.length > 0 ? (
                     <div className="w-full">
-                        {orderData.map(({ orderNo, record }, index) => {
-                            const isSelected = selectedOrderNumbers.has(orderNo);
+                        {/* Header Row */}
+                        <div className="px-4 py-2 border-b-2 border-gray-300 bg-gray-100 sticky top-0 z-30 flex items-center gap-2" style={{ minHeight: '32px' }}>
+                            <span className="font-semibold text-gray-700" style={{ minWidth: '20px' }}>
+                                No
+                            </span>
+                            <span className="font-semibold text-gray-700 flex-1">
+                                Order Number
+                            </span>
+                            <span className="text-xs font-semibold text-gray-700" style={{ minWidth: '50px', textAlign: 'right' }}>
+                                Fordon
+                            </span>
+                        </div>
+                        {orderData.map(({ sequentialNumber, orderNo, fordon, record }) => {
+                            const orderNoTrimmed = orderNo ? orderNo.toString().trim() : '';
+                            const isSelected = selectedOrderNumbers.has(orderNoTrimmed);
                             return (
                                 <div 
                                     key={record.id}
-                                    className={`text-sm px-4 py-2 cursor-pointer border-b border-gray-200 transition-colors flex items-center ${
+                                    className={`text-xs px-4 py-2 cursor-pointer border-b border-gray-200 transition-colors flex items-center gap-2 ${
                                         isSelected ? 'bg-blue-100 border-l-4 border-blue-500' : 'text-gray-700 hover:bg-blue-50'
                                     }`}
                                     style={{ 
@@ -766,18 +1162,27 @@ function OrderList({ orders, orderTable, selectedOrderNumbers = new Set(), onOrd
                                             e.currentTarget.style.backgroundColor = 'transparent';
                                         }
                                     }}
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                        e.stopPropagation();
                                         if (onOrderClick) {
-                                            onOrderClick(orderNo);
+                                            const orderNoTrimmed = orderNo ? orderNo.toString().trim() : '';
+                                            console.log('Order list item clicked:', orderNo, 'trimmed:', orderNoTrimmed);
+                                            onOrderClick(orderNoTrimmed, e);
                                         }
                                     }}
                                     title={isSelected ? "Click to deselect" : "Click to view order details (replaces current selection)"}
                                 >
-                                    <span className={`font-medium ${isSelected ? 'text-blue-700' : 'text-gray-600'}`}>
+                                    <span className={`font-semibold ${isSelected ? 'text-blue-700' : 'text-gray-500'}`} style={{ minWidth: '20px' }}>
+                                        {sequentialNumber}.
+                                    </span>
+                                    <span className={`font-medium flex-1 ${isSelected ? 'text-blue-700' : 'text-gray-600'}`}>
                                         {orderNo}
                                     </span>
+                                    <span className={`text-xs ${isSelected ? 'text-blue-600' : 'text-gray-500'}`} style={{ minWidth: '50px', textAlign: 'right' }}>
+                                        {fordon}
+                                    </span>
                                     {isSelected && (
-                                        <span className="ml-2 text-blue-600 text-xs">✓</span>
+                                        <span className="ml-1 text-blue-600 text-xs">✓</span>
                                     )}
                                 </div>
                             );
@@ -809,7 +1214,10 @@ function DroppableCell({ mechanicName, date, hourIndex, hourHeight }) {
 }
 
 // Draggable Order Event Component (for order detail panel)
-function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated }) {
+function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, showVisualization = true }) {
+    // Use useSortable with unique ID that includes both orderNo and event.id
+    // Format: "order-detail-{orderNo}-{event.id}" so each event is uniquely identifiable
+    const uniqueId = `order-detail-${orderNo || 'unknown'}-${event.id}`;
     const {
         attributes,
         listeners,
@@ -817,7 +1225,12 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
         transform,
         transition,
         isDragging,
-    } = useSortable({ id: `event-${event.id}` });
+    } = useSortable({ id: uniqueId });
+
+    // Don't render if updating or recently updated
+    if (isUpdating || isRecentlyUpdated) {
+        return null;
+    }
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -825,11 +1238,6 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
         opacity: isDragging ? 0.5 : 1,
         cursor: isDragging ? 'grabbing' : 'grab',
     };
-
-    // Don't render if updating or recently updated
-    if (isUpdating || isRecentlyUpdated) {
-        return null;
-    }
 
     return (
         <div 
@@ -846,7 +1254,20 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
                 borderRadius: '8px',
                 padding: '8px',
                 backgroundColor: isDragging ? '#f0f9ff' : 'transparent',
-                transition: 'all 0.2s'
+                transition: 'all 0.2s',
+                position: 'relative'
+            }}
+            onClick={(e) => {
+                // Only handle click if we're not dragging
+                // The drag sensor with 10px activation distance will prevent clicks from triggering drag
+                if (!isDragging) {
+                    // Don't stop propagation or prevent default - let drag work
+                    // Double click to deselect/close the order detail
+                    if (e.detail === 2 && onClose) {
+                        e.stopPropagation();
+                        onClose();
+                    }
+                }
             }}
         >
             {/* Image - First line (at the very top) */}
@@ -864,14 +1285,16 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
                 </div>
             )}
             
-            {/* Visualization - Second line */}
-            <div className="mb-1 text-xs text-center">
-                {visualization ? (
-                    <span className="text-gray-800">{visualization}</span>
-                ) : (
-                    <span className="text-gray-400 italic">Not set</span>
-                )}
-            </div>
+            {/* Visualization - Second line (only if showVisualization is true) */}
+            {showVisualization && (
+                <div className="mb-1 text-xs text-center">
+                    {visualization ? (
+                        <span className="text-gray-800">{visualization}</span>
+                    ) : (
+                        <span className="text-gray-400 italic">Not set</span>
+                    )}
+                </div>
+            )}
             
             {/* Fordon - Third line (from Orders table) */}
             <div className="mb-1 text-xs text-center">
@@ -1147,10 +1570,16 @@ function CalendarInterfaceExtension() {
     const [updatingRecords, setUpdatingRecords] = useState(new Set());
     const [recentlyUpdatedRecords, setRecentlyUpdatedRecords] = useState(new Set());
     const [selectedOrderNumbers, setSelectedOrderNumbers] = useState(new Set());
+    const isInitialMount = useRef(true);
+    const isSelectingOrder = useRef(false); // Prevent multiple simultaneous selections
 
-    // Drag and drop sensors
+    // Drag and drop sensors - configure to only activate on drag, not click
     const sensors = useSensors(
-        useSensor(PointerSensor),
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 10, // Only activate drag after 10px of movement
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
@@ -1174,6 +1603,20 @@ function CalendarInterfaceExtension() {
         setStartDate(monday.toISOString().split('T')[0]);
         setEndDate(friday.toISOString().split('T')[0]);
     }, []);
+
+    // Clear selected orders when week changes
+    useEffect(() => {
+        // Skip clearing on initial mount
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        
+        // Clear selection when week changes
+        if (startDate && endDate) {
+            setSelectedOrderNumbers(new Set());
+        }
+    }, [startDate, endDate]);
 
     const goToWeek = (offsetWeeks) => {
         const start = new Date(startDate);
@@ -1201,6 +1644,188 @@ function CalendarInterfaceExtension() {
             const overId = over.id;
             
             console.log('Parsing IDs:', { activeId, overId });
+            
+            // Handle order detail being dragged to calendar cell
+            if (activeId.startsWith('order-detail-') && overId.startsWith('cell-')) {
+                // Extract order number and event ID from ID format: "order-detail-{orderNo}-{eventId}"
+                const activeParts = activeId.split('-');
+                let orderNo = '';
+                let sourceEventId = '';
+                
+                if (activeParts.length >= 4) {
+                    // Format: order-detail-{orderNo}-{eventId}
+                    orderNo = activeParts.slice(2, -1).join('-'); // Everything between "order-detail" and the last part
+                    sourceEventId = activeParts[activeParts.length - 1]; // Last part is the event ID
+                } else {
+                    // Fallback
+                    orderNo = activeId.replace('order-detail-', '').split('-')[0];
+                }
+                
+                // Parse target cell info
+                const parts = overId.split('-');
+                const mechanicName = parts[1];
+                const dateString = `${parts[2]}-${parts[3]}`; // MM-DD format
+                const hourIndex = parseInt(parts[4]);
+                
+                console.log('Order detail dropped:', { orderNo, sourceEventId, mechanicName, dateString, hourIndex });
+                
+                // Find the order record
+                const orderNoField = orderTable?.fields?.find(field => 
+                    field.name === 'Order No' || 
+                    field.name === 'Order No.' ||
+                    field.name.toLowerCase().includes('order no')
+                );
+                
+                if (!orderNoField || !orderTable || !eventsTable) {
+                    console.error('Required fields or tables not found');
+                    return;
+                }
+                
+                const orderRecord = orderRecords.find(order => {
+                    try {
+                        const orderNoValue = order.getCellValueAsString(orderNoField.name);
+                        return orderNoValue && orderNoValue.toString().trim() === orderNo.toString().trim();
+                    } catch (e) {
+                        return false;
+                    }
+                });
+                
+                if (!orderRecord) {
+                    console.error('Order not found:', orderNo);
+                    return;
+                }
+                
+                // Get the source event if it exists
+                const sourceEvent = sourceEventId ? events.find(ev => ev.id === sourceEventId) : null;
+                
+                // Convert MM-DD format to proper date
+                const [month, day] = dateString.split('-').map(Number);
+                const matchingDate = displayedDates.find(d => 
+                    d.getMonth() + 1 === month && d.getDate() === day
+                );
+                
+                if (!matchingDate) {
+                    console.error('Could not find matching date in displayed dates');
+                    return;
+                }
+                
+                // Calculate start and end times
+                const targetDate = new Date(matchingDate);
+                const newStartTime = new Date(targetDate);
+                newStartTime.setHours(hourIndex + 5, 0, 0, 0); // Convert from 0-14 hour index to actual hour (05:00-19:00)
+                
+                // If source event exists, update it (move it). Otherwise, create a new one.
+                if (sourceEvent) {
+                    // Update existing event (move it to new location)
+                    const oldStartTime = new Date(sourceEvent.getCellValue('Starttid'));
+                    const oldEndTime = new Date(sourceEvent.getCellValue('Sluttid'));
+                    const duration = oldEndTime - oldStartTime;
+                    const newEndTime = new Date(newStartTime.getTime() + duration);
+                    
+                    console.log('Moving existing event:', {
+                        eventId: sourceEvent.id,
+                        mechanicName,
+                        newStartTime: newStartTime.toISOString(),
+                        newEndTime: newEndTime.toISOString()
+                    });
+                    
+                    // Check permissions
+                    if (!eventsTable.hasPermissionToUpdateRecords([sourceEvent])) {
+                        console.warn('No permission to update records. Please enable record editing in Airtable base settings.');
+                        alert('Cannot update event: Record editing is not enabled. Please contact your base administrator.');
+                        return;
+                    }
+                    
+                    // Prepare update fields
+                    const updateFields = {
+                        'Starttid': newStartTime,
+                        'Sluttid': newEndTime
+                    };
+                    
+                    // Update mechanic if different
+                    const mekanikerField = eventsTable.fields.find(field => 
+                        field.name === 'Mekaniker' || 
+                        field.name.toLowerCase() === 'mekaniker'
+                    );
+                    if (mekanikerField) {
+                        const mechanicId = mechanicNameToId[mechanicName];
+                        if (mechanicId) {
+                            updateFields[mekanikerField.name] = [{ id: mechanicId }];
+                        } else {
+                            // Fallback: try to use name
+                            updateFields[mekanikerField.name] = [{ name: mechanicName }];
+                        }
+                    }
+                    
+                    try {
+                        // Update the existing record
+                        await eventsTable.updateRecordAsync(sourceEvent, updateFields);
+                        console.log('Event moved successfully:', sourceEvent.id);
+                    } catch (error) {
+                        console.error('Error moving event:', error);
+                        alert('Error moving event: ' + error.message);
+                    }
+                } else {
+                    // No source event - create a new one
+                    const duration = 60 * 60 * 1000; // Default 1 hour
+                    const newEndTime = new Date(newStartTime.getTime() + duration);
+                    
+                    console.log('Creating new event:', {
+                        orderNo,
+                        mechanicName,
+                        newStartTime: newStartTime.toISOString(),
+                        newEndTime: newEndTime.toISOString()
+                    });
+                    
+                    // Check permissions
+                    if (!eventsTable.hasPermissionToCreateRecords()) {
+                        console.warn('No permission to create records. Please enable record editing in Airtable base settings.');
+                        alert('Cannot create event: Record editing is not enabled. Please contact your base administrator.');
+                        return;
+                    }
+                    
+                    // Prepare fields for new record
+                    const newRecordFields = {
+                        'Starttid': newStartTime,
+                        'Sluttid': newEndTime
+                    };
+                    
+                    // Link the order
+                    const orderField = eventsTable.fields.find(field => 
+                        field.name === 'Order' || 
+                        field.name.toLowerCase() === 'order'
+                    );
+                    if (orderField) {
+                        newRecordFields[orderField.name] = [{ id: orderRecord.id }];
+                    }
+                    
+                    // Link the mechanic
+                    const mekanikerField = eventsTable.fields.find(field => 
+                        field.name === 'Mekaniker' || 
+                        field.name.toLowerCase() === 'mekaniker'
+                    );
+                    if (mekanikerField) {
+                        const mechanicId = mechanicNameToId[mechanicName];
+                        if (mechanicId) {
+                            newRecordFields[mekanikerField.name] = [{ id: mechanicId }];
+                        } else {
+                            // Fallback: try to use name
+                            newRecordFields[mekanikerField.name] = [{ name: mechanicName }];
+                        }
+                    }
+                    
+                    try {
+                        // Create the new record
+                        const newRecord = await eventsTable.createRecordAsync(newRecordFields);
+                        console.log('New calendar event created successfully:', newRecord.id);
+                    } catch (error) {
+                        console.error('Error creating calendar event:', error);
+                        alert('Error creating calendar event: ' + error.message);
+                    }
+                }
+                
+                return;
+            }
             
             // Extract information from IDs (format: "event-{recordId}" and "cell-{mechanicName}-{dateString}-{hourIndex}")
             if (activeId.startsWith('event-') && overId.startsWith('cell-')) {
@@ -1519,10 +2144,101 @@ function CalendarInterfaceExtension() {
 
     const formatShortDate = date => `${date.getMonth() + 1}-${date.getDate()}`;
 
+    // Filter orders to only show those with status "Inget" from Orders table (no week filtering)
+    const getOrdersWithIngetStatus = (orders) => {
+        if (!orders || orders.length === 0) {
+            return orders || [];
+        }
+
+        // Find the Status field in Orders table
+        const statusField = orderTable?.fields?.find(field => 
+            field.name === 'Status' || 
+            field.name === 'Order Status' ||
+            field.name.toLowerCase() === 'status' ||
+            field.name.toLowerCase().includes('status')
+        );
+
+        console.log('Status field search:', {
+            found: !!statusField,
+            fieldName: statusField?.name,
+            fieldType: statusField?.type,
+            allFields: orderTable?.fields?.map(f => ({ name: f.name, type: f.type })) || []
+        });
+
+        // Filter by status "Inget" - show ALL orders with this status regardless of week
+        if (statusField && orderTable) {
+            const ordersWithIngetStatus = orders.filter(order => {
+                try {
+                    // For single select fields, try getCellValueAsString first (recommended for single select)
+                    let statusValue = '';
+                    
+                    // Method 1: Try getCellValueAsString (works well for single select fields)
+                    try {
+                        statusValue = order.getCellValueAsString(statusField.name) || '';
+                    } catch (e1) {
+                        // Method 2: Fall back to getCellValue
+                        const status = order.getCellValue(statusField.name);
+                        
+                        // Handle single select field (can be string or object)
+                        if (typeof status === 'string') {
+                            statusValue = status;
+                        } else if (status && typeof status === 'object') {
+                            // Single select might return an object with name property
+                            statusValue = status.name || status.value || String(status);
+                        } else if (Array.isArray(status) && status.length > 0) {
+                            // Handle array (shouldn't happen for single select, but just in case)
+                            statusValue = status[0]?.name || status[0]?.value || status[0] || '';
+                        } else if (status) {
+                            statusValue = String(status);
+                        }
+                    }
+                    
+                    const statusValueTrimmed = statusValue.toString().trim();
+                    const matches = statusValueTrimmed === 'Inget';
+                    
+                    // Debug logging for first few orders
+                    if (orders.indexOf(order) < 5) {
+                        console.log('Order status check (Single select):', {
+                            orderId: order.id,
+                            statusValue: statusValue,
+                            statusValueTrimmed: statusValueTrimmed,
+                            matches: matches,
+                            fieldType: statusField.type
+                        });
+                    }
+                    
+                    return matches;
+                } catch (e) {
+                    console.error('Error getting status for order:', order.id, e);
+                    return false;
+                }
+            });
+            
+            console.log('Orders with Inget status:', {
+                totalOrders: orders.length,
+                ordersWithIngetStatus: ordersWithIngetStatus.length,
+                orderIds: ordersWithIngetStatus.map(o => o.id)
+            });
+            
+            return ordersWithIngetStatus;
+        } else {
+            console.warn('Status field not found in Orders table. Available fields:', orderTable?.fields?.map(f => f.name) || []);
+            // If status field not found, return empty array (don't show any orders)
+            return [];
+        }
+    };
+
+    const filteredOrderRecords = getOrdersWithIngetStatus(orderRecords);
+
     const getEventsForMechanicAndDate = (mechanicName, date) => {
         if (!mechanicName || mechanicName.trim() === '' || mechanicName === 'undefined') {
             return []; // Don't return events for invalid mechanic names
         }
+        
+        // Find the Order field in Calendar Events table
+        const orderField = eventsTable?.fields?.find(field => 
+            field.name === 'Order'
+        );
         
         return events.filter(ev => {
             const mekaniker = ev.getCellValue('Mekaniker') || [];
@@ -1531,6 +2247,48 @@ function CalendarInterfaceExtension() {
             // Check if date matches
             if (start.toDateString() !== date.toDateString()) {
                 return false;
+            }
+            
+            // Check if event has a valid order number
+            if (orderField && orderTable && orderRecords.length > 0) {
+                const eventOrderValue = ev.getCellValue(orderField.name);
+                
+                // If no order value, exclude this event
+                if (!eventOrderValue) {
+                    return false;
+                }
+                
+                // Check if the order exists in orderRecords
+                let hasValidOrder = false;
+                
+                // Handle linked records (array) - when Order field links to Orders table
+                if (Array.isArray(eventOrderValue)) {
+                    hasValidOrder = eventOrderValue.some(linkedRecord => {
+                        // Check if the linked record ID exists in orderRecords
+                        return orderRecords.some(order => order.id === linkedRecord.id);
+                    });
+                } else {
+                    // Handle direct value (if Order field is a text field with order number)
+                    // Find the Order No field in Orders table
+                    const orderNoField = orderTable.fields?.find(field => 
+                        field.name === 'Order No' || 
+                        field.name === 'Order No.' ||
+                        field.name.toLowerCase().includes('order no')
+                    );
+                    
+                    if (orderNoField) {
+                        const eventOrderNo = eventOrderValue.toString().trim();
+                        hasValidOrder = orderRecords.some(order => {
+                            const orderNo = order.getCellValueAsString(orderNoField.name);
+                            return orderNo && orderNo.toString().trim() === eventOrderNo;
+                        });
+                    }
+                }
+                
+                // If event doesn't have a valid order, exclude it
+                if (!hasValidOrder) {
+                    return false;
+                }
             }
             
             // Check if any mechanic in the event matches the mechanic name
@@ -1580,22 +2338,71 @@ function CalendarInterfaceExtension() {
 
     // Handler for order click - replace previous selection with new one
     // If clicking the same order again, keep it selected (don't deselect)
-    const handleOrderClick = (orderNo) => {
+    const handleOrderClick = useCallback((orderNo, event) => {
+        // Prevent multiple simultaneous selections
+        if (isSelectingOrder.current) {
+            console.warn('Selection already in progress, ignoring click');
+            return;
+        }
+        
+        // If event is provided and it came from an order detail card, ignore it
+        if (event && event.target && event.target.closest('.order-detail-card')) {
+            console.log('Click originated from order detail card, ignoring selection');
+            return;
+        }
+        
+        // Validate input
+        if (!orderNo) {
+            console.warn('handleOrderClick called with empty orderNo');
+            return;
+        }
+        
+        const orderNoTrimmed = orderNo.toString().trim();
+        if (!orderNoTrimmed) {
+            console.warn('handleOrderClick called with orderNo that becomes empty after trim:', orderNo);
+            return;
+        }
+        
+        console.log('handleOrderClick called with orderNo:', orderNo, 'trimmed:', orderNoTrimmed);
+        console.trace('Stack trace for handleOrderClick');
+        
+        // Set flag to prevent multiple simultaneous selections
+        isSelectingOrder.current = true;
+        
+        // Use functional update to ensure we're working with the latest state
         setSelectedOrderNumbers(prev => {
+            console.log('Previous selectedOrderNumbers:', Array.from(prev));
+            console.log('Previous selectedOrderNumbers size:', prev.size);
+            
             // If clicking the same order that's already selected, keep it selected
-            if (prev.has(orderNo)) {
+            if (prev.has(orderNoTrimmed)) {
+                console.log('Order already selected, keeping selection');
+                isSelectingOrder.current = false;
                 return prev; // Keep the same selection
             }
+            
             // Otherwise, replace with the new order (only one selected at a time)
-            return new Set([orderNo]);
+            // Create a completely new Set to ensure React detects the change
+            const newSelection = new Set();
+            newSelection.add(orderNoTrimmed);
+            console.log('New selection:', Array.from(newSelection));
+            console.log('New selection size:', newSelection.size);
+            
+            // Reset flag after a short delay
+            setTimeout(() => {
+                isSelectingOrder.current = false;
+            }, 100);
+            
+            return newSelection;
         });
-    };
+    }, []);
 
     // Handler for closing order detail
     const handleCloseOrder = (orderNo) => {
+        const orderNoTrimmed = orderNo ? orderNo.toString().trim() : '';
         setSelectedOrderNumbers(prev => {
             const newSet = new Set(prev);
-            newSet.delete(orderNo);
+            newSet.delete(orderNoTrimmed);
             return newSet;
         });
     };
@@ -1644,7 +2451,7 @@ function CalendarInterfaceExtension() {
                     {eventsTable && (
                         <OrderDetailsPanel
                             selectedOrderNumbers={selectedOrderNumbers}
-                            orders={orderRecords}
+                            orders={filteredOrderRecords}
                             orderTable={orderTable}
                             calendarEvents={events}
                             eventsTable={eventsTable}
@@ -1670,7 +2477,7 @@ function CalendarInterfaceExtension() {
                     {eventsTable && (
                         <OrderDetailsPanel
                             selectedOrderNumbers={selectedOrderNumbers}
-                            orders={orderRecords}
+                            orders={filteredOrderRecords}
                             orderTable={orderTable}
                             calendarEvents={events}
                             eventsTable={eventsTable}
@@ -1694,6 +2501,74 @@ function CalendarInterfaceExtension() {
                             overflow: 'visible'
                         }}
                     >
+                        {/* LEFT SIDE: Order Details Panel (vertical layout, no Visualization) - Only show when order is selected and has matching events */}
+                        {(() => {
+                            // Check if there are any orders with matching events before rendering the container
+                            if (!eventsTable || selectedOrderNumbers.size === 0) {
+                                return null;
+                            }
+                            
+                            const orderField = eventsTable.fields.find(field => field.name === 'Order');
+                            if (!orderField || !filteredOrderRecords || filteredOrderRecords.length === 0) {
+                                return null;
+                            }
+                            
+                            const orderNoField = orderTable?.fields?.find(field => 
+                                field.name === 'Order No' || 
+                                field.name === 'Order No.' ||
+                                field.name.toLowerCase().includes('order no')
+                            );
+                            
+                            // Check if any selected order has matching events
+                            const hasOrdersWithEvents = filteredOrderRecords.some(order => {
+                                if (!selectedOrderNumbers.has(orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id)) {
+                                    return false;
+                                }
+                                const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
+                                const matchingEvents = events.filter(event => {
+                                    const eventOrderValue = event.getCellValue(orderField.name);
+                                    if (!eventOrderValue) return false;
+                                    if (Array.isArray(eventOrderValue)) {
+                                        return eventOrderValue.some(linkedRecord => linkedRecord.id === order.id);
+                                    }
+                                    const eventOrderNo = eventOrderValue.toString().trim();
+                                    const orderNoStr = orderNo.toString().trim();
+                                    return eventOrderNo === orderNoStr;
+                                });
+                                return matchingEvents.length > 0;
+                            });
+                            
+                            if (!hasOrdersWithEvents) {
+                                return null;
+                            }
+                            
+                            return (
+                                <div 
+                                    className="flex-shrink-0 border-r border-gray-300 bg-white"
+                                    style={{ 
+                                        width: '300px',
+                                        minWidth: '300px',
+                                        height: '100%',
+                                        overflowY: 'auto',
+                                        overflowX: 'hidden'
+                                    }}
+                                >
+                                    <LeftSideOrderDetailsPanel
+                                        selectedOrderNumbers={selectedOrderNumbers}
+                                        orders={filteredOrderRecords}
+                                        orderTable={orderTable}
+                                        calendarEvents={events}
+                                        eventsTable={eventsTable}
+                                        onCloseOrder={handleCloseOrder}
+                                        statusColors={statusColors}
+                                        statusIcons={statusIcons}
+                                        updatingRecords={updatingRecords}
+                                        recentlyUpdatedRecords={recentlyUpdatedRecords}
+                                    />
+                                </div>
+                            );
+                        })()}
+                        
                         <div className="relative rounded-l-lg overflow-hidden flex-1" style={{ overflowY: 'auto', overflowX: 'auto', border: '1px solid rgb(229, 231, 235)', borderRight: 'none', height: '100%' }}>
                         {/* MAIN CALENDAR SECTION */}
                         <div className="flex overflow-x-auto">
@@ -1854,11 +2729,11 @@ function CalendarInterfaceExtension() {
                         {/* RIGHT SIDE: Order List Panel - ALWAYS VISIBLE */}
                         {(() => {
                             console.log('Rendering OrderList component in main render');
-                            console.log('orderRecords:', orderRecords.length);
+                            console.log('filteredOrderRecords:', filteredOrderRecords.length);
                             console.log('orderTable:', orderTable?.name);
                             return (
                                 <OrderList 
-                                    orders={orderRecords} 
+                                    orders={filteredOrderRecords} 
                                     orderTable={orderTable}
                                     selectedOrderNumbers={selectedOrderNumbers}
                                     onOrderClick={handleOrderClick}

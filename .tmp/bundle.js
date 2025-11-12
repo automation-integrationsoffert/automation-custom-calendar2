@@ -42716,6 +42716,9 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       transform
     };
   }
+  function useDndContext() {
+    return (0, import_react7.useContext)(PublicContext);
+  }
   function useDroppable(_ref) {
     let {
       data,
@@ -44231,8 +44234,104 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
     newArray.splice(to < 0 ? newArray.length + to : to, 0, newArray.splice(from, 1)[0]);
     return newArray;
   }
+  function getSortedRects(items, rects) {
+    return items.reduce((accumulator, id, index) => {
+      const rect = rects.get(id);
+      if (rect) {
+        accumulator[index] = rect;
+      }
+      return accumulator;
+    }, Array(items.length));
+  }
   function isValidIndex(index) {
     return index !== null && index >= 0;
+  }
+  function itemsEqual(a, b) {
+    if (a === b) {
+      return true;
+    }
+    if (a.length !== b.length) {
+      return false;
+    }
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+  function normalizeDisabled(disabled) {
+    if (typeof disabled === "boolean") {
+      return {
+        draggable: disabled,
+        droppable: disabled
+      };
+    }
+    return disabled;
+  }
+  function getItemGap$1(clientRects, index, activeIndex) {
+    const currentRect = clientRects[index];
+    const previousRect = clientRects[index - 1];
+    const nextRect = clientRects[index + 1];
+    if (!currentRect) {
+      return 0;
+    }
+    if (activeIndex < index) {
+      return previousRect ? currentRect.top - (previousRect.top + previousRect.height) : nextRect ? nextRect.top - (currentRect.top + currentRect.height) : 0;
+    }
+    return nextRect ? nextRect.top - (currentRect.top + currentRect.height) : previousRect ? currentRect.top - (previousRect.top + previousRect.height) : 0;
+  }
+  function SortableContext(_ref) {
+    let {
+      children,
+      id,
+      items: userDefinedItems,
+      strategy = rectSortingStrategy,
+      disabled: disabledProp = false
+    } = _ref;
+    const {
+      active,
+      dragOverlay,
+      droppableRects,
+      over,
+      measureDroppableContainers
+    } = useDndContext();
+    const containerId = useUniqueId(ID_PREFIX2, id);
+    const useDragOverlay = Boolean(dragOverlay.rect !== null);
+    const items = (0, import_react8.useMemo)(() => userDefinedItems.map((item) => typeof item === "object" && "id" in item ? item.id : item), [userDefinedItems]);
+    const isDragging = active != null;
+    const activeIndex = active ? items.indexOf(active.id) : -1;
+    const overIndex = over ? items.indexOf(over.id) : -1;
+    const previousItemsRef = (0, import_react8.useRef)(items);
+    const itemsHaveChanged = !itemsEqual(items, previousItemsRef.current);
+    const disableTransforms = overIndex !== -1 && activeIndex === -1 || itemsHaveChanged;
+    const disabled = normalizeDisabled(disabledProp);
+    useIsomorphicLayoutEffect(() => {
+      if (itemsHaveChanged && isDragging) {
+        measureDroppableContainers(items);
+      }
+    }, [itemsHaveChanged, items, isDragging, measureDroppableContainers]);
+    (0, import_react8.useEffect)(() => {
+      previousItemsRef.current = items;
+    }, [items]);
+    const contextValue = (0, import_react8.useMemo)(
+      () => ({
+        activeIndex,
+        containerId,
+        disabled,
+        disableTransforms,
+        items,
+        overIndex,
+        useDragOverlay,
+        sortedRects: getSortedRects(items, droppableRects),
+        strategy
+      }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [activeIndex, containerId, disabled.draggable, disabled.droppable, disableTransforms, items, overIndex, droppableRects, useDragOverlay, strategy]
+    );
+    return import_react8.default.createElement(Context.Provider, {
+      value: contextValue
+    }, children);
   }
   function useDerivedTransform(_ref) {
     let {
@@ -44487,7 +44586,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
     }
     return a.data.current.sortable.index < b.data.current.sortable.index;
   }
-  var import_react8, rectSortingStrategy, ID_PREFIX2, Context, defaultNewIndexGetter, defaultAnimateLayoutChanges, defaultTransition, transitionProperty, disabledTransition, defaultAttributes, directions, sortableKeyboardCoordinates;
+  var import_react8, rectSortingStrategy, defaultScale$1, verticalListSortingStrategy, ID_PREFIX2, Context, defaultNewIndexGetter, defaultAnimateLayoutChanges, defaultTransition, transitionProperty, disabledTransition, defaultAttributes, directions, sortableKeyboardCoordinates;
   var init_sortable_esm = __esm({
     "node_modules/@dnd-kit/sortable/dist/sortable.esm.js"() {
       import_react8 = __toESM(require_react());
@@ -44512,6 +44611,51 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           scaleX: newRect.width / oldRect.width,
           scaleY: newRect.height / oldRect.height
         };
+      };
+      defaultScale$1 = {
+        scaleX: 1,
+        scaleY: 1
+      };
+      verticalListSortingStrategy = (_ref) => {
+        var _rects$activeIndex;
+        let {
+          activeIndex,
+          activeNodeRect: fallbackActiveRect,
+          index,
+          rects,
+          overIndex
+        } = _ref;
+        const activeNodeRect = (_rects$activeIndex = rects[activeIndex]) != null ? _rects$activeIndex : fallbackActiveRect;
+        if (!activeNodeRect) {
+          return null;
+        }
+        if (index === activeIndex) {
+          const overIndexRect = rects[overIndex];
+          if (!overIndexRect) {
+            return null;
+          }
+          return __spreadValues({
+            x: 0,
+            y: activeIndex < overIndex ? overIndexRect.top + overIndexRect.height - (activeNodeRect.top + activeNodeRect.height) : overIndexRect.top - activeNodeRect.top
+          }, defaultScale$1);
+        }
+        const itemGap = getItemGap$1(rects, index, activeIndex);
+        if (index > activeIndex && index <= overIndex) {
+          return __spreadValues({
+            x: 0,
+            y: -activeNodeRect.height - itemGap
+          }, defaultScale$1);
+        }
+        if (index < activeIndex && index >= overIndex) {
+          return __spreadValues({
+            x: 0,
+            y: activeNodeRect.height + itemGap
+          }, defaultScale$1);
+        }
+        return __spreadValues({
+          x: 0,
+          y: 0
+        }, defaultScale$1);
       };
       ID_PREFIX2 = "Sortable";
       Context = /* @__PURE__ */ import_react8.default.createContext({
@@ -44669,7 +44813,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
   var init_style = __esm({
     "frontend/style.css"() {
       style = document.createElement("style");
-      style.textContent = '*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }\n\n/*! tailwindcss v3.4.18 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Courier,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.visible{visibility:visible}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.right-2{right:.5rem}.top-0{top:0}.top-2{top:.5rem}.z-10{z-index:10}.z-40{z-index:40}.m-0{margin:0}.mb-1{margin-bottom:.25rem}.mb-2{margin-bottom:.5rem}.mb-4{margin-bottom:1rem}.ml-2{margin-left:.5rem}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-4{margin-top:1rem}.block{display:block}.flex{display:flex}.table{display:table}.grid{display:grid}.hidden{display:none}.h-6{height:1.5rem}.h-full{height:100%}.w-6{width:1.5rem}.w-full{width:100%}.flex-1{flex:1 1 0%}.flex-none{flex:none}.flex-shrink-0{flex-shrink:0}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-center{justify-content:center}.gap-0{gap:0}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:.25rem}.rounded-full{border-radius:9999px}.rounded-l-lg{border-top-left-radius:.875rem;border-bottom-left-radius:.875rem}.rounded-r-lg{border-top-right-radius:.875rem;border-bottom-right-radius:.875rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-l-4{border-left-width:4px}.border-r{border-right-width:1px}.border-dashed{border-style:dashed}.border-blue-300{--tw-border-opacity:1;border-color:rgb(147 197 253/var(--tw-border-opacity,1))}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246/var(--tw-border-opacity,1))}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235/var(--tw-border-opacity,1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219/var(--tw-border-opacity,1))}.border-green-300{--tw-border-opacity:1;border-color:rgb(134 239 172/var(--tw-border-opacity,1))}.border-red-300{--tw-border-opacity:1;border-color:rgb(252 165 165/var(--tw-border-opacity,1))}.border-red-500{--tw-border-opacity:1;border-color:rgb(239 68 68/var(--tw-border-opacity,1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254/var(--tw-bg-opacity,1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255/var(--tw-bg-opacity,1))}.bg-blue-500{--tw-bg-opacity:1;background-color:rgb(59 130 246/var(--tw-bg-opacity,1))}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246/var(--tw-bg-opacity,1))}.bg-gray-200{--tw-bg-opacity:1;background-color:rgb(229 231 235/var(--tw-bg-opacity,1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251/var(--tw-bg-opacity,1))}.bg-green-50{--tw-bg-opacity:1;background-color:rgb(240 253 244/var(--tw-bg-opacity,1))}.bg-green-500{--tw-bg-opacity:1;background-color:rgb(34 197 94/var(--tw-bg-opacity,1))}.bg-red-50{--tw-bg-opacity:1;background-color:rgb(254 242 242/var(--tw-bg-opacity,1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.pb-1{padding-bottom:.25rem}.pr-2{padding-right:.5rem}.pr-6{padding-right:1.5rem}.text-center{text-align:center}.text-right{text-align:right}.font-sans{font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji}.text-base{font-size:.8125rem;line-height:1.25rem}.text-sm{font-size:.6875rem;line-height:1rem}.text-xs{font-size:.5625rem;line-height:.875rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.italic{font-style:italic}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235/var(--tw-text-opacity,1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216/var(--tw-text-opacity,1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175/var(--tw-text-opacity,1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128/var(--tw-text-opacity,1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99/var(--tw-text-opacity,1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81/var(--tw-text-opacity,1))}.text-gray-800{--tw-text-opacity:1;color:rgb(31 41 55/var(--tw-text-opacity,1))}.text-gray-900{--tw-text-opacity:1;color:rgb(17 24 39/var(--tw-text-opacity,1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38/var(--tw-text-opacity,1))}.text-red-700{--tw-text-opacity:1;color:rgb(185 28 28/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.blur{--tw-blur:blur(8px)}.blur,.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-200{transition-duration:.2s}.hover\\:bg-blue-50:hover{--tw-bg-opacity:1;background-color:rgb(239 246 255/var(--tw-bg-opacity,1))}.hover\\:bg-blue-600:hover{--tw-bg-opacity:1;background-color:rgb(37 99 235/var(--tw-bg-opacity,1))}.hover\\:bg-gray-300:hover{--tw-bg-opacity:1;background-color:rgb(209 213 219/var(--tw-bg-opacity,1))}.hover\\:bg-gray-50:hover{--tw-bg-opacity:1;background-color:rgb(249 250 251/var(--tw-bg-opacity,1))}.hover\\:bg-green-600:hover{--tw-bg-opacity:1;background-color:rgb(22 163 74/var(--tw-bg-opacity,1))}.hover\\:opacity-90:hover{opacity:.9}';
+      style.textContent = '*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }\n\n/*! tailwindcss v3.4.18 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Courier,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width:640px){.container{max-width:640px}}@media (min-width:768px){.container{max-width:768px}}@media (min-width:1024px){.container{max-width:1024px}}@media (min-width:1280px){.container{max-width:1280px}}@media (min-width:1536px){.container{max-width:1536px}}.visible{visibility:visible}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.right-2{right:.5rem}.top-0{top:0}.top-2{top:.5rem}.z-10{z-index:10}.z-30{z-index:30}.z-40{z-index:40}.m-0{margin:0}.mb-1{margin-bottom:.25rem}.mb-2{margin-bottom:.5rem}.mb-4{margin-bottom:1rem}.ml-1{margin-left:.25rem}.ml-2{margin-left:.5rem}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-4{margin-top:1rem}.block{display:block}.flex{display:flex}.table{display:table}.grid{display:grid}.hidden{display:none}.h-6{height:1.5rem}.h-full{height:100%}.w-6{width:1.5rem}.w-full{width:100%}.flex-1{flex:1 1 0%}.flex-none{flex:none}.flex-shrink-0{flex-shrink:0}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-center{justify-content:center}.gap-0{gap:0}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:.25rem}.rounded-full{border-radius:9999px}.rounded-l-lg{border-top-left-radius:.875rem;border-bottom-left-radius:.875rem}.rounded-r-lg{border-top-right-radius:.875rem;border-bottom-right-radius:.875rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-l-4{border-left-width:4px}.border-r{border-right-width:1px}.border-dashed{border-style:dashed}.border-blue-300{--tw-border-opacity:1;border-color:rgb(147 197 253/var(--tw-border-opacity,1))}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246/var(--tw-border-opacity,1))}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235/var(--tw-border-opacity,1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219/var(--tw-border-opacity,1))}.border-green-300{--tw-border-opacity:1;border-color:rgb(134 239 172/var(--tw-border-opacity,1))}.border-red-300{--tw-border-opacity:1;border-color:rgb(252 165 165/var(--tw-border-opacity,1))}.border-red-500{--tw-border-opacity:1;border-color:rgb(239 68 68/var(--tw-border-opacity,1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254/var(--tw-bg-opacity,1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255/var(--tw-bg-opacity,1))}.bg-blue-500{--tw-bg-opacity:1;background-color:rgb(59 130 246/var(--tw-bg-opacity,1))}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246/var(--tw-bg-opacity,1))}.bg-gray-200{--tw-bg-opacity:1;background-color:rgb(229 231 235/var(--tw-bg-opacity,1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251/var(--tw-bg-opacity,1))}.bg-green-50{--tw-bg-opacity:1;background-color:rgb(240 253 244/var(--tw-bg-opacity,1))}.bg-green-500{--tw-bg-opacity:1;background-color:rgb(34 197 94/var(--tw-bg-opacity,1))}.bg-red-50{--tw-bg-opacity:1;background-color:rgb(254 242 242/var(--tw-bg-opacity,1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.pb-1{padding-bottom:.25rem}.pr-2{padding-right:.5rem}.pr-6{padding-right:1.5rem}.text-center{text-align:center}.text-right{text-align:right}.font-sans{font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji}.text-base{font-size:.8125rem;line-height:1.25rem}.text-sm{font-size:.6875rem;line-height:1rem}.text-xs{font-size:.5625rem;line-height:.875rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.italic{font-style:italic}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235/var(--tw-text-opacity,1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216/var(--tw-text-opacity,1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175/var(--tw-text-opacity,1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128/var(--tw-text-opacity,1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99/var(--tw-text-opacity,1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81/var(--tw-text-opacity,1))}.text-gray-800{--tw-text-opacity:1;color:rgb(31 41 55/var(--tw-text-opacity,1))}.text-gray-900{--tw-text-opacity:1;color:rgb(17 24 39/var(--tw-text-opacity,1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38/var(--tw-text-opacity,1))}.text-red-700{--tw-text-opacity:1;color:rgb(185 28 28/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.blur{--tw-blur:blur(8px)}.blur,.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-200{transition-duration:.2s}.hover\\:bg-blue-50:hover{--tw-bg-opacity:1;background-color:rgb(239 246 255/var(--tw-bg-opacity,1))}.hover\\:bg-blue-600:hover{--tw-bg-opacity:1;background-color:rgb(37 99 235/var(--tw-bg-opacity,1))}.hover\\:bg-gray-300:hover{--tw-bg-opacity:1;background-color:rgb(209 213 219/var(--tw-bg-opacity,1))}.hover\\:bg-gray-50:hover{--tw-bg-opacity:1;background-color:rgb(249 250 251/var(--tw-bg-opacity,1))}.hover\\:bg-green-600:hover{--tw-bg-opacity:1;background-color:rgb(22 163 74/var(--tw-bg-opacity,1))}.hover\\:opacity-90:hover{opacity:.9}';
       document.head.appendChild(style);
     }
   });
@@ -44934,7 +45078,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
 
   // frontend/index.js
   var frontend_exports = {};
-  function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
+  function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, showVisualization = true }) {
     if (!eventsTable || !eventsTable.fields) {
       return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
         "div",
@@ -45108,149 +45252,141 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           position: "relative",
           overflow: "hidden"
         },
-        children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1", children: matchingEvents.length > 0 ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex gap-3", style: { margin: "auto" }, children: matchingEvents.map((event, index) => {
-          let imageUrl = null;
-          if (event && eventsTable) {
-            try {
-              const attachmentField = eventsTable.fields.find(
-                (f) => f.name.toLowerCase().trim() === "attachments"
-                // f.type === 'multipleAttachment'
-              );
-              if (attachmentField) {
-                const attachments = event.getCellValue(attachmentField.name);
-                if (attachments && Array.isArray(attachments) && attachments.length > 0) {
-                  imageUrl = attachments[0].url || attachments[0].thumbnails?.large?.url || attachments[0].thumbnails?.small?.url;
+        children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1", children: matchingEvents.length > 0 ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
+          SortableContext,
+          {
+            items: matchingEvents.map((ev) => `order-detail-${orderNo}-${ev.id}`),
+            strategy: verticalListSortingStrategy,
+            children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex gap-3", style: { margin: "auto" }, children: matchingEvents.map((event, index) => {
+              let imageUrl = null;
+              if (event && eventsTable) {
+                try {
+                  const attachmentField = eventsTable.fields.find(
+                    (f) => f.name.toLowerCase().trim() === "attachments"
+                    // f.type === 'multipleAttachment'
+                  );
+                  if (attachmentField) {
+                    const attachments = event.getCellValue(attachmentField.name);
+                    if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+                      imageUrl = attachments[0].url || attachments[0].thumbnails?.large?.url || attachments[0].thumbnails?.small?.url;
+                    }
+                  } else {
+                    console.warn("\u26A0\uFE0F Attachments field not found in Calendar Events table. Available fields:", eventsTable.fields.map((f) => f.name));
+                  }
+                } catch (e) {
+                  console.error("Error getting image:", e);
                 }
-              } else {
-                console.warn("\u26A0\uFE0F Attachments field not found in Calendar Events table. Available fields:", eventsTable.fields.map((f) => f.name));
               }
-            } catch (e) {
-              console.error("Error getting image:", e);
-            }
-          }
-          let visualization = "";
-          let arbetsorder = "";
-          let mekanikerNames = "";
-          try {
-            if (event && visualizationField) {
-              visualization = event.getCellValueAsString(visualizationField.name) || "";
-            }
-          } catch (e) {
-            console.error("Error getting Visualization:", e);
-          }
-          try {
-            if (event && arbetsorderField) {
-              arbetsorder = event.getCellValueAsString(arbetsorderField.name) || "";
-              console.log(`Arbetsorder value for event ${index + 1}:`, arbetsorder || "empty");
-            } else {
-              console.log(`Arbetsorder field not found for event ${index + 1}`);
-            }
-          } catch (e) {
-            console.error("Error getting Arbetsorder:", e);
-          }
-          try {
-            if (event && mekanikerField) {
-              const mekaniker = event.getCellValue(mekanikerField.name) || [];
-              if (Array.isArray(mekaniker)) {
-                mekanikerNames = mekaniker.map((m) => {
-                  if (typeof m === "string") return m;
-                  if (m && m.name) return m.name;
-                  if (m && m.value) return m.value;
-                  return String(m);
-                }).filter(Boolean).join(", ");
+              let visualization = "";
+              let arbetsorder = "";
+              let mekanikerNames = "";
+              try {
+                if (event && visualizationField) {
+                  visualization = event.getCellValueAsString(visualizationField.name) || "";
+                }
+              } catch (e) {
+                console.error("Error getting Visualization:", e);
               }
-            }
-          } catch (e) {
-            console.error("Error getting Mekaniker:", e);
-          }
-          console.log(`Event ${index + 1} (${event.id}) data:`, {
-            hasImage: !!imageUrl,
-            hasArbetsorderField: !!arbetsorderField,
-            arbetsorderFieldName: arbetsorderField?.name,
-            visualization: visualization || "empty",
-            arbetsorder: arbetsorder || "empty",
-            mekanikerNames: mekanikerNames || "empty"
-          });
-          let status = "Inget";
-          let statusIcon = "\u2753";
-          let backgroundColor = "#6b7280";
-          try {
-            const orderStatus = event.getCellValue("Order Status");
-            if (orderStatus && Array.isArray(orderStatus) && orderStatus.length > 0) {
-              status = orderStatus[0]?.value || orderStatus[0]?.name || "Inget";
-            } else if (orderStatus && typeof orderStatus === "string") {
-              status = orderStatus;
-            }
-            if (statusColors && statusColors[status]) {
-              backgroundColor = statusColors[status];
-            }
-            if (statusIcons && statusIcons[status]) {
-              statusIcon = statusIcons[status];
-            }
-          } catch (e) {
-            console.error("Error getting Order Status:", e);
-          }
-          return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
-            DraggableOrderEvent,
-            {
-              event,
-              imageUrl,
-              visualization,
-              fordon,
-              mekanikerNames,
-              status,
-              statusIcon,
-              backgroundColor,
-              isUpdating: updatingRecords && updatingRecords.has(event.id),
-              isRecentlyUpdated: recentlyUpdatedRecords && recentlyUpdatedRecords.has(event.id)
-            },
-            event.id || index,
-            false,
-            {
+              try {
+                if (event && arbetsorderField) {
+                  arbetsorder = event.getCellValueAsString(arbetsorderField.name) || "";
+                  console.log(`Arbetsorder value for event ${index + 1}:`, arbetsorder || "empty");
+                } else {
+                  console.log(`Arbetsorder field not found for event ${index + 1}`);
+                }
+              } catch (e) {
+                console.error("Error getting Arbetsorder:", e);
+              }
+              try {
+                if (event && mekanikerField) {
+                  const mekaniker = event.getCellValue(mekanikerField.name) || [];
+                  if (Array.isArray(mekaniker)) {
+                    mekanikerNames = mekaniker.map((m) => {
+                      if (typeof m === "string") return m;
+                      if (m && m.name) return m.name;
+                      if (m && m.value) return m.value;
+                      return String(m);
+                    }).filter(Boolean).join(", ");
+                  }
+                }
+              } catch (e) {
+                console.error("Error getting Mekaniker:", e);
+              }
+              console.log(`Event ${index + 1} (${event.id}) data:`, {
+                hasImage: !!imageUrl,
+                hasArbetsorderField: !!arbetsorderField,
+                arbetsorderFieldName: arbetsorderField?.name,
+                visualization: visualization || "empty",
+                arbetsorder: arbetsorder || "empty",
+                mekanikerNames: mekanikerNames || "empty"
+              });
+              let status = "Inget";
+              let statusIcon = "\u2753";
+              let backgroundColor = "#6b7280";
+              try {
+                const orderStatus = event.getCellValue("Order Status");
+                if (orderStatus && Array.isArray(orderStatus) && orderStatus.length > 0) {
+                  status = orderStatus[0]?.value || orderStatus[0]?.name || "Inget";
+                } else if (orderStatus && typeof orderStatus === "string") {
+                  status = orderStatus;
+                }
+                if (statusColors && statusColors[status]) {
+                  backgroundColor = statusColors[status];
+                }
+                if (statusIcons && statusIcons[status]) {
+                  statusIcon = statusIcons[status];
+                }
+              } catch (e) {
+                console.error("Error getting Order Status:", e);
+              }
+              return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
+                DraggableOrderEvent,
+                {
+                  event,
+                  imageUrl,
+                  visualization,
+                  fordon,
+                  mekanikerNames,
+                  status,
+                  statusIcon,
+                  backgroundColor,
+                  isUpdating: updatingRecords && updatingRecords.has(event.id),
+                  isRecentlyUpdated: recentlyUpdatedRecords && recentlyUpdatedRecords.has(event.id),
+                  orderNo,
+                  orderRecord,
+                  onClose,
+                  showVisualization
+                },
+                event.id || index,
+                false,
+                {
+                  fileName: "frontend/index.js",
+                  lineNumber: 386,
+                  columnNumber: 33
+                },
+                this
+              );
+            }) }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 382,
-              columnNumber: 33
-            },
-            this
-          );
-        }) }, void 0, false, {
-          fileName: "frontend/index.js",
-          lineNumber: 281,
-          columnNumber: 21
-        }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-500 mt-4 p-4 text-center", children: [
-          /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-2 font-semibold", children: "No matching calendar events found" }, void 0, false, {
-            fileName: "frontend/index.js",
-            lineNumber: 400,
-            columnNumber: 25
-          }, this),
-          /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-400", children: [
-            !orderField && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { children: "\u26A0\uFE0F Order field not found in Calendar Events table" }, void 0, false, {
-              fileName: "frontend/index.js",
-              lineNumber: 402,
-              columnNumber: 45
-            }, this),
-            orderField && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { children: [
-              'No events found where Order field matches "',
-              orderNo,
-              '"'
-            ] }, void 0, true, {
-              fileName: "frontend/index.js",
-              lineNumber: 403,
-              columnNumber: 44
-            }, this),
-            /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mt-2 text-xs", children: "Check console (F12) for debugging information" }, void 0, false, {
-              fileName: "frontend/index.js",
-              lineNumber: 404,
-              columnNumber: 29
+              lineNumber: 285,
+              columnNumber: 25
             }, this)
-          ] }, void 0, true, {
+          },
+          void 0,
+          false,
+          {
             fileName: "frontend/index.js",
-            lineNumber: 401,
-            columnNumber: 25
-          }, this)
-        ] }, void 0, true, {
+            lineNumber: 281,
+            columnNumber: 21
+          },
+          this
+        ) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-500 mt-4 p-4 text-center", children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-2 font-semibold", children: "No Orders found" }, void 0, false, {
           fileName: "frontend/index.js",
-          lineNumber: 399,
+          lineNumber: 409,
+          columnNumber: 25
+        }, this) }, void 0, false, {
+          fileName: "frontend/index.js",
+          lineNumber: 408,
           columnNumber: 21
         }, this) }, void 0, false, {
           fileName: "frontend/index.js",
@@ -45315,20 +45451,259 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 472,
+        lineNumber: 474,
         columnNumber: 9
       },
       this
     );
   }
-  function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
-    console.log("OrderDetailsPanel - selectedOrderNumbers:", Array.from(selectedOrderNumbers));
-    console.log("OrderDetailsPanel - orders count:", orders?.length);
+  function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
+    if (!eventsTable || !eventsTable.fields) {
+      return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
+        "div",
+        {
+          className: "left-side-order-detail-card flex-shrink-0",
+          style: {
+            width: "280px",
+            minWidth: "280px",
+            display: "flex",
+            flexDirection: "column",
+            position: "relative"
+          },
+          children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-red-600", children: "Error: Events table not available" }, void 0, false, {
+            fileName: "frontend/index.js",
+            lineNumber: 555,
+            columnNumber: 17
+          }, this)
+        },
+        void 0,
+        false,
+        {
+          fileName: "frontend/index.js",
+          lineNumber: 545,
+          columnNumber: 13
+        },
+        this
+      );
+    }
+    const orderField = eventsTable.fields.find((field) => field.name === "Order");
+    const orderNoFieldInOrders = orderRecord?.table?.fields?.find(
+      (field) => field.name === "Order No" || field.name === "Order No." || field.name.toLowerCase().includes("order no")
+    );
+    const matchingEvents = calendarEvents ? calendarEvents.filter((event) => {
+      if (!orderField) return false;
+      const eventOrderValue = event.getCellValue(orderField.name);
+      if (!eventOrderValue) return false;
+      if (Array.isArray(eventOrderValue)) {
+        return eventOrderValue.some((linkedRecord) => {
+          if (linkedRecord.id === orderRecord.id) return true;
+          if (orderNoFieldInOrders) {
+            try {
+              let linkedOrderNo = null;
+              if (typeof linkedRecord.getCellValueAsString === "function") {
+                linkedOrderNo = linkedRecord.getCellValueAsString(orderNoFieldInOrders.name);
+              } else if (typeof linkedRecord.getCellValue === "function") {
+                const cellValue = linkedRecord.getCellValue(orderNoFieldInOrders.name);
+                linkedOrderNo = cellValue ? cellValue.toString() : null;
+              } else if (linkedRecord[orderNoFieldInOrders.name]) {
+                linkedOrderNo = linkedRecord[orderNoFieldInOrders.name].toString();
+              } else {
+                linkedOrderNo = linkedRecord.name || linkedRecord.id;
+              }
+              if (linkedOrderNo) {
+                const orderNoStr2 = orderNo.toString().trim();
+                const linkedOrderNoStr = linkedOrderNo.toString().trim();
+                return linkedOrderNoStr === orderNoStr2;
+              }
+            } catch (e) {
+              console.log("Error getting Order No from linked record:", e);
+            }
+          }
+          return false;
+        });
+      }
+      const eventOrderNo = eventOrderValue.toString().trim();
+      const orderNoStr = orderNo.toString().trim();
+      return eventOrderNo === orderNoStr;
+    }) : [];
+    const visualizationField = eventsTable.fields.find((f) => f.name === "Visualization");
+    const arbetsorderField = eventsTable.fields.find(
+      (f) => f.name === "Arbetsorder" || f.name === "Arbetsorder beskrivning" || f.name.toLowerCase() === "arbetsorder"
+    );
+    const mekanikerField = eventsTable.fields.find((f) => f.name === "Mekaniker");
+    let fordon = "";
+    const ordersTable = orderTable || orderRecord?.table;
+    if (ordersTable && orderRecord) {
+      const fordonField = ordersTable.fields?.find(
+        (f) => f.name === "Fordon"
+      ) || ordersTable.fields?.find(
+        (f) => f.name.toLowerCase() === "fordon" || f.name.toLowerCase().includes("fordon")
+      ) || null;
+      if (fordonField) {
+        try {
+          fordon = orderRecord.getCellValueAsString(fordonField.name) || "";
+          if (!fordon) {
+            const fordonValue = orderRecord.getCellValue(fordonField.name);
+            if (fordonValue) {
+              fordon = String(fordonValue);
+            }
+          }
+        } catch (e) {
+          console.error("Error getting Fordon:", e);
+        }
+      }
+    }
+    if (matchingEvents.length === 0) {
+      return null;
+    }
+    return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
+      "div",
+      {
+        className: "left-side-order-detail-card p-3 flex-shrink-0",
+        style: {
+          flexDirection: "column",
+          position: "relative",
+          overflow: "hidden",
+          width: "280px"
+        },
+        children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1", children: matchingEvents.length > 0 ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
+          SortableContext,
+          {
+            items: matchingEvents.map((ev) => `order-detail-${orderNo}-${ev.id}`),
+            strategy: verticalListSortingStrategy,
+            children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex flex-col gap-3", style: { margin: "auto" }, children: matchingEvents.map((event, index) => {
+              let imageUrl = null;
+              if (event && eventsTable) {
+                try {
+                  const attachmentField = eventsTable.fields.find(
+                    (f) => f.name.toLowerCase().trim() === "attachments"
+                  );
+                  if (attachmentField) {
+                    const attachments = event.getCellValue(attachmentField.name);
+                    if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+                      imageUrl = attachments[0].url || attachments[0].thumbnails?.large?.url || attachments[0].thumbnails?.small?.url;
+                    }
+                  }
+                } catch (e) {
+                  console.error("Error getting image:", e);
+                }
+              }
+              let visualization = "";
+              let arbetsorder = "";
+              let mekanikerNames = "";
+              try {
+                if (event && visualizationField) {
+                  visualization = event.getCellValueAsString(visualizationField.name) || "";
+                }
+              } catch (e) {
+                console.error("Error getting Visualization:", e);
+              }
+              try {
+                if (event && arbetsorderField) {
+                  arbetsorder = event.getCellValueAsString(arbetsorderField.name) || "";
+                }
+              } catch (e) {
+                console.error("Error getting Arbetsorder:", e);
+              }
+              try {
+                if (event && mekanikerField) {
+                  const mekaniker = event.getCellValue(mekanikerField.name) || [];
+                  if (Array.isArray(mekaniker)) {
+                    mekanikerNames = mekaniker.map((m) => {
+                      if (typeof m === "string") return m;
+                      if (m && m.name) return m.name;
+                      if (m && m.value) return m.value;
+                      return String(m);
+                    }).filter(Boolean).join(", ");
+                  }
+                }
+              } catch (e) {
+                console.error("Error getting Mekaniker:", e);
+              }
+              let status = "Inget";
+              let statusIcon = "\u2753";
+              let backgroundColor = "#6b7280";
+              try {
+                const orderStatus = event.getCellValue("Order Status");
+                if (orderStatus && Array.isArray(orderStatus) && orderStatus.length > 0) {
+                  status = orderStatus[0]?.value || orderStatus[0]?.name || "Inget";
+                } else if (orderStatus && typeof orderStatus === "string") {
+                  status = orderStatus;
+                }
+                if (statusColors && statusColors[status]) {
+                  backgroundColor = statusColors[status];
+                }
+                if (statusIcons && statusIcons[status]) {
+                  statusIcon = statusIcons[status];
+                }
+              } catch (e) {
+                console.error("Error getting Order Status:", e);
+              }
+              return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
+                DraggableOrderEvent,
+                {
+                  event,
+                  imageUrl,
+                  visualization,
+                  fordon,
+                  mekanikerNames,
+                  status,
+                  statusIcon,
+                  backgroundColor,
+                  isUpdating: updatingRecords && updatingRecords.has(event.id),
+                  isRecentlyUpdated: recentlyUpdatedRecords && recentlyUpdatedRecords.has(event.id),
+                  orderNo,
+                  orderRecord,
+                  onClose,
+                  showVisualization: false
+                },
+                event.id || index,
+                false,
+                {
+                  fileName: "frontend/index.js",
+                  lineNumber: 739,
+                  columnNumber: 37
+                },
+                this
+              );
+            }) }, void 0, false, {
+              fileName: "frontend/index.js",
+              lineNumber: 659,
+              columnNumber: 25
+            }, this)
+          },
+          void 0,
+          false,
+          {
+            fileName: "frontend/index.js",
+            lineNumber: 655,
+            columnNumber: 21
+          },
+          this
+        ) : null }, void 0, false, {
+          fileName: "frontend/index.js",
+          lineNumber: 653,
+          columnNumber: 13
+        }, this)
+      },
+      void 0,
+      false,
+      {
+        fileName: "frontend/index.js",
+        lineNumber: 643,
+        columnNumber: 9
+      },
+      this
+    );
+  }
+  function LeftSideOrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
+    console.log("LeftSideOrderDetailsPanel - selectedOrderNumbers:", Array.from(selectedOrderNumbers));
+    console.log("LeftSideOrderDetailsPanel - orders count:", orders?.length);
     if (selectedOrderNumbers.size === 0) {
       return null;
     }
     if (!orderTable || !eventsTable) {
-      console.log("OrderDetailsPanel - Missing orderTable or eventsTable");
+      console.log("LeftSideOrderDetailsPanel - Missing orderTable or eventsTable");
       return null;
     }
     const orderNoField = orderTable?.fields?.find(
@@ -45337,31 +45712,51 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
     const selectedOrders = orders ? orders.filter((order) => {
       if (!orderNoField) return false;
       const orderNo = order.getCellValueAsString(orderNoField.name);
-      return selectedOrderNumbers.has(orderNo);
+      const orderNoTrimmed = orderNo ? orderNo.toString().trim() : "";
+      const isSelected = selectedOrderNumbers.has(orderNoTrimmed);
+      return isSelected;
     }) : [];
-    console.log("OrderDetailsPanel - selectedOrders count:", selectedOrders.length);
-    console.log("OrderDetailsPanel - selectedOrders:", selectedOrders.map((o) => {
-      const no = orderNoField ? o.getCellValueAsString(orderNoField.name) : o.id;
-      return no;
-    }));
+    console.log("LeftSideOrderDetailsPanel - selectedOrders count:", selectedOrders.length);
     if (selectedOrders.length === 0) {
+      return null;
+    }
+    const orderField = eventsTable.fields.find((field) => field.name === "Order");
+    const ordersWithEvents = selectedOrders.filter((order) => {
+      const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
+      if (!orderField || !calendarEvents) return false;
+      const matchingEvents = calendarEvents.filter((event) => {
+        const eventOrderValue = event.getCellValue(orderField.name);
+        if (!eventOrderValue) return false;
+        if (Array.isArray(eventOrderValue)) {
+          return eventOrderValue.some((linkedRecord) => linkedRecord.id === order.id);
+        }
+        const eventOrderNo = eventOrderValue.toString().trim();
+        const orderNoStr = orderNo.toString().trim();
+        return eventOrderNo === orderNoStr;
+      });
+      return matchingEvents.length > 0;
+    });
+    if (ordersWithEvents.length === 0) {
       return null;
     }
     return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
       "div",
       {
-        className: "order-details-panel",
+        className: "left-side-order-details-panel",
         style: {
           width: "100%",
+          height: "100%",
           display: "flex",
-          justifyContent: "center",
+          flexDirection: "column",
+          padding: "16px",
+          gap: "16px",
+          overflowY: "auto",
           alignItems: "center"
         },
-        children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex gap-3", style: { alignItems: "flex-start", justifyContent: "center" }, children: selectedOrders.map((order) => {
+        children: ordersWithEvents.map((order) => {
           const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
-          console.log("Rendering OrderDetailCard for:", orderNo);
           return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
-            OrderDetailCard,
+            LeftSideOrderDetailCard,
             {
               orderNo,
               orderRecord: order,
@@ -45378,22 +45773,124 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             false,
             {
               fileName: "frontend/index.js",
-              lineNumber: 591,
-              columnNumber: 25
+              lineNumber: 846,
+              columnNumber: 21
             },
             this
           );
-        }) }, void 0, false, {
-          fileName: "frontend/index.js",
-          lineNumber: 586,
-          columnNumber: 13
-        }, this)
+        })
       },
       void 0,
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 577,
+        lineNumber: 830,
+        columnNumber: 9
+      },
+      this
+    );
+  }
+  function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, showVisualization = true }) {
+    console.log("OrderDetailsPanel - selectedOrderNumbers:", Array.from(selectedOrderNumbers));
+    console.log("OrderDetailsPanel - orders count:", orders?.length);
+    if (selectedOrderNumbers.size === 0) {
+      return null;
+    }
+    if (!orderTable || !eventsTable) {
+      console.log("OrderDetailsPanel - Missing orderTable or eventsTable");
+      return null;
+    }
+    const orderNoField = orderTable?.fields?.find(
+      (field) => field.name === "Order No" || field.name === "Order No." || field.name.toLowerCase().includes("order no")
+    );
+    const selectedOrders = orders ? orders.filter((order) => {
+      if (!orderNoField) return false;
+      const orderNo = order.getCellValueAsString(orderNoField.name);
+      const orderNoTrimmed = orderNo ? orderNo.toString().trim() : "";
+      const isSelected = selectedOrderNumbers.has(orderNoTrimmed);
+      console.log("Checking order:", {
+        orderId: order.id,
+        orderNo,
+        orderNoTrimmed,
+        selectedOrderNumbers: Array.from(selectedOrderNumbers),
+        isSelected
+      });
+      return isSelected;
+    }) : [];
+    console.log("OrderDetailsPanel - selectedOrders count:", selectedOrders.length);
+    console.log("OrderDetailsPanel - selectedOrders:", selectedOrders.map((o) => {
+      const no = orderNoField ? o.getCellValueAsString(orderNoField.name) : o.id;
+      return no;
+    }));
+    console.log("OrderDetailsPanel - selectedOrderNumbers Set:", Array.from(selectedOrderNumbers));
+    if (selectedOrders.length === 0) {
+      return null;
+    }
+    return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
+      "div",
+      {
+        className: "order-details-panel",
+        style: {
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        },
+        children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
+          "div",
+          {
+            className: "flex gap-3",
+            style: {
+              alignItems: "flex-start",
+              justifyContent: "center",
+              flexDirection: "row",
+              flexWrap: "nowrap",
+              overflowX: "auto"
+            },
+            children: selectedOrders.map((order) => {
+              const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
+              console.log("Rendering OrderDetailCard for:", orderNo);
+              return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
+                OrderDetailCard,
+                {
+                  orderNo,
+                  orderRecord: order,
+                  orderTable,
+                  calendarEvents: calendarEvents || [],
+                  eventsTable,
+                  onClose: () => onCloseOrder(orderNo),
+                  statusColors,
+                  statusIcons,
+                  updatingRecords,
+                  recentlyUpdatedRecords,
+                  showVisualization
+                },
+                order.id,
+                false,
+                {
+                  fileName: "frontend/index.js",
+                  lineNumber: 937,
+                  columnNumber: 25
+                },
+                this
+              );
+            })
+          },
+          void 0,
+          false,
+          {
+            fileName: "frontend/index.js",
+            lineNumber: 923,
+            columnNumber: 13
+          },
+          this
+        )
+      },
+      void 0,
+      false,
+      {
+        fileName: "frontend/index.js",
+        lineNumber: 914,
         columnNumber: 9
       },
       this
@@ -45425,44 +45922,44 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           },
           children: [
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "px-4 py-3 border-b-2 border-red-300 bg-red-50 flex-shrink-0", children: [
-              /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("h3", { className: "text-sm font-bold text-red-700", children: "Order No." }, void 0, false, {
+              /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("h3", { className: "text-sm font-bold text-red-700", children: "Orders" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 639,
+                lineNumber: 986,
                 columnNumber: 21
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-red-600 mt-1", children: "\u26A0\uFE0F DEBUG MODE" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 640,
+                lineNumber: 987,
                 columnNumber: 21
               }, this)
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 638,
+              lineNumber: 985,
               columnNumber: 17
             }, this),
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1 flex items-center justify-center p-4", children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-red-600 text-center", children: [
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-2 font-bold text-base", children: "\u26A0\uFE0F Order table not found" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 644,
+                lineNumber: 991,
                 columnNumber: 25
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-600 mt-2 p-2 bg-gray-100 rounded", children: "Check browser console (F12) for available tables" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 645,
+                lineNumber: 992,
                 columnNumber: 25
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-400 mt-2", children: "This panel should be visible on the right side" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 648,
+                lineNumber: 995,
                 columnNumber: 25
               }, this)
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 643,
+              lineNumber: 990,
               columnNumber: 21
             }, this) }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 642,
+              lineNumber: 989,
               columnNumber: 17
             }, this)
           ]
@@ -45471,7 +45968,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         true,
         {
           fileName: "frontend/index.js",
-          lineNumber: 622,
+          lineNumber: 969,
           columnNumber: 13
         },
         this
@@ -45496,19 +45993,19 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           },
           children: [
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "px-4 py-3 border-b border-gray-200 bg-blue-50 flex-shrink-0", children: [
-              /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("h3", { className: "text-sm font-semibold text-gray-700", children: "Order No." }, void 0, false, {
+              /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("h3", { className: "text-sm font-semibold text-gray-700", children: "Orders" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 675,
+                lineNumber: 1022,
                 columnNumber: 21
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-500 mt-1", children: "0 orders" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 676,
+                lineNumber: 1023,
                 columnNumber: 21
               }, this)
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 674,
+              lineNumber: 1021,
               columnNumber: 17
             }, this),
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1 flex items-center justify-center p-4", children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-sm text-blue-600 text-center font-medium", children: [
@@ -45516,11 +46013,11 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               orderTable.name
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 679,
+              lineNumber: 1026,
               columnNumber: 21
             }, this) }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 678,
+              lineNumber: 1025,
               columnNumber: 17
             }, this)
           ]
@@ -45529,7 +46026,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         true,
         {
           fileName: "frontend/index.js",
-          lineNumber: 659,
+          lineNumber: 1006,
           columnNumber: 13
         },
         this
@@ -45538,12 +46035,22 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
     const orderNoField = orderTable.fields.find(
       (field) => field.name === "Order No" || field.name === "Order No." || field.name === "OrderNo" || field.name === "Order Number" || field.name === "OrderNumber" || field.name.toLowerCase() === "order no" || field.name.toLowerCase() === "order no." || field.name.toLowerCase().includes("order no")
     );
+    const fordonField = orderTable.fields?.find(
+      (f) => f.name === "Fordon"
+    ) || orderTable.fields?.find(
+      (f) => f.name.toLowerCase() === "fordon" || f.name.toLowerCase().includes("fordon")
+    ) || null;
     if (!orderNoField) {
       console.log("Order No field not found. Available fields:", orderTable.fields.map((f) => f.name));
     } else {
       console.log("Order No field found:", orderNoField.name);
     }
-    const orderData = orders.map((order) => {
+    if (!fordonField) {
+      console.log("Fordon field not found. Available fields:", orderTable.fields.map((f) => f.name));
+    } else {
+      console.log("Fordon field found:", fordonField.name);
+    }
+    const orderData = orders.map((order, index) => {
       let orderNo;
       if (orderNoField) {
         orderNo = order.getCellValueAsString(orderNoField.name) || order.id;
@@ -45551,7 +46058,26 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         const textField = orderTable.fields.find((f) => f.type === "singleLineText" || f.type === "multilineText");
         orderNo = textField ? order.getCellValueAsString(textField.name) : order.id;
       }
-      return { orderNo, record: order };
+      let fordon = "";
+      if (fordonField) {
+        try {
+          fordon = order.getCellValueAsString(fordonField.name) || "";
+          if (!fordon) {
+            const fordonValue = order.getCellValue(fordonField.name);
+            if (fordonValue) {
+              fordon = String(fordonValue);
+            }
+          }
+        } catch (e) {
+          console.error("Error getting Fordon for order:", order.id, e);
+        }
+      }
+      return {
+        sequentialNumber: index + 1,
+        orderNo,
+        fordon: fordon || "N/A",
+        record: order
+      };
     }).filter((item) => item.orderNo);
     return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
       "div",
@@ -45572,9 +46098,9 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         },
         children: [
           /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "px-4 py-3 border-b border-gray-200 bg-green-50 sticky top-0 z-40 flex-shrink-0", children: [
-            /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("h3", { className: "text-sm font-semibold text-gray-700", children: "Order No." }, void 0, false, {
+            /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("h3", { className: "text-sm font-semibold text-gray-700", children: "Orders" }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 737,
+              lineNumber: 1120,
               columnNumber: 17
             }, this),
             orderData.length > 0 && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-500 mt-1", children: [
@@ -45582,75 +46108,115 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               " orders"
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 739,
+              lineNumber: 1122,
               columnNumber: 21
             }, this)
           ] }, void 0, true, {
             fileName: "frontend/index.js",
-            lineNumber: 736,
+            lineNumber: 1119,
             columnNumber: 13
           }, this),
-          /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1 overflow-y-auto", style: { minHeight: 0 }, children: orderData.length > 0 ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "w-full", children: orderData.map(({ orderNo, record }, index) => {
-            const isSelected = selectedOrderNumbers.has(orderNo);
-            return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
-              "div",
-              {
-                className: `text-sm px-4 py-2 cursor-pointer border-b border-gray-200 transition-colors flex items-center ${isSelected ? "bg-blue-100 border-l-4 border-blue-500" : "text-gray-700 hover:bg-blue-50"}`,
-                style: {
-                  minHeight: "36px",
-                  borderLeft: isSelected ? "4px solid #3b82f6" : "3px solid transparent"
-                },
-                onMouseEnter: (e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.borderLeftColor = "#3b82f6";
-                    e.currentTarget.style.backgroundColor = "#eff6ff";
-                  }
-                },
-                onMouseLeave: (e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.borderLeftColor = "transparent";
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }
-                },
-                onClick: () => {
-                  if (onOrderClick) {
-                    onOrderClick(orderNo);
-                  }
-                },
-                title: isSelected ? "Click to deselect" : "Click to view order details (replaces current selection)",
-                children: [
-                  /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `font-medium ${isSelected ? "text-blue-700" : "text-gray-600"}`, children: orderNo }, void 0, false, {
-                    fileName: "frontend/index.js",
-                    lineNumber: 776,
-                    columnNumber: 37
-                  }, this),
-                  isSelected && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "ml-2 text-blue-600 text-xs", children: "\u2713" }, void 0, false, {
-                    fileName: "frontend/index.js",
-                    lineNumber: 780,
-                    columnNumber: 41
-                  }, this)
-                ]
-              },
-              record.id,
-              true,
-              {
+          /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1 overflow-y-auto", style: { minHeight: 0 }, children: orderData.length > 0 ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "w-full", children: [
+            /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "px-4 py-2 border-b-2 border-gray-300 bg-gray-100 sticky top-0 z-30 flex items-center gap-2", style: { minHeight: "32px" }, children: [
+              /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "font-semibold text-gray-700", style: { minWidth: "20px" }, children: "No" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 748,
-                columnNumber: 33
-              },
-              this
-            );
-          }) }, void 0, false, {
+                lineNumber: 1130,
+                columnNumber: 29
+              }, this),
+              /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "font-semibold text-gray-700 flex-1", children: "Order Number" }, void 0, false, {
+                fileName: "frontend/index.js",
+                lineNumber: 1133,
+                columnNumber: 29
+              }, this),
+              /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-xs font-semibold text-gray-700", style: { minWidth: "50px", textAlign: "right" }, children: "Fordon" }, void 0, false, {
+                fileName: "frontend/index.js",
+                lineNumber: 1136,
+                columnNumber: 29
+              }, this)
+            ] }, void 0, true, {
+              fileName: "frontend/index.js",
+              lineNumber: 1129,
+              columnNumber: 25
+            }, this),
+            orderData.map(({ sequentialNumber, orderNo, fordon, record }) => {
+              const orderNoTrimmed = orderNo ? orderNo.toString().trim() : "";
+              const isSelected = selectedOrderNumbers.has(orderNoTrimmed);
+              return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
+                "div",
+                {
+                  className: `text-xs px-4 py-2 cursor-pointer border-b border-gray-200 transition-colors flex items-center gap-2 ${isSelected ? "bg-blue-100 border-l-4 border-blue-500" : "text-gray-700 hover:bg-blue-50"}`,
+                  style: {
+                    minHeight: "36px",
+                    borderLeft: isSelected ? "4px solid #3b82f6" : "3px solid transparent"
+                  },
+                  onMouseEnter: (e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.borderLeftColor = "#3b82f6";
+                      e.currentTarget.style.backgroundColor = "#eff6ff";
+                    }
+                  },
+                  onMouseLeave: (e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.borderLeftColor = "transparent";
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }
+                  },
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    if (onOrderClick) {
+                      const orderNoTrimmed2 = orderNo ? orderNo.toString().trim() : "";
+                      console.log("Order list item clicked:", orderNo, "trimmed:", orderNoTrimmed2);
+                      onOrderClick(orderNoTrimmed2, e);
+                    }
+                  },
+                  title: isSelected ? "Click to deselect" : "Click to view order details (replaces current selection)",
+                  children: [
+                    /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `font-semibold ${isSelected ? "text-blue-700" : "text-gray-500"}`, style: { minWidth: "20px" }, children: [
+                      sequentialNumber,
+                      "."
+                    ] }, void 0, true, {
+                      fileName: "frontend/index.js",
+                      lineNumber: 1175,
+                      columnNumber: 37
+                    }, this),
+                    /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `font-medium flex-1 ${isSelected ? "text-blue-700" : "text-gray-600"}`, children: orderNo }, void 0, false, {
+                      fileName: "frontend/index.js",
+                      lineNumber: 1178,
+                      columnNumber: 37
+                    }, this),
+                    /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `text-xs ${isSelected ? "text-blue-600" : "text-gray-500"}`, style: { minWidth: "50px", textAlign: "right" }, children: fordon }, void 0, false, {
+                      fileName: "frontend/index.js",
+                      lineNumber: 1181,
+                      columnNumber: 37
+                    }, this),
+                    isSelected && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "ml-1 text-blue-600 text-xs", children: "\u2713" }, void 0, false, {
+                      fileName: "frontend/index.js",
+                      lineNumber: 1185,
+                      columnNumber: 41
+                    }, this)
+                  ]
+                },
+                record.id,
+                true,
+                {
+                  fileName: "frontend/index.js",
+                  lineNumber: 1144,
+                  columnNumber: 33
+                },
+                this
+              );
+            })
+          ] }, void 0, true, {
             fileName: "frontend/index.js",
-            lineNumber: 744,
+            lineNumber: 1127,
             columnNumber: 21
           }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-sm text-gray-500 p-4 text-center", children: "No order numbers found" }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 787,
+            lineNumber: 1192,
             columnNumber: 21
           }, this) }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 742,
+            lineNumber: 1125,
             columnNumber: 13
           }, this)
         ]
@@ -45659,7 +46225,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       true,
       {
         fileName: "frontend/index.js",
-        lineNumber: 720,
+        lineNumber: 1103,
         columnNumber: 9
       },
       this
@@ -45681,13 +46247,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 803,
+        lineNumber: 1208,
         columnNumber: 9
       },
       this
     );
   }
-  function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated }) {
+  function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, showVisualization = true }) {
+    const uniqueId = `order-detail-${orderNo || "unknown"}-${event.id}`;
     const {
       attributes,
       listeners,
@@ -45695,16 +46262,16 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       transform,
       transition,
       isDragging
-    } = useSortable({ id: `event-${event.id}` });
+    } = useSortable({ id: uniqueId });
+    if (isUpdating || isRecentlyUpdated) {
+      return null;
+    }
     const style2 = {
       transform: CSS.Transform.toString(transform),
       transition,
       opacity: isDragging ? 0.5 : 1,
       cursor: isDragging ? "grabbing" : "grab"
     };
-    if (isUpdating || isRecentlyUpdated) {
-      return null;
-    }
     return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
       "div",
       __spreadProps(__spreadValues(__spreadValues({
@@ -45719,8 +46286,17 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           borderRadius: "8px",
           padding: "8px",
           backgroundColor: isDragging ? "#f0f9ff" : "transparent",
-          transition: "all 0.2s"
+          transition: "all 0.2s",
+          position: "relative"
         }),
+        onClick: (e) => {
+          if (!isDragging) {
+            if (e.detail === 2 && onClose) {
+              e.stopPropagation();
+              onClose();
+            }
+          }
+        },
         children: [
           imageUrl ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-2", style: { width: "100px", height: "100px", overflow: "hidden", borderRadius: "4px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }, children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
             "img",
@@ -45733,70 +46309,70 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             false,
             {
               fileName: "frontend/index.js",
-              lineNumber: 855,
+              lineNumber: 1276,
               columnNumber: 21
             },
             this
           ) }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 854,
+            lineNumber: 1275,
             columnNumber: 17
           }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-2 text-xs text-gray-400 italic text-center border border-dashed border-gray-300 rounded", style: { width: "100px", height: "100px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }, children: "No image" }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 862,
+            lineNumber: 1283,
             columnNumber: 17
           }, this),
-          /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: visualization ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-800", children: visualization }, void 0, false, {
+          showVisualization && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: visualization ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-800", children: visualization }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 870,
-            columnNumber: 21
+            lineNumber: 1292,
+            columnNumber: 25
           }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-400 italic", children: "Not set" }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 872,
-            columnNumber: 21
+            lineNumber: 1294,
+            columnNumber: 25
           }, this) }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 868,
-            columnNumber: 13
+            lineNumber: 1290,
+            columnNumber: 17
           }, this),
           /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: [
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "font-semibold text-gray-600", children: "REG: " }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 878,
+              lineNumber: 1301,
               columnNumber: 17
             }, this),
             fordon ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-800", children: fordon }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 880,
+              lineNumber: 1303,
               columnNumber: 21
             }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-400 italic", children: "Not set" }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 882,
+              lineNumber: 1305,
               columnNumber: 21
             }, this)
           ] }, void 0, true, {
             fileName: "frontend/index.js",
-            lineNumber: 877,
+            lineNumber: 1300,
             columnNumber: 13
           }, this),
           /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: [
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "font-semibold text-gray-600", children: "Namn: " }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 888,
+              lineNumber: 1311,
               columnNumber: 17
             }, this),
             mekanikerNames ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-800", children: mekanikerNames }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 890,
+              lineNumber: 1313,
               columnNumber: 21
             }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-400 italic", children: "Not set" }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 892,
+              lineNumber: 1315,
               columnNumber: 21
             }, this)
           ] }, void 0, true, {
             fileName: "frontend/index.js",
-            lineNumber: 887,
+            lineNumber: 1310,
             columnNumber: 13
           }, this)
         ]
@@ -45805,7 +46381,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       true,
       {
         fileName: "frontend/index.js",
-        lineNumber: 835,
+        lineNumber: 1243,
         columnNumber: 9
       },
       this
@@ -45895,7 +46471,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             width: "100%"
           }, children: eventTitle }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 985,
+            lineNumber: 1408,
             columnNumber: 17
           }, this),
           bookingOrder && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { style: {
@@ -45909,7 +46485,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             width: "100%"
           }, children: bookingOrder }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1e3,
+            lineNumber: 1423,
             columnNumber: 21
           }, this),
           mechanicName && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { style: {
@@ -45921,7 +46497,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             width: "100%"
           }, children: mechanicName }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1016,
+            lineNumber: 1439,
             columnNumber: 21
           }, this),
           /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
@@ -45971,14 +46547,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             false,
             {
               fileName: "frontend/index.js",
-              lineNumber: 1029,
+              lineNumber: 1452,
               columnNumber: 17
             },
             this
           )
         ] }, void 0, true, {
           fileName: "frontend/index.js",
-          lineNumber: 973,
+          lineNumber: 1396,
           columnNumber: 13
         }, this)
       }),
@@ -45986,7 +46562,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 953,
+        lineNumber: 1376,
         columnNumber: 9
       },
       this
@@ -46048,8 +46624,15 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
     const [updatingRecords, setUpdatingRecords] = (0, import_react9.useState)(/* @__PURE__ */ new Set());
     const [recentlyUpdatedRecords, setRecentlyUpdatedRecords] = (0, import_react9.useState)(/* @__PURE__ */ new Set());
     const [selectedOrderNumbers, setSelectedOrderNumbers] = (0, import_react9.useState)(/* @__PURE__ */ new Set());
+    const isInitialMount = (0, import_react9.useRef)(true);
+    const isSelectingOrder = (0, import_react9.useRef)(false);
     const sensors = useSensors(
-      useSensor(PointerSensor),
+      useSensor(PointerSensor, {
+        activationConstraint: {
+          distance: 10
+          // Only activate drag after 10px of movement
+        }
+      }),
       useSensor(KeyboardSensor, {
         coordinateGetter: sortableKeyboardCoordinates
       })
@@ -46070,6 +46653,15 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       setStartDate(monday.toISOString().split("T")[0]);
       setEndDate(friday.toISOString().split("T")[0]);
     }, []);
+    (0, import_react9.useEffect)(() => {
+      if (isInitialMount.current) {
+        isInitialMount.current = false;
+        return;
+      }
+      if (startDate && endDate) {
+        setSelectedOrderNumbers(/* @__PURE__ */ new Set());
+      }
+    }, [startDate, endDate]);
     const goToWeek = (offsetWeeks) => {
       const start = new Date(startDate);
       const end = new Date(endDate);
@@ -46089,6 +46681,135 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         const activeId = active.id;
         const overId = over.id;
         console.log("Parsing IDs:", { activeId, overId });
+        if (activeId.startsWith("order-detail-") && overId.startsWith("cell-")) {
+          const activeParts = activeId.split("-");
+          let orderNo = "";
+          let sourceEventId = "";
+          if (activeParts.length >= 4) {
+            orderNo = activeParts.slice(2, -1).join("-");
+            sourceEventId = activeParts[activeParts.length - 1];
+          } else {
+            orderNo = activeId.replace("order-detail-", "").split("-")[0];
+          }
+          const parts = overId.split("-");
+          const mechanicName = parts[1];
+          const dateString = `${parts[2]}-${parts[3]}`;
+          const hourIndex = parseInt(parts[4]);
+          console.log("Order detail dropped:", { orderNo, sourceEventId, mechanicName, dateString, hourIndex });
+          const orderNoField = orderTable?.fields?.find(
+            (field) => field.name === "Order No" || field.name === "Order No." || field.name.toLowerCase().includes("order no")
+          );
+          if (!orderNoField || !orderTable || !eventsTable) {
+            console.error("Required fields or tables not found");
+            return;
+          }
+          const orderRecord = orderRecords.find((order) => {
+            try {
+              const orderNoValue = order.getCellValueAsString(orderNoField.name);
+              return orderNoValue && orderNoValue.toString().trim() === orderNo.toString().trim();
+            } catch (e) {
+              return false;
+            }
+          });
+          if (!orderRecord) {
+            console.error("Order not found:", orderNo);
+            return;
+          }
+          const sourceEvent = sourceEventId ? events2.find((ev) => ev.id === sourceEventId) : null;
+          const [month, day] = dateString.split("-").map(Number);
+          const matchingDate = displayedDates.find(
+            (d) => d.getMonth() + 1 === month && d.getDate() === day
+          );
+          if (!matchingDate) {
+            console.error("Could not find matching date in displayed dates");
+            return;
+          }
+          const targetDate = new Date(matchingDate);
+          const newStartTime = new Date(targetDate);
+          newStartTime.setHours(hourIndex + 5, 0, 0, 0);
+          if (sourceEvent) {
+            const oldStartTime = new Date(sourceEvent.getCellValue("Starttid"));
+            const oldEndTime = new Date(sourceEvent.getCellValue("Sluttid"));
+            const duration = oldEndTime - oldStartTime;
+            const newEndTime = new Date(newStartTime.getTime() + duration);
+            console.log("Moving existing event:", {
+              eventId: sourceEvent.id,
+              mechanicName,
+              newStartTime: newStartTime.toISOString(),
+              newEndTime: newEndTime.toISOString()
+            });
+            if (!eventsTable.hasPermissionToUpdateRecords([sourceEvent])) {
+              console.warn("No permission to update records. Please enable record editing in Airtable base settings.");
+              alert("Cannot update event: Record editing is not enabled. Please contact your base administrator.");
+              return;
+            }
+            const updateFields = {
+              "Starttid": newStartTime,
+              "Sluttid": newEndTime
+            };
+            const mekanikerField = eventsTable.fields.find(
+              (field) => field.name === "Mekaniker" || field.name.toLowerCase() === "mekaniker"
+            );
+            if (mekanikerField) {
+              const mechanicId = mechanicNameToId[mechanicName];
+              if (mechanicId) {
+                updateFields[mekanikerField.name] = [{ id: mechanicId }];
+              } else {
+                updateFields[mekanikerField.name] = [{ name: mechanicName }];
+              }
+            }
+            try {
+              await eventsTable.updateRecordAsync(sourceEvent, updateFields);
+              console.log("Event moved successfully:", sourceEvent.id);
+            } catch (error) {
+              console.error("Error moving event:", error);
+              alert("Error moving event: " + error.message);
+            }
+          } else {
+            const duration = 60 * 60 * 1e3;
+            const newEndTime = new Date(newStartTime.getTime() + duration);
+            console.log("Creating new event:", {
+              orderNo,
+              mechanicName,
+              newStartTime: newStartTime.toISOString(),
+              newEndTime: newEndTime.toISOString()
+            });
+            if (!eventsTable.hasPermissionToCreateRecords()) {
+              console.warn("No permission to create records. Please enable record editing in Airtable base settings.");
+              alert("Cannot create event: Record editing is not enabled. Please contact your base administrator.");
+              return;
+            }
+            const newRecordFields = {
+              "Starttid": newStartTime,
+              "Sluttid": newEndTime
+            };
+            const orderField = eventsTable.fields.find(
+              (field) => field.name === "Order" || field.name.toLowerCase() === "order"
+            );
+            if (orderField) {
+              newRecordFields[orderField.name] = [{ id: orderRecord.id }];
+            }
+            const mekanikerField = eventsTable.fields.find(
+              (field) => field.name === "Mekaniker" || field.name.toLowerCase() === "mekaniker"
+            );
+            if (mekanikerField) {
+              const mechanicId = mechanicNameToId[mechanicName];
+              if (mechanicId) {
+                newRecordFields[mekanikerField.name] = [{ id: mechanicId }];
+              } else {
+                newRecordFields[mekanikerField.name] = [{ name: mechanicName }];
+              }
+            }
+            try {
+              const newRecord = await eventsTable.createRecordAsync(newRecordFields);
+              console.log("New calendar event created successfully:", newRecord.id);
+            } catch (error) {
+              console.error("Error creating calendar event:", error);
+              alert("Error creating calendar event: " + error.message);
+            }
+          }
+          return;
+        }
         if (activeId.startsWith("event-") && overId.startsWith("cell-")) {
           const recordId = activeId.replace("event-", "");
           const parts = overId.split("-");
@@ -46319,15 +47040,104 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
     };
     const displayedDates = getDisplayedDates();
     const formatShortDate = (date) => `${date.getMonth() + 1}-${date.getDate()}`;
+    const getOrdersWithIngetStatus = (orders) => {
+      if (!orders || orders.length === 0) {
+        return orders || [];
+      }
+      const statusField = orderTable?.fields?.find(
+        (field) => field.name === "Status" || field.name === "Order Status" || field.name.toLowerCase() === "status" || field.name.toLowerCase().includes("status")
+      );
+      console.log("Status field search:", {
+        found: !!statusField,
+        fieldName: statusField?.name,
+        fieldType: statusField?.type,
+        allFields: orderTable?.fields?.map((f) => ({ name: f.name, type: f.type })) || []
+      });
+      if (statusField && orderTable) {
+        const ordersWithIngetStatus = orders.filter((order) => {
+          try {
+            let statusValue = "";
+            try {
+              statusValue = order.getCellValueAsString(statusField.name) || "";
+            } catch (e1) {
+              const status = order.getCellValue(statusField.name);
+              if (typeof status === "string") {
+                statusValue = status;
+              } else if (status && typeof status === "object") {
+                statusValue = status.name || status.value || String(status);
+              } else if (Array.isArray(status) && status.length > 0) {
+                statusValue = status[0]?.name || status[0]?.value || status[0] || "";
+              } else if (status) {
+                statusValue = String(status);
+              }
+            }
+            const statusValueTrimmed = statusValue.toString().trim();
+            const matches = statusValueTrimmed === "Inget";
+            if (orders.indexOf(order) < 5) {
+              console.log("Order status check (Single select):", {
+                orderId: order.id,
+                statusValue,
+                statusValueTrimmed,
+                matches,
+                fieldType: statusField.type
+              });
+            }
+            return matches;
+          } catch (e) {
+            console.error("Error getting status for order:", order.id, e);
+            return false;
+          }
+        });
+        console.log("Orders with Inget status:", {
+          totalOrders: orders.length,
+          ordersWithIngetStatus: ordersWithIngetStatus.length,
+          orderIds: ordersWithIngetStatus.map((o) => o.id)
+        });
+        return ordersWithIngetStatus;
+      } else {
+        console.warn("Status field not found in Orders table. Available fields:", orderTable?.fields?.map((f) => f.name) || []);
+        return [];
+      }
+    };
+    const filteredOrderRecords = getOrdersWithIngetStatus(orderRecords);
     const getEventsForMechanicAndDate = (mechanicName, date) => {
       if (!mechanicName || mechanicName.trim() === "" || mechanicName === "undefined") {
         return [];
       }
+      const orderField = eventsTable?.fields?.find(
+        (field) => field.name === "Order"
+      );
       return events2.filter((ev) => {
         const mekaniker = ev.getCellValue("Mekaniker") || [];
         const start = new Date(ev.getCellValue("Starttid"));
         if (start.toDateString() !== date.toDateString()) {
           return false;
+        }
+        if (orderField && orderTable && orderRecords.length > 0) {
+          const eventOrderValue = ev.getCellValue(orderField.name);
+          if (!eventOrderValue) {
+            return false;
+          }
+          let hasValidOrder = false;
+          if (Array.isArray(eventOrderValue)) {
+            hasValidOrder = eventOrderValue.some((linkedRecord) => {
+              return orderRecords.some((order) => order.id === linkedRecord.id);
+            });
+          } else {
+            const orderNoField = orderTable.fields?.find(
+              (field) => field.name === "Order No" || field.name === "Order No." || field.name.toLowerCase().includes("order no")
+            );
+            if (orderNoField) {
+              const eventOrderNo = eventOrderValue.toString().trim();
+              hasValidOrder = orderRecords.some((order) => {
+                const orderNo = order.getCellValueAsString(orderNoField.name);
+                return orderNo && orderNo.toString().trim() === eventOrderNo;
+              });
+            }
+          }
+          if (!hasValidOrder) {
+            return false;
+          }
         }
         if (Array.isArray(mekaniker) && mekaniker.length > 0) {
           return mekaniker.some((m) => {
@@ -46372,25 +47182,57 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       "Avslutad": "campaign",
       "Inget": "gear"
     };
-    const handleOrderClick = (orderNo) => {
+    const handleOrderClick = (0, import_react9.useCallback)((orderNo, event) => {
+      if (isSelectingOrder.current) {
+        console.warn("Selection already in progress, ignoring click");
+        return;
+      }
+      if (event && event.target && event.target.closest(".order-detail-card")) {
+        console.log("Click originated from order detail card, ignoring selection");
+        return;
+      }
+      if (!orderNo) {
+        console.warn("handleOrderClick called with empty orderNo");
+        return;
+      }
+      const orderNoTrimmed = orderNo.toString().trim();
+      if (!orderNoTrimmed) {
+        console.warn("handleOrderClick called with orderNo that becomes empty after trim:", orderNo);
+        return;
+      }
+      console.log("handleOrderClick called with orderNo:", orderNo, "trimmed:", orderNoTrimmed);
+      console.trace("Stack trace for handleOrderClick");
+      isSelectingOrder.current = true;
       setSelectedOrderNumbers((prev) => {
-        if (prev.has(orderNo)) {
+        console.log("Previous selectedOrderNumbers:", Array.from(prev));
+        console.log("Previous selectedOrderNumbers size:", prev.size);
+        if (prev.has(orderNoTrimmed)) {
+          console.log("Order already selected, keeping selection");
+          isSelectingOrder.current = false;
           return prev;
         }
-        return /* @__PURE__ */ new Set([orderNo]);
+        const newSelection = /* @__PURE__ */ new Set();
+        newSelection.add(orderNoTrimmed);
+        console.log("New selection:", Array.from(newSelection));
+        console.log("New selection size:", newSelection.size);
+        setTimeout(() => {
+          isSelectingOrder.current = false;
+        }, 100);
+        return newSelection;
       });
-    };
+    }, []);
     const handleCloseOrder = (orderNo) => {
+      const orderNoTrimmed = orderNo ? orderNo.toString().trim() : "";
       setSelectedOrderNumbers((prev) => {
         const newSet = new Set(prev);
-        newSet.delete(orderNo);
+        newSet.delete(orderNoTrimmed);
         return newSet;
       });
     };
     return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "p-4 font-sans w-full h-full bg-white text-gray-900", style: { width: "100%", height: "100%", overflow: "visible" }, children: [
       /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(CalendarImagesGallery, { events: events2, eventsTable }, void 0, false, {
         fileName: "frontend/index.js",
-        lineNumber: 1606,
+        lineNumber: 2413,
         columnNumber: 13
       }, this),
       /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex items-center gap-2 mb-4 flex-wrap", children: [
@@ -46405,7 +47247,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           false,
           {
             fileName: "frontend/index.js",
-            lineNumber: 1610,
+            lineNumber: 2417,
             columnNumber: 17
           },
           this
@@ -46431,7 +47273,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           false,
           {
             fileName: "frontend/index.js",
-            lineNumber: 1616,
+            lineNumber: 2423,
             columnNumber: 17
           },
           this
@@ -46447,14 +47289,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           false,
           {
             fileName: "frontend/index.js",
-            lineNumber: 1632,
+            lineNumber: 2439,
             columnNumber: 17
           },
           this
         )
       ] }, void 0, true, {
         fileName: "frontend/index.js",
-        lineNumber: 1609,
+        lineNumber: 2416,
         columnNumber: 13
       }, this),
       displayedDates.length === 0 ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(import_jsx_dev_runtime.Fragment, { children: [
@@ -46462,7 +47304,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           OrderDetailsPanel,
           {
             selectedOrderNumbers,
-            orders: orderRecords,
+            orders: filteredOrderRecords,
             orderTable,
             calendarEvents: events2,
             eventsTable,
@@ -46476,19 +47318,19 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           false,
           {
             fileName: "frontend/index.js",
-            lineNumber: 1645,
+            lineNumber: 2452,
             columnNumber: 25
           },
           this
         ),
         /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1 py-10 text-center text-gray-500 flex items-center justify-center", style: { minWidth: 0 }, children: "Please select Start Date and End Date to view the calendar." }, void 0, false, {
           fileName: "frontend/index.js",
-          lineNumber: 1658,
+          lineNumber: 2465,
           columnNumber: 21
         }, this)
       ] }, void 0, true, {
         fileName: "frontend/index.js",
-        lineNumber: 1642,
+        lineNumber: 2449,
         columnNumber: 17
       }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
         DndContext,
@@ -46502,7 +47344,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               OrderDetailsPanel,
               {
                 selectedOrderNumbers,
-                orders: orderRecords,
+                orders: filteredOrderRecords,
                 orderTable,
                 calendarEvents: events2,
                 eventsTable,
@@ -46516,7 +47358,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               false,
               {
                 fileName: "frontend/index.js",
-                lineNumber: 1671,
+                lineNumber: 2478,
                 columnNumber: 25
               },
               this
@@ -46534,6 +47376,82 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                   overflow: "visible"
                 },
                 children: [
+                  (() => {
+                    if (!eventsTable || selectedOrderNumbers.size === 0) {
+                      return null;
+                    }
+                    const orderField = eventsTable.fields.find((field) => field.name === "Order");
+                    if (!orderField || !filteredOrderRecords || filteredOrderRecords.length === 0) {
+                      return null;
+                    }
+                    const orderNoField = orderTable?.fields?.find(
+                      (field) => field.name === "Order No" || field.name === "Order No." || field.name.toLowerCase().includes("order no")
+                    );
+                    const hasOrdersWithEvents = filteredOrderRecords.some((order) => {
+                      if (!selectedOrderNumbers.has(orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id)) {
+                        return false;
+                      }
+                      const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
+                      const matchingEvents = events2.filter((event) => {
+                        const eventOrderValue = event.getCellValue(orderField.name);
+                        if (!eventOrderValue) return false;
+                        if (Array.isArray(eventOrderValue)) {
+                          return eventOrderValue.some((linkedRecord) => linkedRecord.id === order.id);
+                        }
+                        const eventOrderNo = eventOrderValue.toString().trim();
+                        const orderNoStr = orderNo.toString().trim();
+                        return eventOrderNo === orderNoStr;
+                      });
+                      return matchingEvents.length > 0;
+                    });
+                    if (!hasOrdersWithEvents) {
+                      return null;
+                    }
+                    return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
+                      "div",
+                      {
+                        className: "flex-shrink-0 border-r border-gray-300 bg-white",
+                        style: {
+                          width: "300px",
+                          minWidth: "300px",
+                          height: "100%",
+                          overflowY: "auto",
+                          overflowX: "hidden"
+                        },
+                        children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
+                          LeftSideOrderDetailsPanel,
+                          {
+                            selectedOrderNumbers,
+                            orders: filteredOrderRecords,
+                            orderTable,
+                            calendarEvents: events2,
+                            eventsTable,
+                            onCloseOrder: handleCloseOrder,
+                            statusColors,
+                            statusIcons,
+                            updatingRecords,
+                            recentlyUpdatedRecords
+                          },
+                          void 0,
+                          false,
+                          {
+                            fileName: "frontend/index.js",
+                            lineNumber: 2556,
+                            columnNumber: 37
+                          },
+                          this
+                        )
+                      },
+                      void 0,
+                      false,
+                      {
+                        fileName: "frontend/index.js",
+                        lineNumber: 2546,
+                        columnNumber: 33
+                      },
+                      this
+                    );
+                  })(),
                   /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "relative rounded-l-lg overflow-hidden flex-1", style: { overflowY: "auto", overflowX: "auto", border: "1px solid rgb(229, 231, 235)", borderRight: "none", height: "100%" }, children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex overflow-x-auto", children: [
                     /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "left-sidebar flex-shrink-0 border-r border-gray-200 bg-gray-50", style: { marginTop: `${headerHeight + dateRowHeight}px` }, children: hours.map((hour, i) => /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
                       "div",
@@ -46546,13 +47464,13 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                       false,
                       {
                         fileName: "frontend/index.js",
-                        lineNumber: 1704,
+                        lineNumber: 2579,
                         columnNumber: 33
                       },
                       this
                     )) }, void 0, false, {
                       fileName: "frontend/index.js",
-                      lineNumber: 1702,
+                      lineNumber: 2577,
                       columnNumber: 25
                     }, this),
                     /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "main-section flex gap-3", children: mechanics.map((mech, mechIndex) => /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
@@ -46594,7 +47512,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                   false,
                                   {
                                     fileName: "frontend/index.js",
-                                    lineNumber: 1739,
+                                    lineNumber: 2614,
                                     columnNumber: 45
                                   },
                                   this
@@ -46619,14 +47537,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                   false,
                                   {
                                     fileName: "frontend/index.js",
-                                    lineNumber: 1751,
+                                    lineNumber: 2626,
                                     columnNumber: 45
                                   },
                                   this
                                 ),
                                 /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("h3", { className: "m-0 text-sm font-semibold", style: { margin: 0 }, children: mech.name }, void 0, false, {
                                   fileName: "frontend/index.js",
-                                  lineNumber: 1768,
+                                  lineNumber: 2643,
                                   columnNumber: 41
                                 }, this)
                               ]
@@ -46635,7 +47553,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                             true,
                             {
                               fileName: "frontend/index.js",
-                              lineNumber: 1724,
+                              lineNumber: 2599,
                               columnNumber: 37
                             },
                             this
@@ -46661,7 +47579,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                 false,
                                 {
                                   fileName: "frontend/index.js",
-                                  lineNumber: 1783,
+                                  lineNumber: 2658,
                                   columnNumber: 45
                                 },
                                 this
@@ -46671,7 +47589,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                             false,
                             {
                               fileName: "frontend/index.js",
-                              lineNumber: 1772,
+                              lineNumber: 2647,
                               columnNumber: 37
                             },
                             this
@@ -46694,7 +47612,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                   false,
                                   {
                                     fileName: "frontend/index.js",
-                                    lineNumber: 1800,
+                                    lineNumber: 2675,
                                     columnNumber: 53
                                   },
                                   this
@@ -46729,7 +47647,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                     false,
                                     {
                                       fileName: "frontend/index.js",
-                                      lineNumber: 1831,
+                                      lineNumber: 2706,
                                       columnNumber: 57
                                     },
                                     this
@@ -46737,7 +47655,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                 })
                               ] }, date.toDateString(), true, {
                                 fileName: "frontend/index.js",
-                                lineNumber: 1798,
+                                lineNumber: 2673,
                                 columnNumber: 45
                               }, this))
                             },
@@ -46745,7 +47663,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                             false,
                             {
                               fileName: "frontend/index.js",
-                              lineNumber: 1793,
+                              lineNumber: 2668,
                               columnNumber: 37
                             },
                             this
@@ -46756,32 +47674,32 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                       true,
                       {
                         fileName: "frontend/index.js",
-                        lineNumber: 1717,
+                        lineNumber: 2592,
                         columnNumber: 33
                       },
                       this
                     )) }, void 0, false, {
                       fileName: "frontend/index.js",
-                      lineNumber: 1715,
+                      lineNumber: 2590,
                       columnNumber: 25
                     }, this)
                   ] }, void 0, true, {
                     fileName: "frontend/index.js",
-                    lineNumber: 1699,
+                    lineNumber: 2574,
                     columnNumber: 25
                   }, this) }, void 0, false, {
                     fileName: "frontend/index.js",
-                    lineNumber: 1697,
+                    lineNumber: 2572,
                     columnNumber: 25
                   }, this),
                   (() => {
                     console.log("Rendering OrderList component in main render");
-                    console.log("orderRecords:", orderRecords.length);
+                    console.log("filteredOrderRecords:", filteredOrderRecords.length);
                     console.log("orderTable:", orderTable?.name);
                     return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
                       OrderList,
                       {
-                        orders: orderRecords,
+                        orders: filteredOrderRecords,
                         orderTable,
                         selectedOrderNumbers,
                         onOrderClick: handleOrderClick
@@ -46790,7 +47708,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                       false,
                       {
                         fileName: "frontend/index.js",
-                        lineNumber: 1860,
+                        lineNumber: 2735,
                         columnNumber: 33
                       },
                       this
@@ -46802,7 +47720,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               true,
               {
                 fileName: "frontend/index.js",
-                lineNumber: 1686,
+                lineNumber: 2493,
                 columnNumber: 21
               },
               this
@@ -46813,14 +47731,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         true,
         {
           fileName: "frontend/index.js",
-          lineNumber: 1663,
+          lineNumber: 2470,
           columnNumber: 17
         },
         this
       )
     ] }, void 0, true, {
       fileName: "frontend/index.js",
-      lineNumber: 1604,
+      lineNumber: 2411,
       columnNumber: 9
     }, this);
   }
@@ -46837,7 +47755,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       import_jsx_dev_runtime = __toESM(require_jsx_dev_runtime());
       initializeBlock({ interface: () => /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(CalendarInterfaceExtension, {}, void 0, false, {
         fileName: "frontend/index.js",
-        lineNumber: 1875,
+        lineNumber: 2750,
         columnNumber: 36
       }) });
     }
