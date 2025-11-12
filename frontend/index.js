@@ -39,7 +39,7 @@ function StatusIcon({ iconName, size = 20 }) {
 }
 
 // Order Detail Card Component
-function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose }) {
+function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
 
     // Early return if eventsTable is not available
     if (!eventsTable || !eventsTable.fields) {
@@ -354,59 +354,44 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
                                 mekanikerNames: mekanikerNames || 'empty'
                             });
                             
+                            // Get status for this event
+                            let status = 'Inget';
+                            let statusIcon = '❓';
+                            let backgroundColor = '#6b7280';
+                            
+                            try {
+                                const orderStatus = event.getCellValue('Order Status');
+                                if (orderStatus && Array.isArray(orderStatus) && orderStatus.length > 0) {
+                                    status = orderStatus[0]?.value || orderStatus[0]?.name || 'Inget';
+                                } else if (orderStatus && typeof orderStatus === 'string') {
+                                    status = orderStatus;
+                                }
+                                
+                                // Get status color and icon
+                                if (statusColors && statusColors[status]) {
+                                    backgroundColor = statusColors[status];
+                                }
+                                if (statusIcons && statusIcons[status]) {
+                                    statusIcon = statusIcons[status];
+                                }
+                            } catch (e) {
+                                console.error('Error getting Order Status:', e);
+                            }
+
                             return (
-                                <div 
+                                <DraggableOrderEvent
                                     key={event.id || index}
-                                    className="flex-shrink-0"
-                                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-                                >
-                                    {/* Image - First line (at the very top) */}
-                                    {imageUrl ? (
-                                        <div className="mb-2" style={{ width: '100px', height: '100px', overflow: 'hidden', borderRadius: '4px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-                                            <img 
-                                                src={imageUrl} 
-                                                alt={`Order ${orderNo} Event ${index + 1}`}
-                                                style={{ width: '100px', height: '100px', objectFit: 'cover', display: 'block', margin: '0 auto' }}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div className="mb-2 text-xs text-gray-400 italic text-center border border-dashed border-gray-300 rounded" style={{ width: '150px', height: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                            No image
-                                        </div>
-                                    )}
-                                    
-                                                                       
-                                    {/* Visualization - Second line */}
-                                    <div className="mb-1 text-xs text-center">
-                                        {visualization ? (
-                                            <span className="text-gray-800">{visualization}</span>
-                                        ) : (
-                                            <span className="text-gray-400 italic">Not set</span>
-                                        )}
-                                    </div>
-                                    
-                                    {/* Fordon - Third line (from Orders table) */}
-                                    <div className="mb-1 text-xs text-center">
-                                        <span className="font-semibold text-gray-600">REG: </span>
-                                        {fordon ? (
-                                            <span className="text-gray-800">{fordon}</span>
-                                        ) : (
-                                            <span className="text-gray-400 italic">Not set</span>
-                                        )}
-                                    </div>
-                                    
-                                    {/* Arbetsorder - Fourth line */}
-                                                                        
-                                    {/* Mekaniker - Fifth line */}
-                                    <div className="mb-1 text-xs text-center">
-                                        <span className="font-semibold text-gray-600">Namn: </span>
-                                        {mekanikerNames ? (
-                                            <span className="text-gray-800">{mekanikerNames}</span>
-                                        ) : (
-                                            <span className="text-gray-400 italic">Not set</span>
-                                        )}
-                                    </div>
-                                </div>
+                                    event={event}
+                                    imageUrl={imageUrl}
+                                    visualization={visualization}
+                                    fordon={fordon}
+                                    mekanikerNames={mekanikerNames}
+                                    status={status}
+                                    statusIcon={statusIcon}
+                                    backgroundColor={backgroundColor}
+                                    isUpdating={updatingRecords && updatingRecords.has(event.id)}
+                                    isRecentlyUpdated={recentlyUpdatedRecords && recentlyUpdatedRecords.has(event.id)}
+                                />
                             );
                         })}
                     </div>
@@ -551,7 +536,7 @@ function CalendarImagesGallery({ events, eventsTable }) {
 }
 
 // Order Details Panel Component (shows at top)
-function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarEvents, eventsTable, onCloseOrder }) {
+function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
     console.log('OrderDetailsPanel - selectedOrderNumbers:', Array.from(selectedOrderNumbers));
     console.log('OrderDetailsPanel - orders count:', orders?.length);
     
@@ -590,7 +575,7 @@ function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarE
     
     return (
         <div 
-            className="order-details-panel p-3 mb-4"
+            className="order-details-panel"
             style={{
                 width: '100%',
                 display: 'flex',
@@ -611,6 +596,10 @@ function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarE
                             calendarEvents={calendarEvents || []}
                             eventsTable={eventsTable}
                             onClose={() => onCloseOrder(orderNo)}
+                            statusColors={statusColors}
+                            statusIcons={statusIcons}
+                            updatingRecords={updatingRecords}
+                            recentlyUpdatedRecords={recentlyUpdatedRecords}
                         />
                     );
                 })}
@@ -819,6 +808,94 @@ function DroppableCell({ mechanicName, date, hourIndex, hourHeight }) {
     );
 }
 
+// Draggable Order Event Component (for order detail panel)
+function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated }) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: `event-${event.id}` });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        cursor: isDragging ? 'grabbing' : 'grab',
+    };
+
+    // Don't render if updating or recently updated
+    if (isUpdating || isRecentlyUpdated) {
+        return null;
+    }
+
+    return (
+        <div 
+            ref={setNodeRef}
+            {...attributes}
+            {...listeners}
+            className="flex-shrink-0"
+            style={{ 
+                ...style,
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center',
+                border: isDragging ? '2px dashed #3b82f6' : '2px solid transparent',
+                borderRadius: '8px',
+                padding: '8px',
+                backgroundColor: isDragging ? '#f0f9ff' : 'transparent',
+                transition: 'all 0.2s'
+            }}
+        >
+            {/* Image - First line (at the very top) */}
+            {imageUrl ? (
+                <div className="mb-2" style={{ width: '100px', height: '100px', overflow: 'hidden', borderRadius: '4px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                    <img 
+                        src={imageUrl} 
+                        alt={`Order Event`}
+                        style={{ width: '100px', height: '100px', objectFit: 'cover', display: 'block', margin: '0 auto' }}
+                    />
+                </div>
+            ) : (
+                <div className="mb-2 text-xs text-gray-400 italic text-center border border-dashed border-gray-300 rounded" style={{ width: '100px', height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    No image
+                </div>
+            )}
+            
+            {/* Visualization - Second line */}
+            <div className="mb-1 text-xs text-center">
+                {visualization ? (
+                    <span className="text-gray-800">{visualization}</span>
+                ) : (
+                    <span className="text-gray-400 italic">Not set</span>
+                )}
+            </div>
+            
+            {/* Fordon - Third line (from Orders table) */}
+            <div className="mb-1 text-xs text-center">
+                <span className="font-semibold text-gray-600">REG: </span>
+                {fordon ? (
+                    <span className="text-gray-800">{fordon}</span>
+                ) : (
+                    <span className="text-gray-400 italic">Not set</span>
+                )}
+            </div>
+            
+            {/* Mekaniker - Fifth line */}
+            <div className="mb-1 text-xs text-center">
+                <span className="font-semibold text-gray-600">Namn: </span>
+                {mekanikerNames ? (
+                    <span className="text-gray-800">{mekanikerNames}</span>
+                ) : (
+                    <span className="text-gray-400 italic">Not set</span>
+                )}
+            </div>
+        </div>
+    );
+}
+
 // Draggable Event Component
 function DraggableEvent({ event, top, height, backgroundColor, onExpand, isUpdating, isRecentlyUpdated, status, statusIcon }) {
     const {
@@ -843,7 +920,34 @@ function DraggableEvent({ event, top, height, backgroundColor, onExpand, isUpdat
 
     const eventTitle = event.getCellValueAsString('Arbetsorder beskrivning') || 'Untitled';
     const bookingOrder = event.getCellValueAsString('Boknings-Order') || '';
-    const mechanicName = event.getCellValue('Mekaniker')?.[0]?.value || '';
+    
+    // Get Mekaniker value - handle different data structures
+    let mechanicName = '';
+    try {
+        const mekaniker = event.getCellValue('Mekaniker');
+        if (mekaniker) {
+            if (Array.isArray(mekaniker) && mekaniker.length > 0) {
+                // Try to get name/value from first element
+                const firstMek = mekaniker[0];
+                if (typeof firstMek === 'string') {
+                    mechanicName = firstMek;
+                } else if (firstMek && firstMek.name) {
+                    mechanicName = firstMek.name;
+                } else if (firstMek && firstMek.value) {
+                    mechanicName = firstMek.value;
+                } else if (firstMek) {
+                    mechanicName = String(firstMek);
+                }
+            } else if (typeof mekaniker === 'string') {
+                mechanicName = mekaniker;
+            }
+        }
+    } catch (e) {
+        console.error('Error getting Mekaniker in DraggableEvent:', e, {
+            eventId: event.id,
+            errorMessage: e.message
+        });
+    }
 
     return (
         <div
@@ -877,16 +981,6 @@ function DraggableEvent({ event, top, height, backgroundColor, onExpand, isUpdat
                 overflow: 'hidden',
                 textAlign: 'center'
             }}>
-                {/* Centered SVG Icon at top */}
-                <div style={{
-                    marginBottom: '6px',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                }}>
-                    <StatusIcon iconName={statusIcon} size={28} />
-                </div>
-                
                 {/* Event title - bold and prominent */}
                 <div style={{
                     fontSize: '12px',
@@ -1026,7 +1120,21 @@ function CalendarInterfaceExtension() {
     const orderRecordsRaw = useRecords(orderTable || eventsTable);
     const orderRecords = orderTable ? orderRecordsRaw : [];
     
+    // Get Mechanics table
+    let mechanicsTable = null;
+    try {
+        mechanicsTable = base.getTableByName('Mechanics');
+        console.log('Mechanics table found:', mechanicsTable.name);
+    } catch (error) {
+        console.error('Mechanics table not found. Available tables:', base.tables.map(t => t.name));
+    }
+    
+    // Always call useRecords hook (required by React rules)
+    const mechanicsRecordsRaw = useRecords(mechanicsTable || eventsTable);
+    const mechanicsRecords = mechanicsTable ? mechanicsRecordsRaw : [];
+    
     console.log('Order records count:', orderRecords.length);
+    console.log('Mechanics records count:', mechanicsRecords.length);
     if (orderTable && orderRecords.length > 0) {
         console.log('Successfully loaded orders from Orders table');
     } else if (orderTable && orderRecords.length === 0) {
@@ -1260,56 +1368,127 @@ function CalendarInterfaceExtension() {
     const mechanicNameToId = {}; // Map mechanic names to their record IDs
     const currentMechanicOrder = []; // Current order from events
     
-    events.forEach(ev => {
-        const mechLinked = ev.getCellValue('Mekaniker') || [];
-        const mechProfile = ev.getCellValue('Mekaniker') || [];
-        mechLinked.forEach((m, i) => {
-            if (!mechanicProfiles[m.value]) {
-                mechanicProfiles[m.value] = {
-                    name: m.value,
-                    profileUrl: mechProfile[i]?.value?.thumbnails?.small?.url || null
-                };
-                if (!currentMechanicOrder.includes(m.value)) {
-                    currentMechanicOrder.push(m.value);
+    // First, build a map of mechanic names to their profile images from Mechanics table
+    const mechanicsProfileMap = {};
+    if (mechanicsTable && mechanicsRecords.length > 0) {
+        // Find the name field in Mechanics table (could be "Name", "Mechanic Name", etc.)
+        const nameField = mechanicsTable.fields.find(f => 
+            f.name === 'Name' || 
+            f.name === 'Mechanic Name' ||
+            f.name.toLowerCase().includes('name')
+        );
+        
+        // Find the Profile field
+        const profileField = mechanicsTable.fields.find(f => 
+            f.name === 'Profile'
+        );
+        
+        if (nameField && profileField) {
+            mechanicsRecords.forEach(mechRecord => {
+                const mechName = mechRecord.getCellValueAsString(nameField.name);
+                if (mechName) {
+                    try {
+                        const profile = mechRecord.getCellValue(profileField.name);
+                        let profileUrl = null;
+                        
+                        if (profile && Array.isArray(profile) && profile.length > 0) {
+                            // Get the first attachment URL
+                            const attachment = profile[0];
+                            profileUrl = attachment.url || 
+                                        attachment.thumbnails?.large?.url || 
+                                        attachment.thumbnails?.small?.url;
+                        }
+                        
+                        mechanicsProfileMap[mechName] = profileUrl;
+                        console.log('Found profile for mechanic:', mechName, 'URL:', profileUrl);
+                    } catch (e) {
+                        console.error('Error getting Profile for mechanic:', mechName, e);
+                    }
                 }
-            }
-        });
-    });
+            });
+        } else {
+            console.warn('Name or Profile field not found in Mechanics table. Available fields:', 
+                mechanicsTable.fields.map(f => f.name));
+        }
+    }
     
-    // Check the Mekaniker field to get existing mechanic record IDs
+    // Extract mechanics consistently from all events
     events.forEach(ev => {
-        const mekaniker = ev.getCellValue('Mekaniker');
-        if (mekaniker && mekaniker.length > 0) {
-            const mechRecord = mekaniker[0];
-            const mechName = mechRecord.name || mechRecord;
-            const mechId = mechRecord.id || mechRecord;
-            
-            // Store the mapping of name to ID
-            mechanicNameToId[mechName] = mechId;
-            
-            if (!mechanicProfiles[mechName]) {
-                mechanicProfiles[mechName] = {
-                    name: mechName,
-                    profileUrl: null
-                };
-                if (!currentMechanicOrder.includes(mechName)) {
-                    currentMechanicOrder.push(mechName);
+        const mekaniker = ev.getCellValue('Mekaniker') || [];
+        if (Array.isArray(mekaniker) && mekaniker.length > 0) {
+            mekaniker.forEach((m, i) => {
+                // Get mechanic name - try name first, then value, then string conversion
+                let mechName = '';
+                if (typeof m === 'string') {
+                    mechName = m;
+                } else if (m && m.name) {
+                    mechName = m.name;
+                } else if (m && m.value) {
+                    mechName = m.value;
+                } else if (m) {
+                    mechName = String(m);
                 }
-            }
+                
+                // Get mechanic ID if available
+                const mechId = (m && m.id) ? m.id : null;
+                
+                // Only process if we have a valid name (not empty, not undefined, not null)
+                if (mechName && mechName.trim() !== '' && mechName !== 'undefined' && mechName !== 'null') {
+                    // Store the mapping of name to ID
+                    if (mechId) {
+                        mechanicNameToId[mechName] = mechId;
+                    }
+                    
+                    // Add to mechanic profiles if not already added
+                    if (!mechanicProfiles[mechName]) {
+                        // Get profile URL from Mechanics table if available
+                        const profileUrl = mechanicsProfileMap[mechName] || null;
+                        
+                        mechanicProfiles[mechName] = {
+                            name: mechName,
+                            profileUrl: profileUrl
+                        };
+                        if (!currentMechanicOrder.includes(mechName)) {
+                            currentMechanicOrder.push(mechName);
+                        }
+                    }
+                } else {
+                    console.log('Skipping invalid mechanic name:', mechName, 'from event:', ev.id);
+                }
+            });
         }
     });
     
+    console.log('Mechanic profiles:', mechanicProfiles);
     console.log('Mechanic name to ID mapping:', mechanicNameToId);
+    console.log('Current mechanic order:', currentMechanicOrder);
     
-    // Set stable order only once, or if it's empty
-    if (stableMechanicOrder.length === 0 && currentMechanicOrder.length > 0) {
-        setStableMechanicOrder(currentMechanicOrder);
-        console.log('Setting initial mechanic order:', currentMechanicOrder);
+    // Clean currentMechanicOrder to remove any invalid mechanic names
+    const cleanedCurrentMechanicOrder = currentMechanicOrder.filter(name => 
+        name && name.trim() !== '' && name !== 'undefined' && name !== 'null' && mechanicProfiles[name]
+    );
+    
+    // Clean stableMechanicOrder if it exists
+    const cleanedStableMechanicOrder = stableMechanicOrder.filter(name => 
+        name && name.trim() !== '' && name !== 'undefined' && name !== 'null' && mechanicProfiles[name]
+    );
+    
+    // Set stable order only once, or if it's empty, and only if we have valid mechanics
+    if (cleanedStableMechanicOrder.length === 0 && cleanedCurrentMechanicOrder.length > 0) {
+        setStableMechanicOrder(cleanedCurrentMechanicOrder);
+        console.log('Setting initial mechanic order:', cleanedCurrentMechanicOrder);
+    } else if (cleanedStableMechanicOrder.length > 0 && stableMechanicOrder.length !== cleanedStableMechanicOrder.length) {
+        // Update stable order if it had invalid entries
+        setStableMechanicOrder(cleanedStableMechanicOrder);
+        console.log('Cleaned stable mechanic order:', cleanedStableMechanicOrder);
     }
     
     // Use stable order if available, otherwise use current order
-    const orderToUse = stableMechanicOrder.length > 0 ? stableMechanicOrder : currentMechanicOrder;
-    const mechanics = orderToUse.map(name => mechanicProfiles[name]).filter(Boolean);
+    const orderToUse = cleanedStableMechanicOrder.length > 0 ? cleanedStableMechanicOrder : cleanedCurrentMechanicOrder;
+    // Filter out any undefined/null mechanics and only include valid ones
+    const mechanics = orderToUse
+        .map(name => mechanicProfiles[name])
+        .filter(mech => mech && mech.name && mech.name.trim() !== '' && mech.name !== 'undefined');
     
     // Debug: Log mechanic order to help troubleshoot
     console.log('Stable order:', stableMechanicOrder);
@@ -1341,11 +1520,43 @@ function CalendarInterfaceExtension() {
     const formatShortDate = date => `${date.getMonth() + 1}-${date.getDate()}`;
 
     const getEventsForMechanicAndDate = (mechanicName, date) => {
+        if (!mechanicName || mechanicName.trim() === '' || mechanicName === 'undefined') {
+            return []; // Don't return events for invalid mechanic names
+        }
+        
         return events.filter(ev => {
-            const mechLinked = ev.getCellValue('Mekaniker') || [];
+            const mekaniker = ev.getCellValue('Mekaniker') || [];
             const start = new Date(ev.getCellValue('Starttid'));
-            if (start.toDateString() !== date.toDateString()) return false;
-            return mechLinked.some(m => m.value === mechanicName);
+            
+            // Check if date matches
+            if (start.toDateString() !== date.toDateString()) {
+                return false;
+            }
+            
+            // Check if any mechanic in the event matches the mechanic name
+            if (Array.isArray(mekaniker) && mekaniker.length > 0) {
+                return mekaniker.some(m => {
+                    // Try multiple ways to get the mechanic name from the event
+                    let eventMechName = '';
+                    if (typeof m === 'string') {
+                        eventMechName = m;
+                    } else if (m && m.name) {
+                        eventMechName = m.name;
+                    } else if (m && m.value) {
+                        eventMechName = m.value;
+                    } else if (m) {
+                        eventMechName = String(m);
+                    }
+                    
+                    // Compare (case-insensitive and trimmed) - only if we have a valid name
+                    if (eventMechName && eventMechName.trim() !== '' && eventMechName !== 'undefined') {
+                        return eventMechName.trim().toLowerCase() === mechanicName.trim().toLowerCase();
+                    }
+                    return false;
+                });
+            }
+            
+            return false;
         });
     };
 
@@ -1426,40 +1637,62 @@ function CalendarInterfaceExtension() {
                 </button>
             </div>
 
-            {/* ORDER DETAILS PANEL - Shows selected orders at top */}
-            {eventsTable && (
-                <OrderDetailsPanel
-                    selectedOrderNumbers={selectedOrderNumbers}
-                    orders={orderRecords}
-                    orderTable={orderTable}
-                    calendarEvents={events}
-                    eventsTable={eventsTable}
-                    onCloseOrder={handleCloseOrder}
-                />
-            )}
-
-            {/* MAIN BLOCK: Calendar Container with Order List */}
-            <div 
-                className="flex gap-0 w-full" 
-                style={{ 
-                    height: 'calc(100vh - 120px)', 
-                    minHeight: '600px', 
-                    maxHeight: 'calc(100vh - 120px)', 
-                    width: '100%',
-                    position: 'relative',
-                    overflow: 'visible'
-                }}
-            >
-                {displayedDates.length === 0 ? (
+            {/* Wrap both OrderDetailsPanel and Calendar in DndContext for drag-and-drop */}
+            {displayedDates.length === 0 ? (
+                <>
+                    {/* ORDER DETAILS PANEL - Shows selected orders at top */}
+                    {eventsTable && (
+                        <OrderDetailsPanel
+                            selectedOrderNumbers={selectedOrderNumbers}
+                            orders={orderRecords}
+                            orderTable={orderTable}
+                            calendarEvents={events}
+                            eventsTable={eventsTable}
+                            onCloseOrder={handleCloseOrder}
+                            statusColors={statusColors}
+                            statusIcons={statusIcons}
+                            updatingRecords={updatingRecords}
+                            recentlyUpdatedRecords={recentlyUpdatedRecords}
+                        />
+                    )}
                     <div className="flex-1 py-10 text-center text-gray-500 flex items-center justify-center" style={{ minWidth: 0 }}>
                         Please select Start Date and End Date to view the calendar.
                     </div>
-                ) : (
-                    <DndContext
-                        sensors={sensors}
-                        collisionDetection={closestCenter}
-                        onDragStart={(event) => console.log('Drag started:', event.active.id)}
-                        onDragEnd={handleDragEnd}
+                </>
+            ) : (
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragStart={(event) => console.log('Drag started:', event.active.id)}
+                    onDragEnd={handleDragEnd}
+                >
+                    {/* ORDER DETAILS PANEL - Shows selected orders at top */}
+                    {eventsTable && (
+                        <OrderDetailsPanel
+                            selectedOrderNumbers={selectedOrderNumbers}
+                            orders={orderRecords}
+                            orderTable={orderTable}
+                            calendarEvents={events}
+                            eventsTable={eventsTable}
+                            onCloseOrder={handleCloseOrder}
+                            statusColors={statusColors}
+                            statusIcons={statusIcons}
+                            updatingRecords={updatingRecords}
+                            recentlyUpdatedRecords={recentlyUpdatedRecords}
+                        />
+                    )}
+
+                    {/* MAIN BLOCK: Calendar Container with Order List */}
+                    <div 
+                        className="flex gap-0 w-full" 
+                        style={{ 
+                            height: 'calc(100vh - 120px)', 
+                            minHeight: '600px', 
+                            maxHeight: 'calc(100vh - 120px)', 
+                            width: '100%',
+                            position: 'relative',
+                            overflow: 'visible'
+                        }}
                     >
                         <div className="relative rounded-l-lg overflow-hidden flex-1" style={{ overflowY: 'auto', overflowX: 'auto', border: '1px solid rgb(229, 231, 235)', borderRight: 'none', height: '100%' }}>
                         {/* MAIN CALENDAR SECTION */}
@@ -1491,20 +1724,48 @@ function CalendarInterfaceExtension() {
                                     <div 
                                         className="mechanic-header bg-white flex items-center justify-center gap-2 border-b border-gray-200"
                                         style={{ 
-                                    position: 'sticky',
-                                    top: 0,
+                                            position: 'sticky',
+                                            top: 0,
                                             zIndex: 30,
-                                            height: `${headerHeight}px`
+                                            height: `${headerHeight}px`,
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '8px'
                                         }}
                                     >
-                                    {mech.profileUrl && (
+                                        {mech.profileUrl ? (
                                             <img 
                                                 src={mech.profileUrl} 
-                                                alt="Profile" 
-                                                className="w-8 h-8 rounded-full" 
+                                                alt={`${mech.name} Profile`}
+                                                style={{
+                                                    width: '32px',
+                                                    height: '32px',
+                                                    borderRadius: '50%',
+                                                    objectFit: 'cover',
+                                                    flexShrink: 0
+                                                }}
                                             />
+                                        ) : (
+                                            <div 
+                                                style={{
+                                                    width: '32px',
+                                                    height: '32px',
+                                                    borderRadius: '50%',
+                                                    backgroundColor: '#e5e7eb',
+                                                    flexShrink: 0,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    fontSize: '12px',
+                                                    color: '#6b7280'
+                                                }}
+                                            >
+                                                {mech.name ? mech.name.charAt(0).toUpperCase() : '?'}
+                                            </div>
                                         )}
-                                        <h3 className="m-0 text-sm font-semibold">{mech.name}</h3>
+                                        <h3 className="m-0 text-sm font-semibold" style={{ margin: 0 }}>{mech.name}</h3>
                                 </div>
 
                                     {/* SUB HEADER: Day Names */}
@@ -1586,27 +1847,27 @@ function CalendarInterfaceExtension() {
                                 </div>
                             </div>
                         ))}
-                    </div>
-                </div>
                         </div>
-                    </DndContext>
-                )}
-                
-                {/* RIGHT SIDE: Order List Panel - ALWAYS VISIBLE */}
-                {(() => {
-                    console.log('Rendering OrderList component in main render');
-                    console.log('orderRecords:', orderRecords.length);
-                    console.log('orderTable:', orderTable?.name);
-                    return (
-                        <OrderList 
-                            orders={orderRecords} 
-                            orderTable={orderTable}
-                            selectedOrderNumbers={selectedOrderNumbers}
-                            onOrderClick={handleOrderClick}
-                        />
-                    );
-                })()}
-            </div>
+                        </div>
+                        </div>
+                        
+                        {/* RIGHT SIDE: Order List Panel - ALWAYS VISIBLE */}
+                        {(() => {
+                            console.log('Rendering OrderList component in main render');
+                            console.log('orderRecords:', orderRecords.length);
+                            console.log('orderTable:', orderTable?.name);
+                            return (
+                                <OrderList 
+                                    orders={orderRecords} 
+                                    orderTable={orderTable}
+                                    selectedOrderNumbers={selectedOrderNumbers}
+                                    onOrderClick={handleOrderClick}
+                                />
+                            );
+                        })()}
+                    </div>
+                </DndContext>
+            )}
         </div>
     );
 }
