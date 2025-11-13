@@ -1883,6 +1883,48 @@ function CalendarInterfaceExtension() {
                     }
                 }
                 
+                // Update "Status på tidsmöte" field in Calendar Events table
+                const statusPaTidsmoteField = eventsTable.fields.find(field => 
+                    field.name === 'Status på tidsmöte' ||
+                    field.name.toLowerCase() === 'status på tidsmöte' ||
+                    field.name.toLowerCase().includes('tidsmöte')
+                );
+                
+                if (statusPaTidsmoteField) {
+                    // For Single select fields, we need to pass an object with 'name' or 'id' property
+                    // Check if field has options and find the matching option
+                    let planeradValue = null;
+                    
+                    if (statusPaTidsmoteField.options && statusPaTidsmoteField.options.choices) {
+                        // Find the exact option that matches "Planerad" (case-insensitive)
+                        const matchingOption = statusPaTidsmoteField.options.choices.find(choice => 
+                            choice.name && choice.name.toLowerCase() === 'planerad'
+                        );
+                        
+                        if (matchingOption) {
+                            // For Single select, use object with 'name' property
+                            planeradValue = { name: matchingOption.name };
+                            console.log('Found matching option for Planerad:', matchingOption.name);
+                        } else {
+                            // Log available options to help debug
+                            console.warn('Planerad option not found. Available options:', 
+                                statusPaTidsmoteField.options.choices.map(c => c.name)
+                            );
+                        }
+                    } else {
+                        // If options not available, try with name object
+                        planeradValue = { name: 'Planerad' };
+                        console.log('Using Planerad as fallback (options not available)');
+                    }
+                    
+                    if (planeradValue) {
+                        updateFields[statusPaTidsmoteField.name] = planeradValue;
+                        console.log('Setting Status på tidsmöte to:', planeradValue);
+                    }
+                } else {
+                    console.warn('Status på tidsmöte field not found in Calendar Events table');
+                }
+                
                 // Update Order Status to "Offertförfrågan skickad"
                 // Since Order Status is a lookup field, we need to update the Status field in the Orders table
                 if (orderTable && orderRecord) {
@@ -1894,50 +1936,17 @@ function CalendarInterfaceExtension() {
                         field.name.toLowerCase().includes('status')
                     );
                     
-                    // Find "Status på tidsmöte" field
-                    const statusPaTidsmoteField = orderTable.fields.find(field => 
-                        field.name === 'Status på tidsmöte' ||
-                        field.name.toLowerCase() === 'status på tidsmöte' ||
-                        field.name.toLowerCase().includes('tidsmöte')
-                    );
-                    
-                    // Prepare update fields for Orders table
-                    const orderUpdateFields = {};
-                    
                     if (statusField) {
-                        orderUpdateFields[statusField.name] = 'Offertförfrågan skickad';
-                    }
-                    
-                    if (statusPaTidsmoteField) {
-                        orderUpdateFields[statusPaTidsmoteField.name] = 'Planerad';
-                    }
-                    
-                    // Update both fields if we have any to update
-                    if (Object.keys(orderUpdateFields).length > 0) {
-                        // Check permissions for updating the order
                         if (orderTable.hasPermissionToUpdateRecords([orderRecord])) {
                             try {
-                                // Update the fields in the Orders table
-                                await orderTable.updateRecordAsync(orderRecord, orderUpdateFields);
-                                if (statusField) {
-                                    console.log('Order Status updated to: Offertförfrågan skickad');
-                                }
-                                if (statusPaTidsmoteField) {
-                                    console.log('Status på tidsmöte updated to: Planerad');
-                                }
+                                await orderTable.updateRecordAsync(orderRecord, {
+                                    [statusField.name]: 'Offertförfrågan skickad'
+                                });
+                                console.log('Order Status updated to: Offertförfrågan skickad');
                             } catch (error) {
-                                console.error('Error updating Order fields:', error);
+                                console.error('Error updating Order Status:', error);
                                 // Don't fail the whole operation if status update fails
                             }
-                        } else {
-                            console.warn('No permission to update Order fields');
-                        }
-                    } else {
-                        if (!statusField) {
-                            console.warn('Status field not found in Orders table');
-                        }
-                        if (!statusPaTidsmoteField) {
-                            console.warn('Status på tidsmöte field not found in Orders table');
                         }
                     }
                 }
