@@ -646,18 +646,14 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                 flexDirection: 'column',
                 position: 'relative',
                 overflow: 'hidden',
-                width: '280px'
             }}
         >
             {/* Vertical list of matching events */}
             <div className="flex-1">
                 {matchingEvents.length > 0 ? (
-                    <SortableContext
-                        items={matchingEvents.map(ev => `order-detail-${orderNo}-${ev.id}`)}
-                        strategy={verticalListSortingStrategy}
-                    >
-                        <div className="flex flex-col gap-3" style={{ margin: 'auto' }}>
-                            {matchingEvents.map((event, index) => {
+                    // Left side events are not draggable, so no SortableContext needed
+                    <div className="flex flex-col gap-3" style={{ margin: 'auto' }}>
+                        {matchingEvents.map((event, index) => {
                                 let imageUrl = null;
                                 if (event && eventsTable) {
                                     try {
@@ -736,7 +732,7 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                                 }
                                 
                                 return (
-                                    <DraggableOrderEvent
+                                    <LeftSideOrderEvent
                                         key={event.id || index}
                                         event={event}
                                         imageUrl={imageUrl}
@@ -751,13 +747,11 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                                         orderNo={orderNo}
                                         orderRecord={orderRecord}
                                         onClose={onClose}
-                                        showVisualization={false}
                                     />
                                 );
                             })}
                         </div>
-                    </SortableContext>
-                ) : null}
+                    ) : null}
             </div>
         </div>
     );
@@ -1214,7 +1208,7 @@ function DroppableCell({ mechanicName, date, hourIndex, hourHeight }) {
 }
 
 // Draggable Order Event Component (for order detail panel)
-function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, showVisualization = true }) {
+function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, showVisualization = true, draggable = true }) {
     // Use useSortable with unique ID that includes both orderNo and event.id
     // Format: "order-detail-{orderNo}-{event.id}" so each event is uniquely identifiable
     const uniqueId = `order-detail-${orderNo || 'unknown'}-${event.id}`;
@@ -1225,7 +1219,7 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
         transform,
         transition,
         isDragging,
-    } = useSortable({ id: uniqueId });
+    } = useSortable({ id: uniqueId, disabled: !draggable });
 
     // Don't render if updating or recently updated
     if (isUpdating || isRecentlyUpdated) {
@@ -1242,8 +1236,8 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
     return (
         <div 
             ref={setNodeRef}
-            {...attributes}
-            {...listeners}
+            {...(draggable ? attributes : {})}
+            {...(draggable ? listeners : {})}
             className="flex-shrink-0"
             style={{ 
                 ...style,
@@ -1255,7 +1249,8 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
                 padding: '8px',
                 backgroundColor: isDragging ? '#f0f9ff' : 'transparent',
                 transition: 'all 0.2s',
-                position: 'relative'
+                position: 'relative',
+                cursor: draggable ? (isDragging ? 'grabbing' : 'grab') : 'default'
             }}
             onClick={(e) => {
                 // Only handle click if we're not dragging
@@ -1307,6 +1302,85 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
             </div>
             
             {/* Mekaniker - Fifth line */}
+            <div className="mb-1 text-xs text-center">
+                <span className="font-semibold text-gray-600">Namn: </span>
+                {mekanikerNames ? (
+                    <span className="text-gray-800">{mekanikerNames}</span>
+                ) : (
+                    <span className="text-gray-400 italic">Not set</span>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// Left Side Order Event Component (non-draggable, completely separate from DraggableOrderEvent)
+function LeftSideOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose }) {
+    // Don't render if updating or recently updated
+    if (isUpdating || isRecentlyUpdated) {
+        return null;
+    }
+
+    return (
+        <div 
+            className="left-side-order-event flex-shrink-0"
+            style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center',
+                border: '1px solid #e5e7eb',
+                borderRadius: '6px',
+                padding: '6px',
+                backgroundColor: '#ffffff',
+                transition: 'all 0.2s',
+                position: 'relative',
+                cursor: 'default',
+                width: '100%',
+                marginBottom: '8px'
+            }}
+            onClick={(e) => {
+                // Double click to deselect/close the order detail
+                if (e.detail === 2 && onClose) {
+                    e.stopPropagation();
+                    onClose();
+                }
+            }}
+        >
+            {/* Image - First line (at the very top) */}
+            {imageUrl ? (
+                <div className="mb-2" style={{ width: '80px', height: '80px', overflow: 'hidden', borderRadius: '4px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                    <img 
+                        src={imageUrl} 
+                        alt={`Order Event`}
+                        style={{ width: '80px', height: '80px', objectFit: 'cover', display: 'block', margin: '0 auto' }}
+                    />
+                </div>
+            ) : (
+                <div className="mb-2 text-xs text-gray-400 italic text-center border border-dashed border-gray-300 rounded" style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    No image
+                </div>
+            )}
+            
+            {/* Visualization - Second line (from Calendar Events table) */}
+            <div className="mb-1 text-xs text-center">
+                {visualization ? (
+                    <span className="text-gray-800">{visualization}</span>
+                ) : (
+                    <span className="text-gray-400 italic">Not set</span>
+                )}
+            </div>
+            
+            {/* Fordon - Third line (from Orders table) */}
+            <div className="mb-1 text-xs text-center">
+                <span className="font-semibold text-gray-600">REG: </span>
+                {fordon ? (
+                    <span className="text-gray-800">{fordon}</span>
+                ) : (
+                    <span className="text-gray-400 italic">Not set</span>
+                )}
+            </div>
+            
+            {/* Mekaniker - Fourth line */}
             <div className="mb-1 text-xs text-center">
                 <span className="font-semibold text-gray-600">Namn: </span>
                 {mekanikerNames ? (
@@ -1569,7 +1643,9 @@ function CalendarInterfaceExtension() {
     const [stableMechanicOrder, setStableMechanicOrder] = useState([]);
     const [updatingRecords, setUpdatingRecords] = useState(new Set());
     const [recentlyUpdatedRecords, setRecentlyUpdatedRecords] = useState(new Set());
-    const [selectedOrderNumbers, setSelectedOrderNumbers] = useState(new Set());
+    // Separate selection states for top and left side panels
+    const [topSelectedOrderNumbers, setTopSelectedOrderNumbers] = useState(new Set());
+    const [sideSelectedOrderNumbers, setSideSelectedOrderNumbers] = useState(new Set());
     const isInitialMount = useRef(true);
     const isSelectingOrder = useRef(false); // Prevent multiple simultaneous selections
 
@@ -1612,9 +1688,9 @@ function CalendarInterfaceExtension() {
             return;
         }
         
-        // Clear selection when week changes
+        // Clear selection when week changes (only top selection, left side stays independent)
         if (startDate && endDate) {
-            setSelectedOrderNumbers(new Set());
+            setTopSelectedOrderNumbers(new Set());
         }
     }, [startDate, endDate]);
 
@@ -1648,26 +1724,48 @@ function CalendarInterfaceExtension() {
             // Handle order detail being dragged to calendar cell
             if (activeId.startsWith('order-detail-') && overId.startsWith('cell-')) {
                 // Extract order number and event ID from ID format: "order-detail-{orderNo}-{eventId}"
-                const activeParts = activeId.split('-');
+                // The format is: "order-detail-{orderNo}-{eventId}"
+                // We need to split on '-' but orderNo itself might contain dashes
+                const prefix = 'order-detail-';
+                const afterPrefix = activeId.substring(prefix.length);
+                
+                // Find the last occurrence of '-' which should separate orderNo from eventId
+                // Event IDs are typically long alphanumeric strings, so we'll look for the pattern
                 let orderNo = '';
                 let sourceEventId = '';
                 
-                if (activeParts.length >= 4) {
-                    // Format: order-detail-{orderNo}-{eventId}
-                    orderNo = activeParts.slice(2, -1).join('-'); // Everything between "order-detail" and the last part
-                    sourceEventId = activeParts[activeParts.length - 1]; // Last part is the event ID
+                // Try to find where the event ID starts (it's usually a long string at the end)
+                // Event IDs in Airtable are typically like "recXXXXXXXXXXXXXX"
+                const lastDashIndex = afterPrefix.lastIndexOf('-');
+                if (lastDashIndex > 0) {
+                    // Everything before the last dash is the order number
+                    orderNo = afterPrefix.substring(0, lastDashIndex);
+                    // Everything after the last dash is the event ID
+                    sourceEventId = afterPrefix.substring(lastDashIndex + 1);
                 } else {
-                    // Fallback
-                    orderNo = activeId.replace('order-detail-', '').split('-')[0];
+                    // Fallback: if no dash found, treat everything as orderNo
+                    orderNo = afterPrefix;
                 }
                 
                 // Parse target cell info
                 const parts = overId.split('-');
+                if (parts.length < 5) {
+                    console.error('Invalid cell ID format:', overId);
+                    return;
+                }
                 const mechanicName = parts[1];
                 const dateString = `${parts[2]}-${parts[3]}`; // MM-DD format
                 const hourIndex = parseInt(parts[4]);
                 
-                console.log('Order detail dropped:', { orderNo, sourceEventId, mechanicName, dateString, hourIndex });
+                console.log('Order detail dropped:', { 
+                    activeId, 
+                    orderNo, 
+                    sourceEventId, 
+                    mechanicName, 
+                    dateString, 
+                    hourIndex,
+                    afterPrefix
+                });
                 
                 // Find the order record
                 const orderNoField = orderTable?.fields?.find(field => 
@@ -1714,114 +1812,152 @@ function CalendarInterfaceExtension() {
                 const newStartTime = new Date(targetDate);
                 newStartTime.setHours(hourIndex + 5, 0, 0, 0); // Convert from 0-14 hour index to actual hour (05:00-19:00)
                 
-                // If source event exists, update it (move it). Otherwise, create a new one.
-                if (sourceEvent) {
-                    // Update existing event (move it to new location)
-                    const oldStartTime = new Date(sourceEvent.getCellValue('Starttid'));
-                    const oldEndTime = new Date(sourceEvent.getCellValue('Sluttid'));
-                    const duration = oldEndTime - oldStartTime;
-                    const newEndTime = new Date(newStartTime.getTime() + duration);
-                    
-                    console.log('Moving existing event:', {
-                        eventId: sourceEvent.id,
-                        mechanicName,
-                        newStartTime: newStartTime.toISOString(),
-                        newEndTime: newEndTime.toISOString()
+                // Find existing event for this order (don't create new one)
+                const orderField = eventsTable.fields.find(field => 
+                    field.name === 'Order' || 
+                    field.name.toLowerCase() === 'order'
+                );
+                
+                // Find existing event that matches this order
+                let existingEvent = null;
+                if (sourceEventId) {
+                    // Use the source event if provided
+                    existingEvent = events.find(ev => ev.id === sourceEventId);
+                } else if (orderField && orderRecord) {
+                    // Find any existing event for this order
+                    existingEvent = events.find(ev => {
+                        const eventOrderValue = ev.getCellValue(orderField.name);
+                        if (!eventOrderValue) return false;
+                        if (Array.isArray(eventOrderValue)) {
+                            return eventOrderValue.some(linkedRecord => linkedRecord.id === orderRecord.id);
+                        }
+                        return false;
                     });
+                }
+                
+                if (!existingEvent) {
+                    console.error('No existing event found for order:', orderNo);
+                    alert('No existing event found for this order. Please create an event first.');
+                    return;
+                }
+                
+                // Calculate start and end times
+                const duration = 60 * 60 * 1000; // Default 1 hour
+                const newEndTime = new Date(newStartTime.getTime() + duration);
+                
+                console.log('Updating existing event:', {
+                    eventId: existingEvent.id,
+                    orderNo,
+                    mechanicName,
+                    newStartTime: newStartTime.toISOString(),
+                    newEndTime: newEndTime.toISOString()
+                });
+                
+                // Check permissions
+                if (!eventsTable.hasPermissionToUpdateRecords([existingEvent])) {
+                    console.warn('No permission to update records. Please enable record editing in Airtable base settings.');
+                    alert('Cannot update event: Record editing is not enabled. Please contact your base administrator.');
+                    return;
+                }
+                
+                // Prepare update fields
+                const updateFields = {
+                    'Starttid': newStartTime,
+                    'Sluttid': newEndTime
+                };
+                
+                // Update mechanic
+                const mekanikerField = eventsTable.fields.find(field => 
+                    field.name === 'Mekaniker' || 
+                    field.name.toLowerCase() === 'mekaniker'
+                );
+                if (mekanikerField) {
+                    const mechanicId = mechanicNameToId[mechanicName];
+                    if (mechanicId) {
+                        updateFields[mekanikerField.name] = [{ id: mechanicId }];
+                        console.log('Updating mechanic to:', mechanicId);
+                    } else {
+                        // Fallback: try to use name
+                        updateFields[mekanikerField.name] = [{ name: mechanicName }];
+                        console.log('Updating mechanic by name:', mechanicName);
+                    }
+                }
+                
+                // Update Order Status to "Offertförfrågan skickad"
+                // Since Order Status is a lookup field, we need to update the Status field in the Orders table
+                if (orderTable && orderRecord) {
+                    // Find Status field
+                    const statusField = orderTable.fields.find(field => 
+                        field.name === 'Status' || 
+                        field.name === 'Order Status' ||
+                        field.name.toLowerCase() === 'status' ||
+                        field.name.toLowerCase().includes('status')
+                    );
                     
-                    // Check permissions
-                    if (!eventsTable.hasPermissionToUpdateRecords([sourceEvent])) {
-                        console.warn('No permission to update records. Please enable record editing in Airtable base settings.');
-                        alert('Cannot update event: Record editing is not enabled. Please contact your base administrator.');
-                        return;
+                    // Find "Status på tidsmöte" field
+                    const statusPaTidsmoteField = orderTable.fields.find(field => 
+                        field.name === 'Status på tidsmöte' ||
+                        field.name.toLowerCase() === 'status på tidsmöte' ||
+                        field.name.toLowerCase().includes('tidsmöte')
+                    );
+                    
+                    // Prepare update fields for Orders table
+                    const orderUpdateFields = {};
+                    
+                    if (statusField) {
+                        orderUpdateFields[statusField.name] = 'Offertförfrågan skickad';
                     }
                     
-                    // Prepare update fields
-                    const updateFields = {
-                        'Starttid': newStartTime,
-                        'Sluttid': newEndTime
-                    };
+                    if (statusPaTidsmoteField) {
+                        orderUpdateFields[statusPaTidsmoteField.name] = 'Planerad';
+                    }
                     
-                    // Update mechanic if different
-                    const mekanikerField = eventsTable.fields.find(field => 
-                        field.name === 'Mekaniker' || 
-                        field.name.toLowerCase() === 'mekaniker'
-                    );
-                    if (mekanikerField) {
-                        const mechanicId = mechanicNameToId[mechanicName];
-                        if (mechanicId) {
-                            updateFields[mekanikerField.name] = [{ id: mechanicId }];
+                    // Update both fields if we have any to update
+                    if (Object.keys(orderUpdateFields).length > 0) {
+                        // Check permissions for updating the order
+                        if (orderTable.hasPermissionToUpdateRecords([orderRecord])) {
+                            try {
+                                // Update the fields in the Orders table
+                                await orderTable.updateRecordAsync(orderRecord, orderUpdateFields);
+                                if (statusField) {
+                                    console.log('Order Status updated to: Offertförfrågan skickad');
+                                }
+                                if (statusPaTidsmoteField) {
+                                    console.log('Status på tidsmöte updated to: Planerad');
+                                }
+                            } catch (error) {
+                                console.error('Error updating Order fields:', error);
+                                // Don't fail the whole operation if status update fails
+                            }
                         } else {
-                            // Fallback: try to use name
-                            updateFields[mekanikerField.name] = [{ name: mechanicName }];
+                            console.warn('No permission to update Order fields');
+                        }
+                    } else {
+                        if (!statusField) {
+                            console.warn('Status field not found in Orders table');
+                        }
+                        if (!statusPaTidsmoteField) {
+                            console.warn('Status på tidsmöte field not found in Orders table');
                         }
                     }
-                    
-                    try {
-                        // Update the existing record
-                        await eventsTable.updateRecordAsync(sourceEvent, updateFields);
-                        console.log('Event moved successfully:', sourceEvent.id);
-                    } catch (error) {
-                        console.error('Error moving event:', error);
-                        alert('Error moving event: ' + error.message);
-                    }
-                } else {
-                    // No source event - create a new one
-                    const duration = 60 * 60 * 1000; // Default 1 hour
-                    const newEndTime = new Date(newStartTime.getTime() + duration);
-                    
-                    console.log('Creating new event:', {
+                }
+                
+                console.log('Updating record with fields:', updateFields);
+                
+                try {
+                    // Update the existing record
+                    await eventsTable.updateRecordAsync(existingEvent, updateFields);
+                    console.log('Calendar event updated successfully:', existingEvent.id);
+                } catch (error) {
+                    console.error('Error updating calendar event:', error);
+                    console.error('Error details:', {
+                        message: error.message,
+                        fields: updateFields,
+                        eventId: existingEvent.id,
                         orderNo,
-                        mechanicName,
-                        newStartTime: newStartTime.toISOString(),
-                        newEndTime: newEndTime.toISOString()
+                        mechanicName
                     });
-                    
-                    // Check permissions
-                    if (!eventsTable.hasPermissionToCreateRecords()) {
-                        console.warn('No permission to create records. Please enable record editing in Airtable base settings.');
-                        alert('Cannot create event: Record editing is not enabled. Please contact your base administrator.');
-                        return;
-                    }
-                    
-                    // Prepare fields for new record
-                    const newRecordFields = {
-                        'Starttid': newStartTime,
-                        'Sluttid': newEndTime
-                    };
-                    
-                    // Link the order
-                    const orderField = eventsTable.fields.find(field => 
-                        field.name === 'Order' || 
-                        field.name.toLowerCase() === 'order'
-                    );
-                    if (orderField) {
-                        newRecordFields[orderField.name] = [{ id: orderRecord.id }];
-                    }
-                    
-                    // Link the mechanic
-                    const mekanikerField = eventsTable.fields.find(field => 
-                        field.name === 'Mekaniker' || 
-                        field.name.toLowerCase() === 'mekaniker'
-                    );
-                    if (mekanikerField) {
-                        const mechanicId = mechanicNameToId[mechanicName];
-                        if (mechanicId) {
-                            newRecordFields[mekanikerField.name] = [{ id: mechanicId }];
-                        } else {
-                            // Fallback: try to use name
-                            newRecordFields[mekanikerField.name] = [{ name: mechanicName }];
-                        }
-                    }
-                    
-                    try {
-                        // Create the new record
-                        const newRecord = await eventsTable.createRecordAsync(newRecordFields);
-                        console.log('New calendar event created successfully:', newRecord.id);
-                    } catch (error) {
-                        console.error('Error creating calendar event:', error);
-                        alert('Error creating calendar event: ' + error.message);
-                    }
+                    alert('Error updating calendar event: ' + error.message);
                 }
                 
                 return;
@@ -2235,11 +2371,7 @@ function CalendarInterfaceExtension() {
             return []; // Don't return events for invalid mechanic names
         }
         
-        // Find the Order field in Calendar Events table
-        const orderField = eventsTable?.fields?.find(field => 
-            field.name === 'Order'
-        );
-        
+        // Show ALL events from Calendar Events table - no filtering by Order or Order Status
         return events.filter(ev => {
             const mekaniker = ev.getCellValue('Mekaniker') || [];
             const start = new Date(ev.getCellValue('Starttid'));
@@ -2247,48 +2379,6 @@ function CalendarInterfaceExtension() {
             // Check if date matches
             if (start.toDateString() !== date.toDateString()) {
                 return false;
-            }
-            
-            // Check if event has a valid order number
-            if (orderField && orderTable && orderRecords.length > 0) {
-                const eventOrderValue = ev.getCellValue(orderField.name);
-                
-                // If no order value, exclude this event
-                if (!eventOrderValue) {
-                    return false;
-                }
-                
-                // Check if the order exists in orderRecords
-                let hasValidOrder = false;
-                
-                // Handle linked records (array) - when Order field links to Orders table
-                if (Array.isArray(eventOrderValue)) {
-                    hasValidOrder = eventOrderValue.some(linkedRecord => {
-                        // Check if the linked record ID exists in orderRecords
-                        return orderRecords.some(order => order.id === linkedRecord.id);
-                    });
-                } else {
-                    // Handle direct value (if Order field is a text field with order number)
-                    // Find the Order No field in Orders table
-                    const orderNoField = orderTable.fields?.find(field => 
-                        field.name === 'Order No' || 
-                        field.name === 'Order No.' ||
-                        field.name.toLowerCase().includes('order no')
-                    );
-                    
-                    if (orderNoField) {
-                        const eventOrderNo = eventOrderValue.toString().trim();
-                        hasValidOrder = orderRecords.some(order => {
-                            const orderNo = order.getCellValueAsString(orderNoField.name);
-                            return orderNo && orderNo.toString().trim() === eventOrderNo;
-                        });
-                    }
-                }
-                
-                // If event doesn't have a valid order, exclude it
-                if (!hasValidOrder) {
-                    return false;
-                }
             }
             
             // Check if any mechanic in the event matches the mechanic name
@@ -2370,9 +2460,10 @@ function CalendarInterfaceExtension() {
         isSelectingOrder.current = true;
         
         // Use functional update to ensure we're working with the latest state
-        setSelectedOrderNumbers(prev => {
-            console.log('Previous selectedOrderNumbers:', Array.from(prev));
-            console.log('Previous selectedOrderNumbers size:', prev.size);
+        // Only update top selection (for calendar drag operations)
+        setTopSelectedOrderNumbers(prev => {
+            console.log('Previous topSelectedOrderNumbers:', Array.from(prev));
+            console.log('Previous topSelectedOrderNumbers size:', prev.size);
             
             // If clicking the same order that's already selected, keep it selected
             if (prev.has(orderNoTrimmed)) {
@@ -2385,8 +2476,8 @@ function CalendarInterfaceExtension() {
             // Create a completely new Set to ensure React detects the change
             const newSelection = new Set();
             newSelection.add(orderNoTrimmed);
-            console.log('New selection:', Array.from(newSelection));
-            console.log('New selection size:', newSelection.size);
+            console.log('New top selection:', Array.from(newSelection));
+            console.log('New top selection size:', newSelection.size);
             
             // Reset flag after a short delay
             setTimeout(() => {
@@ -2398,13 +2489,22 @@ function CalendarInterfaceExtension() {
     }, []);
 
     // Handler for closing order detail
-    const handleCloseOrder = (orderNo) => {
+    // This handles closing from both top and left panels
+    const handleCloseOrder = (orderNo, fromPanel = 'top') => {
         const orderNoTrimmed = orderNo ? orderNo.toString().trim() : '';
-        setSelectedOrderNumbers(prev => {
-            const newSet = new Set(prev);
-            newSet.delete(orderNoTrimmed);
-            return newSet;
-        });
+        if (fromPanel === 'top') {
+            setTopSelectedOrderNumbers(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(orderNoTrimmed);
+                return newSet;
+            });
+        } else {
+            setSideSelectedOrderNumbers(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(orderNoTrimmed);
+                return newSet;
+            });
+        }
     };
 
     return (
@@ -2450,12 +2550,12 @@ function CalendarInterfaceExtension() {
                     {/* ORDER DETAILS PANEL - Shows selected orders at top */}
                     {eventsTable && (
                         <OrderDetailsPanel
-                            selectedOrderNumbers={selectedOrderNumbers}
+                            selectedOrderNumbers={topSelectedOrderNumbers}
                             orders={filteredOrderRecords}
                             orderTable={orderTable}
                             calendarEvents={events}
                             eventsTable={eventsTable}
-                            onCloseOrder={handleCloseOrder}
+                            onCloseOrder={(orderNo) => handleCloseOrder(orderNo, 'top')}
                             statusColors={statusColors}
                             statusIcons={statusIcons}
                             updatingRecords={updatingRecords}
@@ -2476,12 +2576,12 @@ function CalendarInterfaceExtension() {
                     {/* ORDER DETAILS PANEL - Shows selected orders at top */}
                     {eventsTable && (
                         <OrderDetailsPanel
-                            selectedOrderNumbers={selectedOrderNumbers}
+                            selectedOrderNumbers={topSelectedOrderNumbers}
                             orders={filteredOrderRecords}
                             orderTable={orderTable}
                             calendarEvents={events}
                             eventsTable={eventsTable}
-                            onCloseOrder={handleCloseOrder}
+                            onCloseOrder={(orderNo) => handleCloseOrder(orderNo, 'top')}
                             statusColors={statusColors}
                             statusIcons={statusIcons}
                             updatingRecords={updatingRecords}
@@ -2501,10 +2601,11 @@ function CalendarInterfaceExtension() {
                             overflow: 'visible'
                         }}
                     >
-                        {/* LEFT SIDE: Order Details Panel (vertical layout, no Visualization) - Only show when order is selected and has matching events */}
+                        {/* LEFT SIDE: Order Details Panel (vertical layout, no Visualization) - Shows same orders as top but not draggable */}
                         {(() => {
                             // Check if there are any orders with matching events before rendering the container
-                            if (!eventsTable || selectedOrderNumbers.size === 0) {
+                            // Use top selection to determine which orders to show (same as top panel)
+                            if (!eventsTable || topSelectedOrderNumbers.size === 0) {
                                 return null;
                             }
                             
@@ -2519,9 +2620,9 @@ function CalendarInterfaceExtension() {
                                 field.name.toLowerCase().includes('order no')
                             );
                             
-                            // Check if any selected order has matching events
+                            // Check if any selected order has matching events (using top selection)
                             const hasOrdersWithEvents = filteredOrderRecords.some(order => {
-                                if (!selectedOrderNumbers.has(orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id)) {
+                                if (!topSelectedOrderNumbers.has(orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id)) {
                                     return false;
                                 }
                                 const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
@@ -2546,20 +2647,18 @@ function CalendarInterfaceExtension() {
                                 <div 
                                     className="flex-shrink-0 border-r border-gray-300 bg-white"
                                     style={{ 
-                                        width: '300px',
-                                        minWidth: '300px',
+                                        width: '150px',
+                                        minWidth: '150px',
                                         height: '100%',
-                                        overflowY: 'auto',
-                                        overflowX: 'hidden'
                                     }}
                                 >
                                     <LeftSideOrderDetailsPanel
-                                        selectedOrderNumbers={selectedOrderNumbers}
+                                        selectedOrderNumbers={topSelectedOrderNumbers}
                                         orders={filteredOrderRecords}
                                         orderTable={orderTable}
                                         calendarEvents={events}
                                         eventsTable={eventsTable}
-                                        onCloseOrder={handleCloseOrder}
+                                        onCloseOrder={(orderNo) => handleCloseOrder(orderNo, 'top')}
                                         statusColors={statusColors}
                                         statusIcons={statusIcons}
                                         updatingRecords={updatingRecords}
@@ -2732,12 +2831,12 @@ function CalendarInterfaceExtension() {
                             console.log('filteredOrderRecords:', filteredOrderRecords.length);
                             console.log('orderTable:', orderTable?.name);
                             return (
-                                <OrderList 
-                                    orders={filteredOrderRecords} 
-                                    orderTable={orderTable}
-                                    selectedOrderNumbers={selectedOrderNumbers}
-                                    onOrderClick={handleOrderClick}
-                                />
+                            <OrderList
+                                orders={filteredOrderRecords}
+                                orderTable={orderTable}
+                                selectedOrderNumbers={topSelectedOrderNumbers}
+                                onOrderClick={handleOrderClick}
+                            />
                             );
                         })()}
                     </div>
