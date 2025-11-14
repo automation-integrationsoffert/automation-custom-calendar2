@@ -247,6 +247,127 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
             orderRecordTable: orderRecord?.table?.name
         });
     }
+
+    const eventDetails = matchingEvents.map((event, index) => {
+        let imageUrl = null;
+        if (event && eventsTable) {
+            try {
+                const attachmentField =
+                    eventsTable.fields.find(
+                        f => f.name.toLowerCase().trim() === 'attachments'
+                    );
+                if (attachmentField) {
+                    const attachments = event.getCellValue(attachmentField.name);
+                    if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+                        imageUrl =
+                            attachments[0].url ||
+                            attachments[0].thumbnails?.large?.url ||
+                            attachments[0].thumbnails?.small?.url;
+                    }
+                } else {
+                    console.warn("⚠️ Attachments field not found in Calendar Events table. Available fields:", eventsTable.fields.map(f => f.name));
+                }
+            } catch (e) {
+                console.error('Error getting image:', e);
+            }
+        }
+
+        let visualization = '';
+        let arbetsorder = '';
+        let mekanikerNames = '';
+        
+        try {
+            if (event && visualizationField) {
+                visualization = event.getCellValueAsString(visualizationField.name) || '';
+            }
+        } catch (e) {
+            console.error('Error getting Visualization:', e);
+        }
+        
+        try {
+            if (event && arbetsorderField) {
+                arbetsorder = event.getCellValueAsString(arbetsorderField.name) || '';
+                console.log(`Arbetsorder value for event ${index + 1}:`, arbetsorder || 'empty');
+            } else {
+                console.log(`Arbetsorder field not found for event ${index + 1}`);
+            }
+        } catch (e) {
+            console.error('Error getting Arbetsorder:', e);
+        }
+        
+        try {
+            if (event && mekanikerField) {
+                const mekaniker = event.getCellValue(mekanikerField.name) || [];
+                if (Array.isArray(mekaniker)) {
+                    mekanikerNames = mekaniker.map(m => {
+                        if (typeof m === 'string') return m;
+                        if (m && m.name) return m.name;
+                        if (m && m.value) return m.value;
+                        return String(m);
+                    }).filter(Boolean).join(', ');
+                }
+            }
+        } catch (e) {
+            console.error('Error getting Mekaniker:', e);
+        }
+        
+        console.log(`Event ${index + 1} (${event.id}) data:`, {
+            hasImage: !!imageUrl,
+            hasArbetsorderField: !!arbetsorderField,
+            arbetsorderFieldName: arbetsorderField?.name,
+            visualization: visualization || 'empty',
+            arbetsorder: arbetsorder || 'empty',
+            mekanikerNames: mekanikerNames || 'empty'
+        });
+        
+        let status = 'Inget';
+        let statusIcon = '❓';
+        let backgroundColor = '#6b7280';
+        
+        try {
+            const orderStatus = event.getCellValue('Order Status');
+            if (orderStatus && Array.isArray(orderStatus) && orderStatus.length > 0) {
+                status = orderStatus[0]?.value || orderStatus[0]?.name || 'Inget';
+            } else if (orderStatus && typeof orderStatus === 'string') {
+                status = orderStatus;
+            }
+            
+            if (statusColors && statusColors[status]) {
+                backgroundColor = statusColors[status];
+            }
+            if (statusIcons && statusIcons[status]) {
+                statusIcon = statusIcons[status];
+            }
+        } catch (e) {
+            console.error('Error getting Order Status:', e);
+        }
+        
+        let isScheduled = false;
+        try {
+            const starttid = event.getCellValue('Starttid');
+            const sluttid = event.getCellValue('Sluttid');
+            isScheduled = !!(starttid && sluttid);
+        } catch (e) {
+            console.error('Error checking if event is scheduled:', e);
+        }
+
+        return {
+            key: event.id || index,
+            event,
+            imageUrl,
+            visualization,
+            mekanikerNames,
+            status,
+            statusIcon,
+            backgroundColor,
+            isUpdating: updatingRecords && updatingRecords.has(event.id),
+            isRecentlyUpdated: recentlyUpdatedRecords && recentlyUpdatedRecords.has(event.id),
+            isScheduled,
+        };
+    });
+
+    const unscheduledEvents = eventDetails.filter(detail => !detail.isScheduled);
+    const scheduledEvents = eventDetails.filter(detail => detail.isScheduled);
     
     return (
         <div 
@@ -277,144 +398,59 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
             
             {/* Horizontal scrollable list of matching events */}
             <div className="flex-1">
-                {matchingEvents.length > 0 ? (
-                    <SortableContext
-                        items={matchingEvents.map(ev => `order-detail-${orderNo}-${ev.id}`)}
-                        strategy={verticalListSortingStrategy}
-                    >
-                        <div className="flex gap-3" style={{ margin: 'auto' }}>
-                            {matchingEvents.map((event, index) => {
-                            // Get image from event using exact field name "Attachments"
-                            let imageUrl = null;
-                                if (event && eventsTable) {
-                                    try {
-                                        const attachmentField =
-                                            eventsTable.fields.find(
-                                                f => f.name.toLowerCase().trim() === 'attachments'
-                                                    // f.type === 'multipleAttachment'
-                                            );
-                                        if (attachmentField) {
-                                            const attachments = event.getCellValue(attachmentField.name);
-                                            if (attachments && Array.isArray(attachments) && attachments.length > 0) {
-                                                imageUrl =
-                                                    attachments[0].url ||
-                                                    attachments[0].thumbnails?.large?.url ||
-                                                    attachments[0].thumbnails?.small?.url;
-                                            }
-                                        } else {
-                                            console.warn("⚠️ Attachments field not found in Calendar Events table. Available fields:", eventsTable.fields.map(f => f.name));
-                                        }
-                                    } catch (e) {
-                                        console.error('Error getting image:', e);
-                                    }
-                                }
-                            
-                            // Get other values from this event
-                            let visualization = '';
-                            let arbetsorder = '';
-                            let mekanikerNames = '';
-                            
-                            try {
-                                if (event && visualizationField) {
-                                    visualization = event.getCellValueAsString(visualizationField.name) || '';
-                                }
-                            } catch (e) {
-                                console.error('Error getting Visualization:', e);
-                            }
-                            
-                            try {
-                                if (event && arbetsorderField) {
-                                    arbetsorder = event.getCellValueAsString(arbetsorderField.name) || '';
-                                    console.log(`Arbetsorder value for event ${index + 1}:`, arbetsorder || 'empty');
-                                } else {
-                                    console.log(`Arbetsorder field not found for event ${index + 1}`);
-                                }
-                            } catch (e) {
-                                console.error('Error getting Arbetsorder:', e);
-                            }
-                            
-                            try {
-                                if (event && mekanikerField) {
-                                    const mekaniker = event.getCellValue(mekanikerField.name) || [];
-                                    if (Array.isArray(mekaniker)) {
-                                        mekanikerNames = mekaniker.map(m => {
-                                            if (typeof m === 'string') return m;
-                                            if (m && m.name) return m.name;
-                                            if (m && m.value) return m.value;
-                                            return String(m);
-                                        }).filter(Boolean).join(', ');
-                                    }
-                                }
-                            } catch (e) {
-                                console.error('Error getting Mekaniker:', e);
-                            }
-                            
-                            console.log(`Event ${index + 1} (${event.id}) data:`, {
-                                hasImage: !!imageUrl,
-                                hasArbetsorderField: !!arbetsorderField,
-                                arbetsorderFieldName: arbetsorderField?.name,
-                                visualization: visualization || 'empty',
-                                arbetsorder: arbetsorder || 'empty',
-                                mekanikerNames: mekanikerNames || 'empty'
-                            });
-                            
-                            // Get status for this event
-                            let status = 'Inget';
-                            let statusIcon = '❓';
-                            let backgroundColor = '#6b7280';
-                            
-                            try {
-                                const orderStatus = event.getCellValue('Order Status');
-                                if (orderStatus && Array.isArray(orderStatus) && orderStatus.length > 0) {
-                                    status = orderStatus[0]?.value || orderStatus[0]?.name || 'Inget';
-                                } else if (orderStatus && typeof orderStatus === 'string') {
-                                    status = orderStatus;
-                                }
-                                
-                                // Get status color and icon
-                                if (statusColors && statusColors[status]) {
-                                    backgroundColor = statusColors[status];
-                                }
-                                if (statusIcons && statusIcons[status]) {
-                                    statusIcon = statusIcons[status];
-                                }
-                            } catch (e) {
-                                console.error('Error getting Order Status:', e);
-                            }
-                            
-                            // Check if event is scheduled (has both Starttid and Sluttid)
-                            let isScheduled = false;
-                            try {
-                                const starttid = event.getCellValue('Starttid');
-                                const sluttid = event.getCellValue('Sluttid');
-                                isScheduled = !!(starttid && sluttid);
-                            } catch (e) {
-                                console.error('Error checking if event is scheduled:', e);
-                            }
+                {eventDetails.length > 0 ? (
+                    <div className="flex gap-3 flex-nowrap" style={{ margin: 'auto' }}>
+                        {unscheduledEvents.length > 0 && (
+                            <SortableContext
+                                items={unscheduledEvents.map(detail => `order-detail-${orderNo || 'unknown'}-${detail.event.id}`)}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                <>
+                                    {unscheduledEvents.map(detail => (
+                                        <DraggableOrderEvent
+                                            key={detail.key}
+                                            event={detail.event}
+                                            imageUrl={detail.imageUrl}
+                                            visualization={detail.visualization}
+                                            fordon={fordon}
+                                            mekanikerNames={detail.mekanikerNames}
+                                            status={detail.status}
+                                            statusIcon={detail.statusIcon}
+                                            backgroundColor={detail.backgroundColor}
+                                            isUpdating={detail.isUpdating}
+                                            isRecentlyUpdated={detail.isRecentlyUpdated}
+                                            orderNo={orderNo}
+                                            orderRecord={orderRecord}
+                                            onClose={onClose}
+                                            showVisualization={showVisualization}
+                                            isScheduled={detail.isScheduled}
+                                        />
+                                    ))}
+                                </>
+                            </SortableContext>
+                        )}
 
-                            return (
-                                <DraggableOrderEvent
-                                    key={event.id || index}
-                                    event={event}
-                                    imageUrl={imageUrl}
-                                    visualization={visualization}
-                                    fordon={fordon}
-                                    mekanikerNames={mekanikerNames}
-                                    status={status}
-                                    statusIcon={statusIcon}
-                                    backgroundColor={backgroundColor}
-                                    isUpdating={updatingRecords && updatingRecords.has(event.id)}
-                                    isRecentlyUpdated={recentlyUpdatedRecords && recentlyUpdatedRecords.has(event.id)}
-                                    orderNo={orderNo}
-                                    orderRecord={orderRecord}
-                                    onClose={onClose}
-                                    showVisualization={showVisualization}
-                                    isScheduled={isScheduled}
-                                />
-                            );
-                        })}
-                        </div>
-                    </SortableContext>
+                        {scheduledEvents.length > 0 && scheduledEvents.map(detail => (
+                            <StaticOrderEvent
+                                key={`static-${detail.key}`}
+                                event={detail.event}
+                                imageUrl={detail.imageUrl}
+                                visualization={detail.visualization}
+                                fordon={fordon}
+                                mekanikerNames={detail.mekanikerNames}
+                                status={detail.status}
+                                statusIcon={detail.statusIcon}
+                                backgroundColor={detail.backgroundColor}
+                                isUpdating={detail.isUpdating}
+                                isRecentlyUpdated={detail.isRecentlyUpdated}
+                                orderNo={orderNo}
+                                orderRecord={orderRecord}
+                                onClose={onClose}
+                                showVisualization={showVisualization}
+                                isScheduled={detail.isScheduled}
+                            />
+                        ))}
+                    </div>
                 ) : (
                     <div className="text-xs text-gray-500 mt-4 p-4 text-center">
                         <div className="mb-2 font-semibold">No Orders found</div>
@@ -676,9 +712,12 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
             {/* Vertical list of unscheduled events */}
             <div className="flex-1">
                 {unscheduledEvents.length > 0 ? (
-                    // Left side events are not draggable, so no SortableContext needed
-                    <div className="flex flex-col gap-3" style={{ margin: 'auto' }}>
-                        {unscheduledEvents.map((event, index) => {
+                    <SortableContext
+                        items={unscheduledEvents.map(event => `left-order-detail-${orderNo || 'unknown'}-${event.id}`)}
+                        strategy={verticalListSortingStrategy}
+                    >
+                        <div className="flex flex-col gap-3" style={{ margin: 'auto' }}>
+                            {unscheduledEvents.map((event, index) => {
                                 let imageUrl = null;
                                 if (event && eventsTable) {
                                     try {
@@ -767,8 +806,9 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                                 }
                                 
                                 return (
-                                    <LeftSideOrderEvent
+                                    <DraggableOrderEvent
                                         key={event.id || index}
+                                        customUniqueId={`left-order-detail-${orderNo || 'unknown'}-${event.id}`}
                                         event={event}
                                         imageUrl={imageUrl}
                                         visualization={visualization}
@@ -783,11 +823,14 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                                         orderRecord={orderRecord}
                                         onClose={onClose}
                                         isScheduled={isScheduled}
+                                        variant="left"
+                                        showVisualization={true}
                                     />
                                 );
                             })}
                         </div>
-                    ) : null}
+                    </SortableContext>
+                ) : null}
             </div>
         </div>
     );
@@ -1244,10 +1287,10 @@ function DroppableCell({ mechanicName, date, hourIndex, hourHeight }) {
 }
 
 // Draggable Order Event Component (for order detail panel)
-function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, showVisualization = true, draggable = true, isScheduled = false }) {
+function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, showVisualization = true, isScheduled = false, variant = 'top', customUniqueId = null }) {
     // Use useSortable with unique ID that includes both orderNo and event.id
     // Format: "order-detail-{orderNo}-{event.id}" so each event is uniquely identifiable
-    const uniqueId = `order-detail-${orderNo || 'unknown'}-${event.id}`;
+    const uniqueId = customUniqueId || `order-detail-${orderNo || 'unknown'}-${event.id}`;
     const {
         attributes,
         listeners,
@@ -1255,10 +1298,10 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
         transform,
         transition,
         isDragging,
-    } = useSortable({ id: uniqueId, disabled: !draggable });
+    } = useSortable({ id: uniqueId });
 
-    // Don't render if updating or recently updated
-    if (isUpdating || isRecentlyUpdated) {
+    // Don't render if updating, recently updated, or already scheduled (should not be draggable)
+    if (isUpdating || isRecentlyUpdated || isScheduled) {
         return null;
     }
 
@@ -1269,24 +1312,44 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
         cursor: isDragging ? 'grabbing' : 'grab',
     };
 
+    const isLeftVariant = variant === 'left';
+    const imageSize = isLeftVariant ? 80 : 100;
+    const containerStyles = isLeftVariant
+        ? {
+            border: isDragging ? '2px dashed #3b82f6' : '1px solid #e5e7eb',
+            backgroundColor: isDragging ? '#f0f9ff' : '#ffffff',
+            borderRadius: '6px',
+            padding: '6px',
+            width: '100%',
+            marginBottom: '8px',
+        }
+        : {
+            border: isDragging ? '2px dashed #3b82f6' : '2px solid transparent',
+            backgroundColor: isDragging ? '#f0f9ff' : 'transparent',
+            borderRadius: '8px',
+            padding: '8px',
+        };
+
     return (
         <div 
             ref={setNodeRef}
-            {...(draggable ? attributes : {})}
-            {...(draggable ? listeners : {})}
+            {...attributes}
+            {...listeners}
             className="flex-shrink-0"
             style={{ 
                 ...style,
                 display: 'flex', 
                 flexDirection: 'column', 
                 alignItems: 'center',
-                border: isDragging ? '2px dashed #3b82f6' : '2px solid transparent',
-                borderRadius: '8px',
-                padding: '8px',
-                backgroundColor: isDragging ? '#f0f9ff' : 'transparent',
+                border: containerStyles.border,
+                borderRadius: containerStyles.borderRadius,
+                padding: containerStyles.padding,
+                backgroundColor: containerStyles.backgroundColor,
                 transition: 'all 0.2s',
                 position: 'relative',
-                cursor: draggable ? (isDragging ? 'grabbing' : 'grab') : 'default'
+                cursor: isDragging ? 'grabbing' : 'grab',
+                width: isLeftVariant ? '100%' : undefined,
+                marginBottom: isLeftVariant ? containerStyles.marginBottom : undefined
             }}
             onClick={(e) => {
                 // Only handle click if we're not dragging
@@ -1303,15 +1366,15 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
         >
             {/* Image - First line (at the very top) */}
             {imageUrl ? (
-                <div className="mb-2" style={{ width: '100px', height: '100px', overflow: 'hidden', borderRadius: '4px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                <div className="mb-2" style={{ width: `${imageSize}px`, height: `${imageSize}px`, overflow: 'hidden', borderRadius: '4px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
                     <img 
                         src={imageUrl} 
                         alt={`Order Event`}
-                        style={{ width: '100px', height: '100px', objectFit: 'cover', display: 'block', margin: '0 auto' }}
+                        style={{ width: `${imageSize}px`, height: `${imageSize}px`, objectFit: 'cover', display: 'block', margin: '0 auto' }}
                     />
                 </div>
             ) : (
-                <div className="mb-2 text-xs text-gray-400 italic text-center border border-dashed border-gray-300 rounded" style={{ width: '100px', height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div className="mb-2 text-xs text-gray-400 italic text-center border border-dashed border-gray-300 rounded" style={{ width: `${imageSize}px`, height: `${imageSize}px`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     No image
                 </div>
             )}
@@ -1350,63 +1413,57 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
     );
 }
 
-// Left Side Order Event Component (non-draggable, completely separate from DraggableOrderEvent)
-function LeftSideOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, isScheduled = false }) {
-    // Don't render if updating or recently updated
+// Static (non-draggable) Order Event for already scheduled events
+function StaticOrderEvent({ imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, onClose, showVisualization = true, isScheduled = true }) {
     if (isUpdating || isRecentlyUpdated) {
         return null;
     }
 
     return (
         <div 
-            className="left-side-order-event flex-shrink-0"
+            className="flex-shrink-0"
             style={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
                 alignItems: 'center',
-                border: '1px solid #e5e7eb',
-                borderRadius: '6px',
-                padding: '6px',
-                backgroundColor: '#ffffff',
-                transition: 'all 0.2s',
-                position: 'relative',
-                cursor: 'default',
-                width: '100%',
-                marginBottom: '8px'
+                borderRadius: '8px',
+                padding: '8px',
+                backgroundColor: 'transparent',
+                opacity: 0.7,
+                cursor: 'not-allowed',
+                position: 'relative'
             }}
             onClick={(e) => {
-                // Double click to deselect/close the order detail
                 if (e.detail === 2 && onClose) {
                     e.stopPropagation();
                     onClose();
                 }
             }}
         >
-            {/* Image - First line (at the very top) */}
             {imageUrl ? (
-                <div className="mb-2" style={{ width: '80px', height: '80px', overflow: 'hidden', borderRadius: '4px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                <div className="mb-2" style={{ width: '100px', height: '100px', overflow: 'hidden', borderRadius: '4px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
                     <img 
                         src={imageUrl} 
                         alt={`Order Event`}
-                        style={{ width: '80px', height: '80px', objectFit: 'cover', display: 'block', margin: '0 auto' }}
+                        style={{ width: '100px', height: '100px', objectFit: 'cover', display: 'block', margin: '0 auto' }}
                     />
                 </div>
             ) : (
-                <div className="mb-2 text-xs text-gray-400 italic text-center border border-dashed border-gray-300 rounded" style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div className="mb-2 text-xs text-gray-400 italic text-center rounded" style={{ width: '100px', height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     No image
                 </div>
             )}
             
-            {/* Visualization - Second line (from Calendar Events table) */}
-            <div className="mb-1 text-xs text-center">
-                {visualization ? (
-                    <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{visualization}</span>
-                ) : (
-                    <span className="text-gray-400 italic">Not set</span>
-                )}
-            </div>
+            {showVisualization && (
+                <div className="mb-1 text-xs text-center">
+                    {visualization ? (
+                        <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{visualization}</span>
+                    ) : (
+                        <span className="text-gray-400 italic">Not set</span>
+                    )}
+                </div>
+            )}
             
-            {/* Fordon - Third line (from Orders table) */}
             <div className="mb-1 text-xs text-center">
                 <span className={`font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`}>REG: </span>
                 {fordon ? (
@@ -1416,7 +1473,6 @@ function LeftSideOrderEvent({ event, imageUrl, visualization, fordon, mekanikerN
                 )}
             </div>
             
-            {/* Mekaniker - Fourth line */}
             <div className="mb-1 text-xs text-center">
                 <span className={`font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`}>Namn: </span>
                 {mekanikerNames ? (
@@ -1758,12 +1814,13 @@ function CalendarInterfaceExtension() {
             console.log('Parsing IDs:', { activeId, overId });
             
             // Handle order detail being dragged to calendar cell
-            if (activeId.startsWith('order-detail-') && overId.startsWith('cell-')) {
-                // Extract order number and event ID from ID format: "order-detail-{orderNo}-{eventId}"
-                // The format is: "order-detail-{orderNo}-{eventId}"
+            const draggablePrefixes = ['order-detail-', 'left-order-detail-'];
+            const matchedPrefix = draggablePrefixes.find(prefix => activeId.startsWith(prefix));
+
+            if (matchedPrefix && overId.startsWith('cell-')) {
+                // Extract order number and event ID from ID format: "{prefix}{orderNo}-{eventId}"
                 // We need to split on '-' but orderNo itself might contain dashes
-                const prefix = 'order-detail-';
-                const afterPrefix = activeId.substring(prefix.length);
+                const afterPrefix = activeId.substring(matchedPrefix.length);
                 
                 // Find the last occurrence of '-' which should separate orderNo from eventId
                 // Event IDs are typically long alphanumeric strings, so we'll look for the pattern
@@ -2556,7 +2613,7 @@ function CalendarInterfaceExtension() {
             <CalendarImagesGallery events={events} eventsTable={eventsTable} />
             
             {/* TOP SECTION: Navigation Buttons */}
-            <div className="flex items-center gap-2 mb-4 flex-wrap">
+            <div className="flex items-center gap-2 mb-4 flex-nowrap overflow-x-auto">
                 <button 
                     onClick={() => goToWeek(-1)}
                     className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm transition-colors"
