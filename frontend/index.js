@@ -369,13 +369,20 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
     const unscheduledEvents = eventDetails.filter(detail => !detail.isScheduled);
     const scheduledEvents = eventDetails.filter(detail => detail.isScheduled);
     
+    const { setNodeRef: setOrderDropRef, isOver: isOrderDropOver } = useDroppable({
+        id: `order-detail-drop-${orderNo || 'unknown'}`
+    });
+
     return (
         <div 
+            ref={setOrderDropRef}
             className="order-detail-card p-3 flex-shrink-0"
             style={{ 
                 flexDirection: 'column',
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                border: isOrderDropOver ? '1px dashed #3b82f6' : undefined,
+                borderRadius: isOrderDropOver ? '8px' : undefined
             }}
         >
             {/* Close button */}
@@ -700,14 +707,21 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
         return null;
     }
     
+    const { setNodeRef: setLeftOrderDropRef, isOver: isLeftDropOver } = useDroppable({
+        id: `left-order-detail-drop-${orderNo || 'unknown'}`
+    });
+    
     return (
         <div 
+            ref={setLeftOrderDropRef}
             className="left-side-order-detail-card p-3 flex-shrink-0"
             style={{ 
                 flexDirection: 'column',
                 position: 'relative',
                 overflow: 'hidden',
-                width: '100%'
+                width: '100%',
+                border: isLeftDropOver ? '1px dashed #3b82f6' : undefined,
+                borderRadius: isLeftDropOver ? '8px' : undefined
             }}
         >
             <div className="w-full text-xs font-semibold text-gray-700 border-b border-dashed border-gray-300 pb-1 mb-3 text-center">
@@ -1828,6 +1842,99 @@ function CalendarInterfaceExtension() {
             const overId = over.id;
             
             console.log('Parsing IDs:', { activeId, overId });
+            
+            // Handle calendar event being dragged back to order detail panels
+            const orderDetailDropPrefixes = [
+                'order-detail-drop-',
+                'left-order-detail-drop-',
+                'order-detail-',
+                'left-order-detail-'
+            ];
+            
+            if (activeId.startsWith('event-')) {
+                const targetDropPrefix = orderDetailDropPrefixes.find(prefix => overId.startsWith(prefix));
+                if (targetDropPrefix) {
+                    if (!eventsTable) {
+                        console.warn('Events table not available, cannot unschedule event');
+                        return;
+                    }
+                    
+                    const eventRecordId = activeId.replace('event-', '');
+                    const eventRecord = events.find(ev => ev.id === eventRecordId);
+                    if (!eventRecord) {
+                        console.error('Could not find event record for unscheduling:', eventRecordId);
+                        return;
+                    }
+                    
+                    let targetOrderNo = '';
+                    const afterPrefix = overId.substring(targetDropPrefix.length);
+                    if (targetDropPrefix === 'order-detail-' || targetDropPrefix === 'left-order-detail-') {
+                        const lastDashIndex = afterPrefix.lastIndexOf('-');
+                        targetOrderNo = lastDashIndex > 0 ? afterPrefix.substring(0, lastDashIndex) : afterPrefix;
+                    } else {
+                        targetOrderNo = afterPrefix;
+                    }
+                    
+                    console.log('Unscheduling event from calendar:', {
+                        eventRecordId,
+                        targetOrderNo,
+                        overId
+                    });
+                    
+                    if (!eventsTable.hasPermissionToUpdateRecords([eventRecord])) {
+                        console.warn('No permission to update event record when unscheduling');
+                        alert('Cannot update event: Record editing is not enabled. Please contact your base administrator.');
+                        return;
+                    }
+                    
+                    const updates = {
+                        'Starttid': null,
+                        'Sluttid': null
+                    };
+                    
+                    const mekanikerField = eventsTable.fields.find(field => 
+                        field.name === 'Mekaniker' || 
+                        field.name.toLowerCase() === 'mekaniker'
+                    );
+                    if (mekanikerField) {
+                        updates[mekanikerField.name] = [];
+                    }
+                    
+                    const statusPaTidsmoteField = eventsTable.fields.find(field => 
+                        field.name === 'Status på tidsmöte' ||
+                        field.name.toLowerCase() === 'status på tidsmöte' ||
+                        field.name.toLowerCase().includes('tidsmöte')
+                    );
+                    if (statusPaTidsmoteField) {
+                        updates[statusPaTidsmoteField.name] = null;
+                    }
+                    
+                    setUpdatingRecords(prev => new Set(prev).add(eventRecordId));
+                    
+                    try {
+                        await eventsTable.updateRecordAsync(eventRecord, updates);
+                        setRecentlyUpdatedRecords(prev => new Set(prev).add(eventRecordId));
+                        setTimeout(() => {
+                            setRecentlyUpdatedRecords(prev => {
+                                const newSet = new Set(prev);
+                                newSet.delete(eventRecordId);
+                                return newSet;
+                            });
+                        }, 1000);
+                    } catch (error) {
+                        console.error('Error unscheduling event:', error);
+                        alert('Error updating event: ' + error.message);
+                    } finally {
+                        setUpdatingRecords(prev => {
+                            const newSet = new Set(prev);
+                            newSet.delete(eventRecordId);
+                            return newSet;
+                        });
+                    }
+                    
+                    return;
+                }
+            }
             
             // Handle order detail being dragged to calendar cell
             const draggablePrefixes = ['order-detail-', 'left-order-detail-'];
