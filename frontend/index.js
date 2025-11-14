@@ -707,8 +707,12 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                 flexDirection: 'column',
                 position: 'relative',
                 overflow: 'hidden',
+                width: '100%'
             }}
         >
+            <div className="w-full text-xs font-semibold text-gray-700 border-b border-dashed border-gray-300 pb-1 mb-3 text-center">
+                {orderNo ? `Order ${orderNo}` : 'Order'}
+            </div>
             {/* Vertical list of unscheduled events */}
             <div className="flex-1">
                 {unscheduledEvents.length > 0 ? (
@@ -837,49 +841,55 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
 }
 
 // Left Side Order Details Panel Component (vertical layout for events, no Visualization)
-function LeftSideOrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
-    console.log('LeftSideOrderDetailsPanel - selectedOrderNumbers:', Array.from(selectedOrderNumbers));
+function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
     console.log('LeftSideOrderDetailsPanel - orders count:', orders?.length);
     
-    if (selectedOrderNumbers.size === 0) {
-        return null;
-    }
+    const containerStyle = {
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '16px',
+        gap: '16px',
+        overflowY: 'auto',
+        alignItems: 'center'
+    };
     
-    // Early return if required props are missing
     if (!orderTable || !eventsTable) {
         console.log('LeftSideOrderDetailsPanel - Missing orderTable or eventsTable');
-        return null;
+        return (
+            <div className="left-side-order-details-panel" style={containerStyle}>
+                <div className="text-xs text-red-600 text-center w-full border border-dashed border-red-300 rounded p-3 bg-red-50">
+                    Unable to load order details. Missing table configuration.
+                </div>
+            </div>
+        );
     }
     
-    // Get selected order records
     const orderNoField = orderTable?.fields?.find(field => 
         field.name === 'Order No' || 
         field.name === 'Order No.' ||
         field.name.toLowerCase().includes('order no')
     );
     
-    const selectedOrders = orders ? orders.filter(order => {
-        if (!orderNoField) return false;
-        const orderNo = order.getCellValueAsString(orderNoField.name);
-        const orderNoTrimmed = orderNo ? orderNo.toString().trim() : '';
-        const isSelected = selectedOrderNumbers.has(orderNoTrimmed);
-        return isSelected;
-    }) : [];
+    const availableOrders = Array.isArray(orders) ? orders : [];
     
-    console.log('LeftSideOrderDetailsPanel - selectedOrders count:', selectedOrders.length);
-    
-    if (selectedOrders.length === 0) {
-        return null;
-    }
-    
-    // Find Calendar Events that match order numbers
     const orderField = eventsTable.fields.find(field => field.name === 'Order');
     
-    // Filter orders that have matching events
-    const ordersWithEvents = selectedOrders.filter(order => {
+    if (!orderField || !calendarEvents) {
+        console.log('LeftSideOrderDetailsPanel - Missing orderField or calendarEvents');
+        return (
+            <div className="left-side-order-details-panel" style={containerStyle}>
+                <div className="text-sm text-gray-500 text-center py-6 w-full border border-dashed border-gray-300 rounded bg-gray-50">
+                    No Orders to assign
+                </div>
+            </div>
+        );
+    }
+    
+    const ordersWithUnscheduledEvents = availableOrders.filter(order => {
         const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
-        if (!orderField || !calendarEvents) return false;
-        
+        const orderNoTrimmed = orderNo ? orderNo.toString().trim() : '';
         const matchingEvents = calendarEvents.filter(event => {
             const eventOrderValue = event.getCellValue(orderField.name);
             if (!eventOrderValue) return false;
@@ -887,50 +897,56 @@ function LeftSideOrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, c
                 return eventOrderValue.some(linkedRecord => linkedRecord.id === order.id);
             }
             const eventOrderNo = eventOrderValue.toString().trim();
-            const orderNoStr = orderNo.toString().trim();
-            return eventOrderNo === orderNoStr;
+            return eventOrderNo === orderNoTrimmed;
         });
         
-        return matchingEvents.length > 0;
+        if (matchingEvents.length === 0) {
+            return false;
+        }
+        
+        return matchingEvents.some(event => {
+            try {
+                const starttid = event.getCellValue('Starttid');
+                const sluttid = event.getCellValue('Sluttid');
+                return !(starttid && sluttid);
+            } catch (e) {
+                console.error('Error checking event schedule for left panel:', e);
+                return true;
+            }
+        });
     });
     
-    // Don't render the panel if no orders have matching events
-    if (ordersWithEvents.length === 0) {
-        return null;
-    }
+    console.log('LeftSideOrderDetailsPanel - ordersWithUnscheduledEvents:', ordersWithUnscheduledEvents.length);
     
     return (
         <div 
             className="left-side-order-details-panel"
-            style={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                padding: '16px',
-                gap: '16px',
-                overflowY: 'auto',
-                alignItems: 'center'
-            }}
+            style={containerStyle}
         >
-            {ordersWithEvents.map(order => {
-                const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
-                return (
-                    <LeftSideOrderDetailCard
-                        key={order.id}
-                        orderNo={orderNo}
-                        orderRecord={order}
-                        orderTable={orderTable}
-                        calendarEvents={calendarEvents || []}
-                        eventsTable={eventsTable}
-                        onClose={() => onCloseOrder(orderNo)}
-                        statusColors={statusColors}
-                        statusIcons={statusIcons}
-                        updatingRecords={updatingRecords}
-                        recentlyUpdatedRecords={recentlyUpdatedRecords}
-                    />
-                );
-            })}
+            {ordersWithUnscheduledEvents.length === 0 ? (
+                <div className="text-sm text-gray-500 text-center py-6 w-full border border-dashed border-gray-300 rounded bg-gray-50">
+                    No Orders to assign
+                </div>
+            ) : (
+                ordersWithUnscheduledEvents.map(order => {
+                    const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
+                    return (
+                        <LeftSideOrderDetailCard
+                            key={order.id}
+                            orderNo={orderNo}
+                            orderRecord={order}
+                            orderTable={orderTable}
+                            calendarEvents={calendarEvents || []}
+                            eventsTable={eventsTable}
+                            onClose={() => onCloseOrder(orderNo)}
+                            statusColors={statusColors}
+                            statusIcons={statusIcons}
+                            updatingRecords={updatingRecords}
+                            recentlyUpdatedRecords={recentlyUpdatedRecords}
+                        />
+                    );
+                })
+            )}
         </div>
     );
 }
@@ -2701,72 +2717,29 @@ function CalendarInterfaceExtension() {
                             overflow: 'visible'
                         }}
                     >
-                        {/* LEFT SIDE: Order Details Panel (vertical layout, no Visualization) - Shows same orders as top but not draggable */}
-                        {(() => {
-                            // Check if there are any orders with matching events before rendering the container
-                            // Use top selection to determine which orders to show (same as top panel)
-                            if (!eventsTable || topSelectedOrderNumbers.size === 0) {
-                                return null;
-                            }
-                            
-                            const orderField = eventsTable.fields.find(field => field.name === 'Order');
-                            if (!orderField || !filteredOrderRecords || filteredOrderRecords.length === 0) {
-                                return null;
-                            }
-                            
-                            const orderNoField = orderTable?.fields?.find(field => 
-                                field.name === 'Order No' || 
-                                field.name === 'Order No.' ||
-                                field.name.toLowerCase().includes('order no')
-                            );
-                            
-                            // Check if any selected order has matching events (using top selection)
-                            const hasOrdersWithEvents = filteredOrderRecords.some(order => {
-                                if (!topSelectedOrderNumbers.has(orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id)) {
-                                    return false;
-                                }
-                                const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
-                                const matchingEvents = events.filter(event => {
-                                    const eventOrderValue = event.getCellValue(orderField.name);
-                                    if (!eventOrderValue) return false;
-                                    if (Array.isArray(eventOrderValue)) {
-                                        return eventOrderValue.some(linkedRecord => linkedRecord.id === order.id);
-                                    }
-                                    const eventOrderNo = eventOrderValue.toString().trim();
-                                    const orderNoStr = orderNo.toString().trim();
-                                    return eventOrderNo === orderNoStr;
-                                });
-                                return matchingEvents.length > 0;
-                            });
-                            
-                            if (!hasOrdersWithEvents) {
-                                return null;
-                            }
-                            
-                            return (
-                                <div 
-                                    className="flex-shrink-0 border-r border-gray-300 bg-white"
-                                    style={{ 
-                                        width: '150px',
-                                        minWidth: '150px',
-                                        height: '100%',
-                                    }}
-                                >
-                                    <LeftSideOrderDetailsPanel
-                                        selectedOrderNumbers={topSelectedOrderNumbers}
-                                        orders={filteredOrderRecords}
-                                        orderTable={orderTable}
-                                        calendarEvents={events}
-                                        eventsTable={eventsTable}
-                                        onCloseOrder={(orderNo) => handleCloseOrder(orderNo, 'top')}
-                                        statusColors={statusColors}
-                                        statusIcons={statusIcons}
-                                        updatingRecords={updatingRecords}
-                                        recentlyUpdatedRecords={recentlyUpdatedRecords}
-                                    />
-                                </div>
-                            );
-                        })()}
+                        {/* LEFT SIDE: Order Details Panel (vertical layout, no Visualization) */}
+                        {eventsTable && orderRecords && (
+                            <div 
+                                className="flex-shrink-0 border-r border-gray-300 bg-white"
+                                style={{ 
+                                    width: '150px',
+                                    minWidth: '150px',
+                                    height: '100%',
+                                }}
+                            >
+                                <LeftSideOrderDetailsPanel
+                                        orders={orderRecords}
+                                    orderTable={orderTable}
+                                    calendarEvents={events}
+                                    eventsTable={eventsTable}
+                                    onCloseOrder={(orderNo) => handleCloseOrder(orderNo, 'side')}
+                                    statusColors={statusColors}
+                                    statusIcons={statusIcons}
+                                    updatingRecords={updatingRecords}
+                                    recentlyUpdatedRecords={recentlyUpdatedRecords}
+                                />
+                            </div>
+                        )}
                         
                         <div className="relative rounded-l-lg overflow-hidden flex-1" style={{ overflowY: 'auto', overflowX: 'auto', border: '1px solid rgb(229, 231, 235)', borderRight: 'none', height: '100%' }}>
                         {/* MAIN CALENDAR SECTION */}
