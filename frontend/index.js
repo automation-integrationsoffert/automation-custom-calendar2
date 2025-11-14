@@ -381,6 +381,16 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
                             } catch (e) {
                                 console.error('Error getting Order Status:', e);
                             }
+                            
+                            // Check if event is scheduled (has both Starttid and Sluttid)
+                            let isScheduled = false;
+                            try {
+                                const starttid = event.getCellValue('Starttid');
+                                const sluttid = event.getCellValue('Sluttid');
+                                isScheduled = !!(starttid && sluttid);
+                            } catch (e) {
+                                console.error('Error checking if event is scheduled:', e);
+                            }
 
                             return (
                                 <DraggableOrderEvent
@@ -399,6 +409,7 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
                                     orderRecord={orderRecord}
                                     onClose={onClose}
                                     showVisualization={showVisualization}
+                                    isScheduled={isScheduled}
                                 />
                             );
                         })}
@@ -602,6 +613,20 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
         return eventOrderNo === orderNoStr;
     }) : [];
     
+    // Filter to only show unscheduled events (events without both Starttid and Sluttid)
+    const unscheduledEvents = matchingEvents.filter(event => {
+        try {
+            const starttid = event.getCellValue('Starttid');
+            const sluttid = event.getCellValue('Sluttid');
+            // Event is unscheduled if either Starttid or Sluttid is missing
+            return !(starttid && sluttid);
+        } catch (e) {
+            console.error('Error checking if event is scheduled:', e);
+            // If we can't check, include it (assume unscheduled)
+            return true;
+        }
+    });
+    
     const visualizationField = eventsTable.fields.find(f => f.name === 'Visualization');
     const arbetsorderField = eventsTable.fields.find(f => 
         f.name === 'Arbetsorder' ||
@@ -634,8 +659,8 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
         }
     }
     
-    // Don't render the component if there are no matching events
-    if (matchingEvents.length === 0) {
+    // Don't render the component if there are no unscheduled events
+    if (unscheduledEvents.length === 0) {
         return null;
     }
     
@@ -648,12 +673,12 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                 overflow: 'hidden',
             }}
         >
-            {/* Vertical list of matching events */}
+            {/* Vertical list of unscheduled events */}
             <div className="flex-1">
-                {matchingEvents.length > 0 ? (
+                {unscheduledEvents.length > 0 ? (
                     // Left side events are not draggable, so no SortableContext needed
                     <div className="flex flex-col gap-3" style={{ margin: 'auto' }}>
-                        {matchingEvents.map((event, index) => {
+                        {unscheduledEvents.map((event, index) => {
                                 let imageUrl = null;
                                 if (event && eventsTable) {
                                     try {
@@ -731,6 +756,16 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                                     console.error('Error getting Order Status:', e);
                                 }
                                 
+                                // Check if event is scheduled (has both Starttid and Sluttid)
+                                let isScheduled = false;
+                                try {
+                                    const starttid = event.getCellValue('Starttid');
+                                    const sluttid = event.getCellValue('Sluttid');
+                                    isScheduled = !!(starttid && sluttid);
+                                } catch (e) {
+                                    console.error('Error checking if event is scheduled:', e);
+                                }
+                                
                                 return (
                                     <LeftSideOrderEvent
                                         key={event.id || index}
@@ -747,6 +782,7 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                                         orderNo={orderNo}
                                         orderRecord={orderRecord}
                                         onClose={onClose}
+                                        isScheduled={isScheduled}
                                     />
                                 );
                             })}
@@ -1018,7 +1054,7 @@ function OrderList({ orders, orderTable, selectedOrderNumbers = new Set(), onOrd
                 </div>
                 <div className="flex-1 flex items-center justify-center p-4">
                     <div className="text-sm text-blue-600 text-center font-medium">
-                        No orders found in table: {orderTable.name}
+                        No orders are scheduled for this week.
                     </div>
                 </div>
             </div>
@@ -1208,7 +1244,7 @@ function DroppableCell({ mechanicName, date, hourIndex, hourHeight }) {
 }
 
 // Draggable Order Event Component (for order detail panel)
-function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, showVisualization = true, draggable = true }) {
+function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, showVisualization = true, draggable = true, isScheduled = false }) {
     // Use useSortable with unique ID that includes both orderNo and event.id
     // Format: "order-detail-{orderNo}-{event.id}" so each event is uniquely identifiable
     const uniqueId = `order-detail-${orderNo || 'unknown'}-${event.id}`;
@@ -1284,7 +1320,7 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
             {showVisualization && (
                 <div className="mb-1 text-xs text-center">
                     {visualization ? (
-                        <span className="text-gray-800">{visualization}</span>
+                        <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{visualization}</span>
                     ) : (
                         <span className="text-gray-400 italic">Not set</span>
                     )}
@@ -1293,9 +1329,9 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
             
             {/* Fordon - Third line (from Orders table) */}
             <div className="mb-1 text-xs text-center">
-                <span className="font-semibold text-gray-600">REG: </span>
+                <span className={`font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`}>REG: </span>
                 {fordon ? (
-                    <span className="text-gray-800">{fordon}</span>
+                    <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{fordon}</span>
                 ) : (
                     <span className="text-gray-400 italic">Not set</span>
                 )}
@@ -1303,9 +1339,9 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
             
             {/* Mekaniker - Fifth line */}
             <div className="mb-1 text-xs text-center">
-                <span className="font-semibold text-gray-600">Namn: </span>
+                <span className={`font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`}>Namn: </span>
                 {mekanikerNames ? (
-                    <span className="text-gray-800">{mekanikerNames}</span>
+                    <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{mekanikerNames}</span>
                 ) : (
                     <span className="text-gray-400 italic">Not set</span>
                 )}
@@ -1315,7 +1351,7 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
 }
 
 // Left Side Order Event Component (non-draggable, completely separate from DraggableOrderEvent)
-function LeftSideOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose }) {
+function LeftSideOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, isScheduled = false }) {
     // Don't render if updating or recently updated
     if (isUpdating || isRecentlyUpdated) {
         return null;
@@ -1364,7 +1400,7 @@ function LeftSideOrderEvent({ event, imageUrl, visualization, fordon, mekanikerN
             {/* Visualization - Second line (from Calendar Events table) */}
             <div className="mb-1 text-xs text-center">
                 {visualization ? (
-                    <span className="text-gray-800">{visualization}</span>
+                    <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{visualization}</span>
                 ) : (
                     <span className="text-gray-400 italic">Not set</span>
                 )}
@@ -1372,9 +1408,9 @@ function LeftSideOrderEvent({ event, imageUrl, visualization, fordon, mekanikerN
             
             {/* Fordon - Third line (from Orders table) */}
             <div className="mb-1 text-xs text-center">
-                <span className="font-semibold text-gray-600">REG: </span>
+                <span className={`font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`}>REG: </span>
                 {fordon ? (
-                    <span className="text-gray-800">{fordon}</span>
+                    <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{fordon}</span>
                 ) : (
                     <span className="text-gray-400 italic">Not set</span>
                 )}
@@ -1382,9 +1418,9 @@ function LeftSideOrderEvent({ event, imageUrl, visualization, fordon, mekanikerN
             
             {/* Mekaniker - Fourth line */}
             <div className="mb-1 text-xs text-center">
-                <span className="font-semibold text-gray-600">Namn: </span>
+                <span className={`font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`}>Namn: </span>
                 {mekanikerNames ? (
-                    <span className="text-gray-800">{mekanikerNames}</span>
+                    <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{mekanikerNames}</span>
                 ) : (
                     <span className="text-gray-400 italic">Not set</span>
                 )}
@@ -2289,88 +2325,86 @@ function CalendarInterfaceExtension() {
 
     const formatShortDate = date => `${date.getMonth() + 1}-${date.getDate()}`;
 
-    // Filter orders to only show those with status "Inget" from Orders table (no week filtering)
+    // Filter orders to only show those with at least one scheduled event in displayed week
     const getOrdersWithIngetStatus = (orders) => {
         if (!orders || orders.length === 0) {
             return orders || [];
         }
 
-        // Find the Status field in Orders table
-        const statusField = orderTable?.fields?.find(field => 
-            field.name === 'Status' || 
-            field.name === 'Order Status' ||
-            field.name.toLowerCase() === 'status' ||
-            field.name.toLowerCase().includes('status')
+        // Find the Order field in Calendar Events table
+        const orderField = eventsTable?.fields?.find(field => 
+            field.name === 'Order'
         );
 
-        console.log('Status field search:', {
-            found: !!statusField,
-            fieldName: statusField?.name,
-            fieldType: statusField?.type,
-            allFields: orderTable?.fields?.map(f => ({ name: f.name, type: f.type })) || []
-        });
+        // Get Order No field from Orders table
+        const orderNoField = orderTable?.fields?.find(field => 
+            field.name === 'Order No' || 
+            field.name === 'Order No.' ||
+            field.name.toLowerCase().includes('order no')
+        );
 
-        // Filter by status "Inget" - show ALL orders with this status regardless of week
-        if (statusField && orderTable) {
-            const ordersWithIngetStatus = orders.filter(order => {
-                try {
-                    // For single select fields, try getCellValueAsString first (recommended for single select)
-                    let statusValue = '';
-                    
-                    // Method 1: Try getCellValueAsString (works well for single select fields)
-                    try {
-                        statusValue = order.getCellValueAsString(statusField.name) || '';
-                    } catch (e1) {
-                        // Method 2: Fall back to getCellValue
-                        const status = order.getCellValue(statusField.name);
-                        
-                        // Handle single select field (can be string or object)
-                        if (typeof status === 'string') {
-                            statusValue = status;
-                        } else if (status && typeof status === 'object') {
-                            // Single select might return an object with name property
-                            statusValue = status.name || status.value || String(status);
-                        } else if (Array.isArray(status) && status.length > 0) {
-                            // Handle array (shouldn't happen for single select, but just in case)
-                            statusValue = status[0]?.name || status[0]?.value || status[0] || '';
-                        } else if (status) {
-                            statusValue = String(status);
-                        }
-                    }
-                    
-                    const statusValueTrimmed = statusValue.toString().trim();
-                    const matches = statusValueTrimmed === 'Inget';
-                    
-                    // Debug logging for first few orders
-                    if (orders.indexOf(order) < 5) {
-                        console.log('Order status check (Single select):', {
-                            orderId: order.id,
-                            statusValue: statusValue,
-                            statusValueTrimmed: statusValueTrimmed,
-                            matches: matches,
-                            fieldType: statusField.type
-                        });
-                    }
-                    
-                    return matches;
-                } catch (e) {
-                    console.error('Error getting status for order:', order.id, e);
-                    return false;
-                }
-            });
-            
-            console.log('Orders with Inget status:', {
-                totalOrders: orders.length,
-                ordersWithIngetStatus: ordersWithIngetStatus.length,
-                orderIds: ordersWithIngetStatus.map(o => o.id)
-            });
-            
-            return ordersWithIngetStatus;
-        } else {
-            console.warn('Status field not found in Orders table. Available fields:', orderTable?.fields?.map(f => f.name) || []);
-            // If status field not found, return empty array (don't show any orders)
+        // Check if order has scheduled event in displayed week (no status filter)
+        if (!orderField || !events || events.length === 0 || displayedDates.length === 0) {
             return [];
         }
+
+        const ordersWithScheduledEvents = orders.filter(order => {
+            try {
+                // Get order number for matching
+                const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
+                const orderNoTrimmed = orderNo ? orderNo.toString().trim() : '';
+                
+                // Find events linked to this order
+                const matchingEvents = events.filter(event => {
+                    const eventOrderValue = event.getCellValue(orderField.name);
+                    if (!eventOrderValue) return false;
+                    
+                    // Handle linked records (array) - when Order field links to Orders table
+                    if (Array.isArray(eventOrderValue)) {
+                        return eventOrderValue.some(linkedRecord => linkedRecord.id === order.id);
+                    }
+                    
+                    // Handle direct value (if Order field is a text field with order number)
+                    const eventOrderNo = eventOrderValue.toString().trim();
+                    return eventOrderNo === orderNoTrimmed;
+                });
+                
+                // Check if any matching event is scheduled in the displayed week
+                const hasScheduledEventInWeek = matchingEvents.some(event => {
+                    try {
+                        const starttid = event.getCellValue('Starttid');
+                        const sluttid = event.getCellValue('Sluttid');
+                        
+                        // Both Starttid and Sluttid must have values (scheduled)
+                        if (!starttid || !sluttid) {
+                            return false;
+                        }
+                        
+                        // Check if Starttid falls within the displayed week
+                        const startDate = new Date(starttid);
+                        return displayedDates.some(displayedDate => {
+                            return startDate.toDateString() === displayedDate.toDateString();
+                        });
+                    } catch (e) {
+                        console.error('Error checking event schedule:', e);
+                        return false;
+                    }
+                });
+                
+                return hasScheduledEventInWeek;
+            } catch (e) {
+                console.error('Error checking order for scheduled events:', order.id, e);
+                return false;
+            }
+        });
+        
+        console.log('Orders with scheduled events in week:', {
+            totalOrders: orders.length,
+            ordersWithScheduledEvents: ordersWithScheduledEvents.length,
+            orderIds: ordersWithScheduledEvents.map(o => o.id)
+        });
+        
+        return ordersWithScheduledEvents;
     };
 
     const filteredOrderRecords = getOrdersWithIngetStatus(orderRecords);
