@@ -593,6 +593,10 @@ function CalendarImagesGallery({ events, eventsTable }) {
 
 // Left Side Order Detail Card Component (vertical layout for events, no Visualization)
 function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
+    const [isExpanded, setIsExpanded] = useState(true);
+    const contentRef = useRef(null);
+    const [contentHeight, setContentHeight] = useState('2000px'); // Large initial value to show content
+    
     // Early return if eventsTable is not available
     if (!eventsTable || !eventsTable.fields) {
         return (
@@ -707,6 +711,29 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
         return null;
     }
     
+    // Measure content height for smooth accordion animation
+    useEffect(() => {
+        const measureHeight = () => {
+            try {
+                if (contentRef.current) {
+                    const height = contentRef.current.scrollHeight;
+                    if (height > 0) {
+                        setContentHeight(`${height}px`);
+                    }
+                }
+            } catch (error) {
+                // Silently handle errors
+            }
+        };
+        
+        // Measure after content is rendered
+        if (isExpanded && unscheduledEvents.length > 0) {
+            // Use setTimeout to ensure DOM is updated
+            const timeoutId = setTimeout(measureHeight, 50);
+            return () => clearTimeout(timeoutId);
+        }
+    }, [unscheduledEvents.length, isExpanded]);
+    
     const { setNodeRef: setLeftOrderDropRef, isOver: isLeftDropOver } = useDroppable({
         id: `left-order-detail-drop-${orderNo || 'unknown'}`
     });
@@ -724,18 +751,57 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                 borderRadius: isLeftDropOver ? '8px' : undefined
             }}
         >
-            <div className="w-full text-xs font-semibold text-gray-700 border-b border-dashed border-gray-300 pb-1 mb-3 text-center">
-                {orderNo ? `Order ${orderNo}` : 'Order'}
+            {/* Accordion Header - Order Number */}
+            <div 
+                className="w-full text-xs font-semibold text-gray-700 border-b border-dashed border-gray-300 pb-1 mb-3 cursor-pointer hover:bg-gray-50 transition-colors rounded px-2 py-1 flex items-center justify-between"
+                onClick={() => {
+                    setIsExpanded(!isExpanded);
+                }}
+                style={{ userSelect: 'none' }}
+                role="button"
+                aria-expanded={isExpanded}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setIsExpanded(!isExpanded);
+                    }
+                }}
+            >
+                <span>{orderNo ? `Order ${orderNo}` : 'Order'}</span>
+                <span 
+                    style={{ 
+                        display: 'inline-block',
+                        fontSize: '12px',
+                        marginLeft: '8px',
+                        fontWeight: 'bold',
+                        color: '#6b7280',
+                        transition: 'transform 0.2s ease'
+                    }}
+                    aria-hidden="true"
+                >
+                    {isExpanded ? '▲' : '▼'}
+                </span>
             </div>
-            {/* Vertical list of unscheduled events */}
-            <div className="flex-1">
-                {unscheduledEvents.length > 0 ? (
-                    <SortableContext
-                        items={unscheduledEvents.map(event => `left-order-detail-${orderNo || 'unknown'}-${event.id}`)}
-                        strategy={verticalListSortingStrategy}
-                    >
-                        <div className="flex flex-col gap-3" style={{ margin: 'auto' }}>
-                            {unscheduledEvents.map((event, index) => {
+            
+            {/* Accordion Content - Sub Orders List */}
+            <div 
+                style={{
+                    maxHeight: isExpanded ? contentHeight : '0',
+                    opacity: isExpanded ? 1 : 0,
+                    overflow: 'hidden',
+                    transition: 'max-height 0.3s ease, opacity 0.3s ease'
+                }}
+                aria-hidden={!isExpanded}
+            >
+                <div className="flex-1" ref={contentRef} style={{ paddingTop: '4px' }}>
+                    {unscheduledEvents.length > 0 ? (
+                        <SortableContext
+                            items={unscheduledEvents.map(event => `left-order-detail-${orderNo || 'unknown'}-${event.id}`)}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            <div className="flex flex-col gap-3" style={{ margin: 'auto' }}>
+                                {unscheduledEvents.map((event, index) => {
                                 let imageUrl = null;
                                 if (event && eventsTable) {
                                     try {
@@ -849,6 +915,7 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                         </div>
                     </SortableContext>
                 ) : null}
+                </div>
             </div>
         </div>
     );
