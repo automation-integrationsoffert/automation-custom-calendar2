@@ -660,7 +660,7 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
         return eventOrderNo === orderNoStr;
     }) : [];
     
-    // Filter to only show unscheduled events (events without both Starttid and Sluttid)
+    // Separate events into scheduled and unscheduled
     const unscheduledEvents = matchingEvents.filter(event => {
         try {
             const starttid = event.getCellValue('Starttid');
@@ -673,6 +673,21 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
             return true;
         }
     });
+    
+    const scheduledEvents = matchingEvents.filter(event => {
+        try {
+            const starttid = event.getCellValue('Starttid');
+            const sluttid = event.getCellValue('Sluttid');
+            // Event is scheduled if both Starttid and Sluttid are present
+            return !!(starttid && sluttid);
+        } catch (e) {
+            console.error('Error checking if event is scheduled:', e);
+            return false;
+        }
+    });
+    
+    // All events (both scheduled and unscheduled)
+    const allEvents = matchingEvents;
     
     const visualizationField = eventsTable.fields.find(f => f.name === 'Visualization');
     const arbetsorderField = eventsTable.fields.find(f => 
@@ -706,8 +721,8 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
         }
     }
     
-    // Don't render the component if there are no unscheduled events
-    if (unscheduledEvents.length === 0) {
+    // Don't render the component if there are no events at all
+    if (allEvents.length === 0) {
         return null;
     }
     
@@ -727,12 +742,12 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
         };
         
         // Measure after content is rendered
-        if (isExpanded && unscheduledEvents.length > 0) {
+        if (isExpanded && allEvents.length > 0) {
             // Use setTimeout to ensure DOM is updated
             const timeoutId = setTimeout(measureHeight, 50);
             return () => clearTimeout(timeoutId);
         }
-    }, [unscheduledEvents.length, isExpanded]);
+    }, [allEvents.length, isExpanded]);
     
     const { setNodeRef: setLeftOrderDropRef, isOver: isLeftDropOver } = useDroppable({
         id: `left-order-detail-drop-${orderNo || 'unknown'}`
@@ -795,12 +810,13 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                 aria-hidden={!isExpanded}
             >
                 <div className="flex-1" ref={contentRef} style={{ paddingTop: '4px' }}>
-                    {unscheduledEvents.length > 0 ? (
+                    {allEvents.length > 0 ? (
                         <SortableContext
                             items={unscheduledEvents.map(event => `left-order-detail-${orderNo || 'unknown'}-${event.id}`)}
                             strategy={verticalListSortingStrategy}
                         >
                             <div className="flex flex-col gap-3" style={{ margin: 'auto' }}>
+                                {/* Render unscheduled events first (gray) */}
                                 {unscheduledEvents.map((event, index) => {
                                 let imageUrl = null;
                                 if (event && eventsTable) {
@@ -912,6 +928,112 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                                     />
                                 );
                             })}
+                            
+                            {/* Render scheduled events (red) */}
+                            {scheduledEvents.map((event, index) => {
+                                let imageUrl = null;
+                                if (event && eventsTable) {
+                                    try {
+                                        const attachmentField = eventsTable.fields.find(
+                                            f => f.name.toLowerCase().trim() === 'attachments'
+                                        );
+                                        if (attachmentField) {
+                                            const attachments = event.getCellValue(attachmentField.name);
+                                            if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+                                                imageUrl = attachments[0].url ||
+                                                    attachments[0].thumbnails?.large?.url ||
+                                                    attachments[0].thumbnails?.small?.url;
+                                            }
+                                        }
+                                    } catch (e) {
+                                        console.error('Error getting image:', e);
+                                    }
+                                }
+                                
+                                let visualization = '';
+                                let arbetsorder = '';
+                                let mekanikerNames = '';
+                                
+                                try {
+                                    if (event && visualizationField) {
+                                        visualization = event.getCellValueAsString(visualizationField.name) || '';
+                                    }
+                                } catch (e) {
+                                    console.error('Error getting Visualization:', e);
+                                }
+                                
+                                try {
+                                    if (event && arbetsorderField) {
+                                        arbetsorder = event.getCellValueAsString(arbetsorderField.name) || '';
+                                    }
+                                } catch (e) {
+                                    console.error('Error getting Arbetsorder:', e);
+                                }
+                                
+                                try {
+                                    if (event && mekanikerField) {
+                                        const mekaniker = event.getCellValue(mekanikerField.name) || [];
+                                        if (Array.isArray(mekaniker)) {
+                                            mekanikerNames = mekaniker.map(m => {
+                                                if (typeof m === 'string') return m;
+                                                if (m && m.name) return m.name;
+                                                if (m && m.value) return m.value;
+                                                return String(m);
+                                            }).filter(Boolean).join(', ');
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error('Error getting Mekaniker:', e);
+                                }
+                                
+                                let status = 'Inget';
+                                let statusIcon = '❓';
+                                let backgroundColor = '#6b7280';
+                                
+                                try {
+                                    const orderStatus = event.getCellValue('Order Status');
+                                    if (orderStatus && Array.isArray(orderStatus) && orderStatus.length > 0) {
+                                        status = orderStatus[0]?.value || orderStatus[0]?.name || 'Inget';
+                                    } else if (orderStatus && typeof orderStatus === 'string') {
+                                        status = orderStatus;
+                                    }
+                                    
+                                    if (statusColors && statusColors[status]) {
+                                        backgroundColor = statusColors[status];
+                                    }
+                                    if (statusIcons && statusIcons[status]) {
+                                        statusIcon = statusIcons[status];
+                                    }
+                                } catch (e) {
+                                    console.error('Error getting Order Status:', e);
+                                }
+                                
+                                // Scheduled events always have isScheduled = true
+                                const isScheduled = true;
+                                
+                                return (
+                                    <DraggableOrderEvent
+                                        key={event.id || `scheduled-${index}`}
+                                        customUniqueId={`left-order-detail-${orderNo || 'unknown'}-${event.id}`}
+                                        event={event}
+                                        imageUrl={imageUrl}
+                                        visualization={visualization}
+                                        fordon={fordon}
+                                        mekanikerNames={mekanikerNames}
+                                        status={status}
+                                        statusIcon={statusIcon}
+                                        backgroundColor={backgroundColor}
+                                        isUpdating={updatingRecords && updatingRecords.has(event.id)}
+                                        isRecentlyUpdated={recentlyUpdatedRecords && recentlyUpdatedRecords.has(event.id)}
+                                        orderNo={orderNo}
+                                        orderRecord={orderRecord}
+                                        onClose={onClose}
+                                        isScheduled={isScheduled}
+                                        variant="left"
+                                        showVisualization={true}
+                                    />
+                                );
+                            })}
                         </div>
                     </SortableContext>
                 ) : null}
@@ -925,6 +1047,11 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
 function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
     console.log('LeftSideOrderDetailsPanel - orders count:', orders?.length);
     
+    // Make the entire panel droppable
+    const { setNodeRef: setPanelDropRef, isOver: isPanelDropOver } = useDroppable({
+        id: 'left-side-panel-drop'
+    });
+    
     const containerStyle = {
         width: '100%',
         height: '100%',
@@ -933,7 +1060,11 @@ function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsT
         padding: '16px',
         gap: '16px',
         overflowY: 'auto',
-        alignItems: 'center'
+        alignItems: 'center',
+        border: isPanelDropOver ? '2px dashed #3b82f6' : undefined,
+        borderRadius: isPanelDropOver ? '8px' : undefined,
+        backgroundColor: isPanelDropOver ? '#f0f9ff' : undefined,
+        transition: 'all 0.2s'
     };
     
     if (!orderTable || !eventsTable) {
@@ -968,6 +1099,7 @@ function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsT
         );
     }
     
+    // Filter orders that have at least one undelegated (unscheduled) sub order
     const ordersWithUnscheduledEvents = availableOrders.filter(order => {
         const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
         const orderNoTrimmed = orderNo ? orderNo.toString().trim() : '';
@@ -985,6 +1117,7 @@ function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsT
             return false;
         }
         
+        // Return true only if there is at least one unscheduled event
         return matchingEvents.some(event => {
             try {
                 const starttid = event.getCellValue('Starttid');
@@ -992,7 +1125,7 @@ function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsT
                 return !(starttid && sluttid);
             } catch (e) {
                 console.error('Error checking event schedule for left panel:', e);
-                return true;
+                return true; // If we can't check, assume unscheduled
             }
         });
     });
@@ -1001,6 +1134,7 @@ function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsT
     
     return (
         <div 
+            ref={setPanelDropRef}
             className="left-side-order-details-panel"
             style={containerStyle}
         >
@@ -1397,19 +1531,28 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
         isDragging,
     } = useSortable({ id: uniqueId });
 
-    // Don't render if updating, recently updated, or already scheduled (should not be draggable)
-    if (isUpdating || isRecentlyUpdated || isScheduled) {
+    // Don't render if updating or recently updated
+    if (isUpdating || isRecentlyUpdated) {
+        return null;
+    }
+
+    // For left variant, allow scheduled events to render (but not draggable)
+    // For top variant, don't render scheduled events (they use StaticOrderEvent instead)
+    const isLeftVariant = variant === 'left';
+    const shouldRenderScheduled = isLeftVariant && isScheduled;
+    const shouldMakeDraggable = !isScheduled;
+    
+    // Don't render scheduled events for top variant
+    if (isScheduled && !isLeftVariant) {
         return null;
     }
 
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.5 : 1,
-        cursor: isDragging ? 'grabbing' : 'grab',
+        opacity: isDragging ? 0.5 : (isScheduled && isLeftVariant ? 0.7 : 1),
+        cursor: shouldMakeDraggable ? (isDragging ? 'grabbing' : 'grab') : 'not-allowed',
     };
-
-    const isLeftVariant = variant === 'left';
     const imageSize = isLeftVariant ? 80 : 100;
     const containerStyles = isLeftVariant
         ? {
@@ -1430,8 +1573,8 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
     return (
         <div 
             ref={setNodeRef}
-            {...attributes}
-            {...listeners}
+            {...(shouldMakeDraggable ? attributes : {})}
+            {...(shouldMakeDraggable ? listeners : {})}
             className="flex-shrink-0"
             style={{ 
                 ...style,
@@ -1444,7 +1587,6 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
                 backgroundColor: containerStyles.backgroundColor,
                 transition: 'all 0.2s',
                 position: 'relative',
-                cursor: isDragging ? 'grabbing' : 'grab',
                 width: isLeftVariant ? '100%' : undefined,
                 marginBottom: isLeftVariant ? containerStyles.marginBottom : undefined
             }}
@@ -1919,6 +2061,114 @@ function CalendarInterfaceExtension() {
             ];
             
             if (activeId.startsWith('event-')) {
+                // Check if dropped on the entire left side panel
+                if (overId === 'left-side-panel-drop') {
+                    if (!eventsTable || !orderTable) {
+                        console.warn('Events table or order table not available, cannot unschedule event');
+                        return;
+                    }
+                    
+                    const eventRecordId = activeId.replace('event-', '');
+                    const eventRecord = events.find(ev => ev.id === eventRecordId);
+                    if (!eventRecord) {
+                        console.error('Could not find event record for unscheduling:', eventRecordId);
+                        return;
+                    }
+                    
+                    // Find which order this event belongs to by checking the event's Order field
+                    const orderField = eventsTable.fields.find(field => field.name === 'Order');
+                    if (!orderField) {
+                        console.error('Order field not found in Calendar Events table');
+                        return;
+                    }
+                    
+                    const eventOrderValue = eventRecord.getCellValue(orderField.name);
+                    let targetOrderRecord = null;
+                    
+                    if (Array.isArray(eventOrderValue) && eventOrderValue.length > 0) {
+                        // If Order field is a linked record, find the matching order
+                        const linkedOrderId = eventOrderValue[0].id;
+                        targetOrderRecord = orderRecords.find(order => order.id === linkedOrderId);
+                    } else if (eventOrderValue) {
+                        // If Order field is a text field with order number
+                        const orderNoField = orderTable.fields.find(field => 
+                            field.name === 'Order No' || 
+                            field.name === 'Order No.' ||
+                            field.name.toLowerCase().includes('order no')
+                        );
+                        if (orderNoField) {
+                            const eventOrderNo = eventOrderValue.toString().trim();
+                            targetOrderRecord = orderRecords.find(order => {
+                                const orderNo = order.getCellValueAsString(orderNoField.name);
+                                return orderNo && orderNo.toString().trim() === eventOrderNo;
+                            });
+                        }
+                    }
+                    
+                    if (!targetOrderRecord) {
+                        console.warn('Could not find matching order for event. Event will still be unscheduled.');
+                    }
+                    
+                    console.log('Unscheduling event from calendar (dropped on panel):', {
+                        eventRecordId,
+                        targetOrderRecord: targetOrderRecord?.id
+                    });
+                    
+                    if (!eventsTable.hasPermissionToUpdateRecords([eventRecord])) {
+                        console.warn('No permission to update event record when unscheduling');
+                        alert('Cannot update event: Record editing is not enabled. Please contact your base administrator.');
+                        return;
+                    }
+                    
+                    const updates = {
+                        'Starttid': null,
+                        'Sluttid': null
+                    };
+                    
+                    const mekanikerField = eventsTable.fields.find(field => 
+                        field.name === 'Mekaniker' || 
+                        field.name.toLowerCase() === 'mekaniker'
+                    );
+                    if (mekanikerField) {
+                        updates[mekanikerField.name] = [];
+                    }
+                    
+                    const statusPaTidsmoteField = eventsTable.fields.find(field => 
+                        field.name === 'Status på tidsmöte' ||
+                        field.name.toLowerCase() === 'status på tidsmöte' ||
+                        field.name.toLowerCase().includes('tidsmöte')
+                    );
+                    if (statusPaTidsmoteField) {
+                        updates[statusPaTidsmoteField.name] = null;
+                    }
+                    
+                    setUpdatingRecords(prev => new Set(prev).add(eventRecordId));
+                    
+                    try {
+                        await eventsTable.updateRecordAsync(eventRecord, updates);
+                        setRecentlyUpdatedRecords(prev => new Set(prev).add(eventRecordId));
+                        setTimeout(() => {
+                            setRecentlyUpdatedRecords(prev => {
+                                const newSet = new Set(prev);
+                                newSet.delete(eventRecordId);
+                                return newSet;
+                            });
+                        }, 1000);
+                    } catch (error) {
+                        console.error('Error unscheduling event:', error);
+                        alert('Error updating event: ' + error.message);
+                    } finally {
+                        setUpdatingRecords(prev => {
+                            const newSet = new Set(prev);
+                            newSet.delete(eventRecordId);
+                            return newSet;
+                        });
+                    }
+                    
+                    return;
+                }
+                
+                // Check if dropped on a specific order card
                 const targetDropPrefix = orderDetailDropPrefixes.find(prefix => overId.startsWith(prefix));
                 if (targetDropPrefix) {
                     if (!eventsTable) {
