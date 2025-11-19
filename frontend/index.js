@@ -2930,18 +2930,340 @@ function CalendarInterfaceExtension() {
 
     const filteredOrderRecords = getOrdersWithIngetStatus(orderRecords);
 
+    // Helper function to convert Starttid (number format) to Date object
+    // Examples: 1230 = 12:30, 10 = 10:00, 16 = 16:00, 1630 = 16:30
+    const convertStarttidToDate = (starttid, date) => {
+        if (!starttid && starttid !== 0) return null;
+        
+        const starttidStr = String(starttid).trim();
+        const starttidNum = parseInt(starttidStr, 10);
+        if (isNaN(starttidNum)) return null;
+        
+        let hours, minutes;
+        
+        // Handle different formats:
+        // - Single digit or two digits (1-23): treat as hours only (e.g., "10" = 10:00)
+        // - Three or four digits: treat as HHMM format (e.g., "1230" = 12:30, "100" = 1:00)
+        if (starttidNum < 100) {
+            // Single or two digits: hours only
+            hours = starttidNum;
+            minutes = 0;
+        } else {
+            // Three or four digits: HHMM format
+            hours = Math.floor(starttidNum / 100);
+            minutes = starttidNum % 100;
+        }
+        
+        // Validate hours and minutes
+        if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+            console.warn(`Invalid time: ${starttid} -> ${hours}:${minutes}`);
+            return null;
+        }
+        
+        const resultDate = new Date(date);
+        resultDate.setHours(hours, minutes, 0, 0);
+        
+        console.log(`🕐 Converted Starttid "${starttid}" to ${hours}:${minutes.toString().padStart(2, '0')} (${resultDate.toTimeString()})`);
+        
+        return resultDate;
+    };
+
+    // Helper function to parse duration string (e.g., "1:00", "0:20") to minutes
+    const parseDurationToMinutes = (durationStr) => {
+        if (!durationStr) return 30; // Default 30 minutes
+        
+        // Handle format like "1:00" or "0:20"
+        if (typeof durationStr === 'string') {
+            const parts = durationStr.trim().split(':');
+            if (parts.length === 2) {
+                const hours = parseInt(parts[0], 10) || 0;
+                const minutes = parseInt(parts[1], 10) || 0;
+                return hours * 60 + minutes;
+            }
+            // Try parsing as number (minutes)
+            const num = parseInt(durationStr, 10);
+            if (!isNaN(num)) return num;
+        } else if (typeof durationStr === 'number') {
+            return durationStr;
+        }
+        
+        return 30; // Default 30 minutes
+    };
+
+    // Extract lunch settings from Calendar Events and create lunch/break events
+    // Deduplicate by mechanic so each mechanic only shows their lunch settings once
+    const getLunchBreakEventsForMechanicAndDate = (mechanicName, date) => {
+        if (!eventsTable || !events || events.length === 0) {
+            console.log('getLunchBreakEventsForMechanicAndDate: No events table or events');
+            return [];
+        }
+        // Find lunch setting fields
+        const lunchNameField = eventsTable.fields.find(f => 
+            f.name === 'Lunch setting Name' || 
+            f.name.toLowerCase().includes('lunch setting name')
+        );
+        const lunchStarttidField = eventsTable.fields.find(f => 
+            f.name === 'Lunch setting Starttid' || 
+            f.name.toLowerCase().includes('lunch setting starttid')
+        );
+        const lunchDurationField = eventsTable.fields.find(f => 
+            f.name === 'Lunch setting Duration' || 
+            f.name.toLowerCase().includes('lunch setting duration')
+        );
+        const mekanikerField = eventsTable.fields.find(f => 
+            f.name === 'Mekaniker' || 
+            f.name.toLowerCase().includes('mekaniker')
+        );
+
+        if (!lunchNameField || !lunchStarttidField || !lunchDurationField || !mekanikerField) {
+            console.warn('Lunch setting fields not found:', {
+                lunchNameField: lunchNameField?.name || 'NOT FOUND',
+                lunchStarttidField: lunchStarttidField?.name || 'NOT FOUND',
+                lunchDurationField: lunchDurationField?.name || 'NOT FOUND',
+                mekanikerField: mekanikerField?.name || 'NOT FOUND',
+                availableFields: eventsTable.fields.map(f => f.name)
+            });
+            return [];
+        }
+
+        console.log(`🔍 Looking for lunch settings for mechanic: ${mechanicName} on ${date.toDateString()}`);
+
+        const lunchEvents = [];
+        // Track individual lunch entries to avoid exact duplicates (same name, time, duration)
+        // But allow different lunch settings to show
+        const seenLunchEntries = new Set(); // Format: "mechanic-name-starttid-duration"
+
+        events.forEach(event => {
+            try {
+                // Get Mekaniker from event
+                const mekanikerValue = event.getCellValue(mekanikerField.name);
+                if (!mekanikerValue) return;
+
+                // Extract mechanic names
+                let eventMechanicNames = [];
+                if (Array.isArray(mekanikerValue)) {
+                    eventMechanicNames = mekanikerValue.map(m => {
+                        if (typeof m === 'string') return m.trim();
+                        if (m && m.name) return m.name.trim();
+                        if (m && m.value) return m.value.trim();
+                        return String(m).trim();
+                    }).filter(name => name && name !== '' && name !== 'undefined');
+                } else if (typeof mekanikerValue === 'string') {
+                    eventMechanicNames = [mekanikerValue.trim()];
+                }
+
+                // Check if this event has our mechanic
+                const hasOurMechanic = eventMechanicNames.some(mechName => 
+                    mechName.toLowerCase() === mechanicName.trim().toLowerCase()
+                );
+
+                if (!hasOurMechanic) return;
+
+                // Get lunch setting values (these are lookup fields from Mekaniker table)
+                // Lookup fields can return arrays or single values, so handle both cases
+                let lunchName = '';
+                let lunchStarttid = '';
+                let lunchDuration = '';
+
+                try {
+                    // Try getCellValueAsString first (works for most lookup fields)
+                    lunchName = event.getCellValueAsString(lunchNameField.name) || '';
+                    lunchStarttid = event.getCellValueAsString(lunchStarttidField.name) || '';
+                    lunchDuration = event.getCellValueAsString(lunchDurationField.name) || '';
+
+                    // If getCellValueAsString returns empty, try getCellValue (for array values)
+                    if (!lunchName) {
+                        const lunchNameValue = event.getCellValue(lunchNameField.name);
+                        if (Array.isArray(lunchNameValue) && lunchNameValue.length > 0) {
+                            lunchName = lunchNameValue.map(v => String(v)).join(', ');
+                        } else if (lunchNameValue) {
+                            lunchName = String(lunchNameValue);
+                        }
+                    }
+
+                    if (!lunchStarttid) {
+                        const lunchStarttidValue = event.getCellValue(lunchStarttidField.name);
+                        if (Array.isArray(lunchStarttidValue) && lunchStarttidValue.length > 0) {
+                            lunchStarttid = lunchStarttidValue.map(v => String(v)).join(', ');
+                        } else if (lunchStarttidValue) {
+                            lunchStarttid = String(lunchStarttidValue);
+                        }
+                    }
+
+                    if (!lunchDuration) {
+                        const lunchDurationValue = event.getCellValue(lunchDurationField.name);
+                        if (Array.isArray(lunchDurationValue) && lunchDurationValue.length > 0) {
+                            lunchDuration = lunchDurationValue.map(v => String(v)).join(', ');
+                        } else if (lunchDurationValue) {
+                            lunchDuration = String(lunchDurationValue);
+                        }
+                    }
+                } catch (e) {
+                    console.error(`Error getting lookup field values for event ${event.id}:`, e);
+                }
+
+                console.log(`📋 Lunch settings from lookup fields for event ${event.id}:`, {
+                    lunchName,
+                    lunchStarttid,
+                    lunchDuration,
+                    mechanic: mechanicName,
+                    fieldTypes: {
+                        name: lunchNameField.type,
+                        starttid: lunchStarttidField.type,
+                        duration: lunchDurationField.type
+                    }
+                });
+
+                if (!lunchName || !lunchStarttid) {
+                    if (lunchName || lunchStarttid) {
+                        console.log(`⚠️ Event ${event.id} has partial lunch settings:`, { lunchName, lunchStarttid, lunchDuration });
+                    }
+                    return;
+                }
+
+                console.log(`✅ Found lunch settings in event ${event.id}:`, {
+                    lunchName,
+                    lunchStarttid,
+                    lunchDuration,
+                    mechanic: mechanicName
+                });
+
+                // Parse comma-separated values
+                const lunchNames = lunchName.split(',').map(s => s.trim()).filter(s => s);
+                const starttidValues = lunchStarttid.split(',').map(s => s.trim()).filter(s => s);
+                const durationValues = lunchDuration.split(',').map(s => s.trim()).filter(s => s);
+
+                console.log(`📝 Parsed lunch settings from event ${event.id}:`, {
+                    names: lunchNames,
+                    starttids: starttidValues,
+                    durations: durationValues,
+                    mechanic: mechanicName
+                });
+
+                // Create lunch events for each lunch/break entry
+                // Match each name with its corresponding starttid and duration by index
+                const maxLength = Math.max(lunchNames.length, starttidValues.length, durationValues.length);
+                console.log(`🔄 Processing ${maxLength} lunch/break entries from this event...`);
+
+                for (let i = 0; i < maxLength; i++) {
+                    // Get values by index - each entry should match by position
+                    // Only use fallback to [0] if the array is shorter, but prefer the actual index value
+                    const name = lunchNames[i] !== undefined ? lunchNames[i] : (lunchNames.length > 0 ? lunchNames[0] : 'Lunch/Coffee Break');
+                    const starttidStr = starttidValues[i] !== undefined ? starttidValues[i] : (starttidValues.length > 0 ? starttidValues[0] : null);
+                    const durationStr = durationValues[i] !== undefined ? durationValues[i] : (durationValues.length > 0 ? durationValues[0] : '0:30');
+
+                    console.log(`🔍 Processing entry ${i}:`, {
+                        name,
+                        starttidStr,
+                        durationStr,
+                        nameExists: lunchNames[i] !== undefined,
+                        starttidExists: starttidValues[i] !== undefined,
+                        durationExists: durationValues[i] !== undefined
+                    });
+
+                    if (!starttidStr || starttidStr.trim() === '') {
+                        console.log(`⚠️ Skipping entry ${i} - no Starttid value`);
+                        continue;
+                    }
+
+                    // Convert Starttid to Date
+                    const startDate = convertStarttidToDate(starttidStr.trim(), date);
+                    if (!startDate) {
+                        console.log(`⚠️ Skipping entry ${i} - invalid Starttid: "${starttidStr}" (could not convert to date)`);
+                        continue;
+                    }
+
+                    // Parse duration and calculate end time
+                    const durationMinutes = parseDurationToMinutes(durationStr.trim());
+                    const endDate = new Date(startDate);
+                    endDate.setMinutes(endDate.getMinutes() + durationMinutes);
+
+                    console.log(`✓ Entry ${i} converted successfully:`, {
+                        name,
+                        starttid: starttidStr,
+                        startDate: startDate.toTimeString(),
+                        duration: durationStr,
+                        durationMinutes,
+                        endDate: endDate.toTimeString()
+                    });
+
+                    // Create a unique key for this specific lunch entry to avoid exact duplicates
+                    // Only skip if we've already created this exact same lunch entry (same name, time, duration)
+                    const entryKey = `${mechanicName.toLowerCase()}-${name.toLowerCase().trim()}-${starttidStr.trim()}-${durationStr.trim()}`;
+                    if (seenLunchEntries.has(entryKey)) {
+                        console.log(`⏭️ Skipping duplicate entry: "${name}" at ${starttidStr} (already shown)`);
+                        continue;
+                    }
+                    seenLunchEntries.add(entryKey);
+                    console.log(`➕ Adding new lunch entry: "${name}" at ${starttidStr}`);
+
+                    console.log(`✨ Creating separate event ${i + 1}/${maxLength}:`, {
+                        name,
+                        starttid: starttidStr,
+                        duration: durationStr,
+                        startTime: startDate.toTimeString(),
+                        endTime: endDate.toTimeString(),
+                        durationMinutes
+                    });
+
+                    // Create virtual lunch event with unique ID for each separate entry
+                    const lunchEvent = {
+                        id: `lunch-${mechanicName}-${name.replace(/\s+/g, '-')}-${starttidStr}-${date.toISOString()}-${i}-${event.id}`,
+                        isLunchBreak: true,
+                        getCellValue: (fieldName) => {
+                            if (fieldName === 'Starttid' || fieldName.toLowerCase().includes('starttid')) {
+                                return startDate;
+                            }
+                            if (fieldName === 'Sluttid' || fieldName.toLowerCase().includes('sluttid')) {
+                                return endDate;
+                            }
+                            if (fieldName === 'Mekaniker' || fieldName.toLowerCase().includes('mekaniker')) {
+                                return [mechanicName];
+                            }
+                            if (fieldName === 'Arbetsorder beskrivning' || fieldName.toLowerCase().includes('beskrivning')) {
+                                return name;
+                            }
+                            return null;
+                        },
+                        getCellValueAsString: (fieldName) => {
+                            if (fieldName === 'Arbetsorder beskrivning' || fieldName.toLowerCase().includes('beskrivning')) {
+                                return name;
+                            }
+                            if (fieldName === 'Mekaniker' || fieldName.toLowerCase().includes('mekaniker')) {
+                                return mechanicName;
+                            }
+                            return '';
+                        }
+                    };
+
+                    lunchEvents.push(lunchEvent);
+                    console.log(`✅ Created separate lunch event: "${name}" at ${startDate.toTimeString()} (${durationMinutes} min) for ${mechanicName}`);
+                }
+            } catch (e) {
+                console.error('Error processing lunch settings from event:', event.id, e);
+            }
+        });
+
+        console.log(`📊 Total lunch events created for ${mechanicName} on ${date.toDateString()}: ${lunchEvents.length}`);
+        return lunchEvents;
+    };
+
     const getEventsForMechanicAndDate = (mechanicName, date) => {
         if (!mechanicName || mechanicName.trim() === '' || mechanicName === 'undefined') {
             return []; // Don't return events for invalid mechanic names
         }
         
-        // Show ALL events from Calendar Events table - no filtering by Order or Order Status
-        return events.filter(ev => {
+        // Get regular events from Calendar Events table
+        const regularEvents = events.filter(ev => {
             const mekaniker = ev.getCellValue('Mekaniker') || [];
-            const start = new Date(ev.getCellValue('Starttid'));
+            const start = ev.getCellValue('Starttid');
+            
+            if (!start) return false;
+            
+            const startDate = new Date(start);
             
             // Check if date matches
-            if (start.toDateString() !== date.toDateString()) {
+            if (startDate.toDateString() !== date.toDateString()) {
                 return false;
             }
             
@@ -2970,6 +3292,12 @@ function CalendarInterfaceExtension() {
             
             return false;
         });
+
+        // Get lunch/break events for this mechanic
+        const lunchBreakEvents = getLunchBreakEventsForMechanicAndDate(mechanicName, date);
+
+        // Combine regular events and lunch/break events
+        return [...regularEvents, ...lunchBreakEvents];
     };
 
     const statusColors = {
@@ -3320,9 +3648,15 @@ function CalendarInterfaceExtension() {
                                                     const top = adjustedStartHour * hourHeight + (start.getMinutes() / 60) * hourHeight;
                                                 const height = ((end - start) / (1000 * 60 * 60)) * hourHeight;
 
+                                                // Check if this is a lunch/break event - use green color
+                                                const isLunchBreak = ev.isLunchBreak === true;
                                                 const status = ev.getCellValue('Order Status')?.[0]?.value || 'Inget';
-                                                    const backgroundColor = statusColors[status] || '#6b7280';
+                                                    // Use green color (#22c55e) for lunch/break events, otherwise use status color
+                                                    const backgroundColor = isLunchBreak ? '#22c55e' : (statusColors[status] || '#6b7280');
                                                     const statusIcon = statusIcons[status] || '❓';
+
+                                                // For lunch/break events, don't allow expansion (they're virtual events)
+                                                const handleExpand = isLunchBreak ? () => {} : expandRecord;
 
                                                 return (
                                                         <DraggableEvent
@@ -3331,7 +3665,7 @@ function CalendarInterfaceExtension() {
                                                             top={top}
                                                             height={height}
                                                             backgroundColor={backgroundColor}
-                                                            onExpand={expandRecord}
+                                                            onExpand={handleExpand}
                                                             isUpdating={updatingRecords.has(ev.id)}
                                                             isRecentlyUpdated={recentlyUpdatedRecords.has(ev.id)}
                                                             status={status}
