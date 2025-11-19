@@ -925,6 +925,7 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                                         isScheduled={isScheduled}
                                         variant="left"
                                         showVisualization={true}
+                                        arbetsorder={arbetsorder}
                                     />
                                 );
                             })}
@@ -1031,6 +1032,7 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                                         isScheduled={isScheduled}
                                         variant="left"
                                         showVisualization={true}
+                                        arbetsorder={arbetsorder}
                                     />
                                 );
                             })}
@@ -1518,7 +1520,7 @@ function DroppableCell({ mechanicName, date, hourIndex, hourHeight }) {
 }
 
 // Draggable Order Event Component (for order detail panel)
-function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, showVisualization = true, isScheduled = false, variant = 'top', customUniqueId = null }) {
+function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, showVisualization = true, isScheduled = false, variant = 'top', customUniqueId = null, arbetsorder = '' }) {
     // Use useSortable with unique ID that includes both orderNo and event.id
     // Format: "order-detail-{orderNo}-{event.id}" so each event is uniquely identifiable
     const uniqueId = customUniqueId || `order-detail-${orderNo || 'unknown'}-${event.id}`;
@@ -1556,12 +1558,12 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
     const imageSize = isLeftVariant ? 80 : 100;
     const containerStyles = isLeftVariant
         ? {
-            border: isDragging ? '2px dashed #3b82f6' : '1px solid #e5e7eb',
-            backgroundColor: isDragging ? '#f0f9ff' : '#ffffff',
-            borderRadius: '6px',
-            padding: '6px',
+            border: isDragging ? '2px dashed #3b82f6' : 'none',
+            backgroundColor: isDragging ? '#f0f9ff' : 'transparent',
+            borderRadius: '0',
+            padding: '0',
             width: '100%',
-            marginBottom: '8px',
+            marginBottom: '4px',
         }
         : {
             border: isDragging ? '2px dashed #3b82f6' : '2px solid transparent',
@@ -1580,7 +1582,7 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
                 ...style,
                 display: 'flex', 
                 flexDirection: 'column', 
-                alignItems: 'center',
+                alignItems: isLeftVariant ? 'flex-start' : 'center',
                 border: containerStyles.border,
                 borderRadius: containerStyles.borderRadius,
                 padding: containerStyles.padding,
@@ -1603,51 +1605,73 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
                 }
             }}
         >
-            {/* Image - First line (at the very top) */}
-            {imageUrl ? (
-                <div className="mb-2" style={{ width: `${imageSize}px`, height: `${imageSize}px`, overflow: 'hidden', borderRadius: '4px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-                    <img 
-                        src={imageUrl} 
-                        alt={`Order Event`}
-                        style={{ width: `${imageSize}px`, height: `${imageSize}px`, objectFit: 'cover', display: 'block', margin: '0 auto' }}
-                    />
+            {isLeftVariant ? (
+                // Left variant: Show only title
+                <div className="w-full text-xs" style={{ 
+                    fontWeight: !isScheduled ? '700' : 'normal',
+                    color: !isScheduled ? '#111827' : '#dc2626',
+                    textAlign: 'left',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    fontSize: !isScheduled ? '13px' : '12px',
+                    backgroundColor: 'transparent',
+                    padding: '0',
+                    borderRadius: '0',
+                    borderLeft: 'none'
+                }}>
+                    {arbetsorder || 'Untitled'}
                 </div>
             ) : (
-                <div className="mb-2 text-xs text-gray-400 italic text-center border border-dashed border-gray-300 rounded" style={{ width: `${imageSize}px`, height: `${imageSize}px`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    No image
-                </div>
-            )}
-            
-            {/* Visualization - Second line (only if showVisualization is true) */}
-            {showVisualization && (
-                <div className="mb-1 text-xs text-center">
-                    {visualization ? (
-                        <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{visualization}</span>
+                // Top variant: Show full details
+                <>
+                    {/* Image - First line (at the very top) */}
+                    {imageUrl ? (
+                        <div className="mb-2" style={{ width: `${imageSize}px`, height: `${imageSize}px`, overflow: 'hidden', borderRadius: '4px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                            <img 
+                                src={imageUrl} 
+                                alt={`Order Event`}
+                                style={{ width: `${imageSize}px`, height: `${imageSize}px`, objectFit: 'cover', display: 'block', margin: '0 auto' }}
+                            />
+                        </div>
                     ) : (
-                        <span className="text-gray-400 italic">Not set</span>
+                        <div className="mb-2 text-xs text-gray-400 italic text-center border border-dashed border-gray-300 rounded" style={{ width: `${imageSize}px`, height: `${imageSize}px`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            No image
+                        </div>
                     )}
-                </div>
+                    
+                    {/* Visualization - Second line (only if showVisualization is true) */}
+                    {showVisualization && (
+                        <div className="mb-1 text-xs text-center">
+                            {visualization ? (
+                                <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{visualization}</span>
+                            ) : (
+                                <span className="text-gray-400 italic">Not set</span>
+                            )}
+                        </div>
+                    )}
+                    
+                    {/* Fordon - Third line (from Orders table) */}
+                    <div className="mb-1 text-xs text-center">
+                        <span className={`font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`}>REG: </span>
+                        {fordon ? (
+                            <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{fordon}</span>
+                        ) : (
+                            <span className="text-gray-400 italic">Not set</span>
+                        )}
+                    </div>
+                    
+                    {/* Mekaniker - Fifth line */}
+                    <div className="mb-1 text-xs text-center">
+                        <span className={`font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`}>Namn: </span>
+                        {mekanikerNames ? (
+                            <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{mekanikerNames}</span>
+                        ) : (
+                            <span className="text-gray-400 italic">Not set</span>
+                        )}
+                    </div>
+                </>
             )}
-            
-            {/* Fordon - Third line (from Orders table) */}
-            <div className="mb-1 text-xs text-center">
-                <span className={`font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`}>REG: </span>
-                {fordon ? (
-                    <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{fordon}</span>
-                ) : (
-                    <span className="text-gray-400 italic">Not set</span>
-                )}
-            </div>
-            
-            {/* Mekaniker - Fifth line */}
-            <div className="mb-1 text-xs text-center">
-                <span className={`font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`}>Namn: </span>
-                {mekanikerNames ? (
-                    <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{mekanikerNames}</span>
-                ) : (
-                    <span className="text-gray-400 italic">Not set</span>
-                )}
-            </div>
         </div>
     );
 }
@@ -3144,11 +3168,13 @@ function CalendarInterfaceExtension() {
                         {/* LEFT SIDE: Order Details Panel (vertical layout, no Visualization) */}
                         {eventsTable && orderRecords && (
                             <div 
-                                className="flex-shrink-0 border-r border-gray-300 bg-white"
+                                className="flex-shrink-0 bg-white"
                                 style={{ 
-                                    width: '150px',
-                                    minWidth: '150px',
+                                    width: '175px',
+                                    minWidth: '175px',
                                     height: '100%',
+                                    border: '1px solid #e5e7eb',
+                                    borderRadius: '8px',
                                 }}
                             >
                                 <LeftSideOrderDetailsPanel
