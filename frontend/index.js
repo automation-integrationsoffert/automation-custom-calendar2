@@ -2398,9 +2398,59 @@ function CalendarInterfaceExtension() {
                     return;
                 }
                 
+                // Check if this is an undelegated sub order (black colored - no Starttid/Sluttid)
+                const currentStarttid = existingEvent.getCellValue('Starttid');
+                const currentSluttid = existingEvent.getCellValue('Sluttid');
+                const isUndelegated = !currentStarttid || !currentSluttid;
+                
                 // Calculate start and end times
-                const duration = 60 * 60 * 1000; // Default 1 hour
-                const newEndTime = new Date(newStartTime.getTime() + duration);
+                // Default duration for undelegated sub orders is 1 hour
+                const defaultDuration = 60 * 60 * 1000; // 1 hour in milliseconds
+                const newEndTime = new Date(newStartTime.getTime() + defaultDuration);
+                
+                // If this is an undelegated sub order, check for lunch/break overlaps
+                if (isUndelegated) {
+                    console.log('Checking lunch/break overlap for undelegated sub order:', {
+                        mechanic: mechanicName,
+                        date: targetDate.toDateString(),
+                        proposedStart: newStartTime.toTimeString(),
+                        proposedEnd: newEndTime.toTimeString(),
+                        duration: '1 hour'
+                    });
+                    
+                    const lunchBreakEvents = getLunchBreakEventsForMechanicAndDate(mechanicName, targetDate);
+                    
+                    // Check if the new time slot (1 hour duration) overlaps with any lunch/break event
+                    const hasOverlap = lunchBreakEvents.some(lunchEvent => {
+                        const lunchStart = new Date(lunchEvent.getCellValue('Starttid'));
+                        const lunchEnd = new Date(lunchEvent.getCellValue('Sluttid'));
+                        const lunchName = lunchEvent.getCellValueAsString('Arbetsorder beskrivning') || 'Lunch/Coffee Break';
+                        
+                        // Check if time ranges overlap
+                        // Two time ranges overlap if: start1 < end2 && start2 < end1
+                        // newStartTime to newEndTime (1 hour) vs lunchStart to lunchEnd
+                        const overlaps = newStartTime < lunchEnd && lunchStart < newEndTime;
+                        
+                        if (overlaps) {
+                            console.warn(`⚠️ Time slot overlaps with lunch/break:`, {
+                                lunchName,
+                                lunchTime: `${lunchStart.toTimeString()} - ${lunchEnd.toTimeString()}`,
+                                proposedTime: `${newStartTime.toTimeString()} - ${newEndTime.toTimeString()}`,
+                                overlap: true
+                            });
+                        }
+                        
+                        return overlaps;
+                    });
+                    
+                    if (hasOverlap) {
+                        alert('Cannot assign undelegated sub order: The selected time slot overlaps with a lunch/break period. Please choose a different time.');
+                        console.log('Assignment blocked due to lunch/break overlap');
+                        return;
+                    }
+                    
+                    console.log('✓ No lunch/break overlap - assignment allowed');
+                }
                 
                 console.log('Updating existing event:', {
                     eventId: existingEvent.id,
