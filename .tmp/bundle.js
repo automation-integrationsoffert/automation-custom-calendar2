@@ -45324,14 +45324,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       } catch (e) {
         console.error("Error getting Order Status:", e);
       }
-      let isScheduled = false;
-      try {
-        const starttid = event.getCellValue("Starttid");
-        const sluttid = event.getCellValue("Sluttid");
-        isScheduled = !!(starttid && sluttid);
-      } catch (e) {
-        console.error("Error checking if event is scheduled:", e);
-      }
+      const isScheduled = false;
       return {
         key: event.id || index,
         event,
@@ -45392,13 +45385,13 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                 false,
                 {
                   fileName: "frontend/index.js",
-                  lineNumber: 417,
-                  columnNumber: 41
+                  lineNumber: 411,
+                  columnNumber: 33
                 },
                 this
               )) }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 415,
+                lineNumber: 409,
                 columnNumber: 33
               }, this)
             },
@@ -45406,7 +45399,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             false,
             {
               fileName: "frontend/index.js",
-              lineNumber: 411,
+              lineNumber: 405,
               columnNumber: 29
             },
             this
@@ -45434,26 +45427,26 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             false,
             {
               fileName: "frontend/index.js",
-              lineNumber: 441,
+              lineNumber: 435,
               columnNumber: 29
             },
             this
           ))
         ] }, void 0, true, {
           fileName: "frontend/index.js",
-          lineNumber: 409,
+          lineNumber: 403,
           columnNumber: 21
         }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-500 mt-4 p-4 text-center", children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-2 font-semibold", children: "No Orders found" }, void 0, false, {
           fileName: "frontend/index.js",
-          lineNumber: 463,
+          lineNumber: 457,
           columnNumber: 25
         }, this) }, void 0, false, {
           fileName: "frontend/index.js",
-          lineNumber: 462,
+          lineNumber: 456,
           columnNumber: 21
         }, this) }, void 0, false, {
           fileName: "frontend/index.js",
-          lineNumber: 407,
+          lineNumber: 401,
           columnNumber: 13
         }, this)
       },
@@ -45461,7 +45454,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 377,
+        lineNumber: 371,
         columnNumber: 9
       },
       this
@@ -45514,7 +45507,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 528,
+        lineNumber: 522,
         columnNumber: 9
       },
       this
@@ -45538,7 +45531,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           },
           children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-red-600", children: "Error: Events table not available" }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 613,
+            lineNumber: 607,
             columnNumber: 17
           }, this)
         },
@@ -45546,7 +45539,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         false,
         {
           fileName: "frontend/index.js",
-          lineNumber: 603,
+          lineNumber: 597,
           columnNumber: 13
         },
         this
@@ -45592,26 +45585,8 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       const orderNoStr = orderNo.toString().trim();
       return eventOrderNo === orderNoStr;
     }) : [];
-    const unscheduledEvents = matchingEvents.filter((event) => {
-      try {
-        const starttid = event.getCellValue("Starttid");
-        const sluttid = event.getCellValue("Sluttid");
-        return !(starttid && sluttid);
-      } catch (e) {
-        console.error("Error checking if event is scheduled:", e);
-        return true;
-      }
-    });
-    const scheduledEvents = matchingEvents.filter((event) => {
-      try {
-        const starttid = event.getCellValue("Starttid");
-        const sluttid = event.getCellValue("Sluttid");
-        return !!(starttid && sluttid);
-      } catch (e) {
-        console.error("Error checking if event is scheduled:", e);
-        return false;
-      }
-    });
+    const unscheduledEvents = matchingEvents;
+    const scheduledEvents = [];
     const allEvents = matchingEvents;
     const visualizationField = eventsTable.fields.find((f) => f.name === "Visualization");
     const arbetsorderField = eventsTable.fields.find(
@@ -45697,7 +45672,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               children: [
                 /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { children: orderNo ? `Order ${orderNo}` : "Order" }, void 0, false, {
                   fileName: "frontend/index.js",
-                  lineNumber: 786,
+                  lineNumber: 756,
                   columnNumber: 17
                 }, this),
                 /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
@@ -45718,7 +45693,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                   false,
                   {
                     fileName: "frontend/index.js",
-                    lineNumber: 787,
+                    lineNumber: 757,
                     columnNumber: 17
                   },
                   this
@@ -45729,7 +45704,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             true,
             {
               fileName: "frontend/index.js",
-              lineNumber: 770,
+              lineNumber: 740,
               columnNumber: 13
             },
             this
@@ -45852,7 +45827,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                         false,
                         {
                           fileName: "frontend/index.js",
-                          lineNumber: 909,
+                          lineNumber: 879,
                           columnNumber: 37
                         },
                         this
@@ -45953,7 +45928,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                         false,
                         {
                           fileName: "frontend/index.js",
-                          lineNumber: 1016,
+                          lineNumber: 986,
                           columnNumber: 37
                         },
                         this
@@ -45961,7 +45936,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                     })
                   ] }, void 0, true, {
                     fileName: "frontend/index.js",
-                    lineNumber: 818,
+                    lineNumber: 788,
                     columnNumber: 29
                   }, this)
                 },
@@ -45969,13 +45944,13 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                 false,
                 {
                   fileName: "frontend/index.js",
-                  lineNumber: 814,
+                  lineNumber: 784,
                   columnNumber: 25
                 },
                 this
               ) : null }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 812,
+                lineNumber: 782,
                 columnNumber: 17
               }, this)
             },
@@ -45983,7 +45958,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             false,
             {
               fileName: "frontend/index.js",
-              lineNumber: 803,
+              lineNumber: 773,
               columnNumber: 13
             },
             this
@@ -45994,7 +45969,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       true,
       {
         fileName: "frontend/index.js",
-        lineNumber: 757,
+        lineNumber: 727,
         columnNumber: 9
       },
       this
@@ -46023,11 +45998,11 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       console.log("LeftSideOrderDetailsPanel - Missing orderTable or eventsTable");
       return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "left-side-order-details-panel", style: containerStyle, children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-red-600 text-center w-full border border-dashed border-red-300 rounded p-3 bg-red-50", children: "Unable to load order details. Missing table configuration." }, void 0, false, {
         fileName: "frontend/index.js",
-        lineNumber: 1076,
+        lineNumber: 1046,
         columnNumber: 17
       }, this) }, void 0, false, {
         fileName: "frontend/index.js",
-        lineNumber: 1075,
+        lineNumber: 1045,
         columnNumber: 13
       }, this);
     }
@@ -46036,17 +46011,29 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
     );
     const availableOrders = Array.isArray(orders) ? orders : [];
     const orderField = eventsTable.fields.find((field) => field.name === "Order");
+    const starttidField = eventsTable.fields.find(
+      (field) => field.name === "Starttid" || field.name.toLowerCase() === "starttid"
+    );
+    const sluttidField = eventsTable.fields.find(
+      (field) => field.name === "Sluttid" || field.name.toLowerCase() === "sluttid"
+    );
     if (!orderField || !calendarEvents) {
       console.log("LeftSideOrderDetailsPanel - Missing orderField or calendarEvents");
       return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "left-side-order-details-panel", style: containerStyle, children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-sm text-gray-500 text-center py-6 w-full border border-dashed border-gray-300 rounded bg-gray-50", children: "No Orders to assign" }, void 0, false, {
         fileName: "frontend/index.js",
-        lineNumber: 1097,
+        lineNumber: 1077,
         columnNumber: 17
       }, this) }, void 0, false, {
         fileName: "frontend/index.js",
-        lineNumber: 1096,
+        lineNumber: 1076,
         columnNumber: 13
       }, this);
+    }
+    if (!starttidField || !sluttidField) {
+      console.warn("LeftSideOrderDetailsPanel - Starttid or Sluttid fields not found:", {
+        starttidField: starttidField?.name || "NOT FOUND",
+        sluttidField: sluttidField?.name || "NOT FOUND"
+      });
     }
     const ordersWithUnscheduledEvents = availableOrders.filter((order) => {
       const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
@@ -46065,8 +46052,11 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       }
       return matchingEvents.some((event) => {
         try {
-          const starttid = event.getCellValue("Starttid");
-          const sluttid = event.getCellValue("Sluttid");
+          if (!starttidField || !sluttidField) {
+            return true;
+          }
+          const starttid = event.getCellValue(starttidField.name);
+          const sluttid = event.getCellValue(sluttidField.name);
           return !(starttid && sluttid);
         } catch (e) {
           console.error("Error checking event schedule for left panel:", e);
@@ -46083,7 +46073,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         style: containerStyle,
         children: ordersWithUnscheduledEvents.length === 0 ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-sm text-gray-500 text-center py-6 w-full border border-dashed border-gray-300 rounded bg-gray-50", children: "No Orders to assign" }, void 0, false, {
           fileName: "frontend/index.js",
-          lineNumber: 1144,
+          lineNumber: 1134,
           columnNumber: 17
         }, this) : ordersWithUnscheduledEvents.map((order) => {
           const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
@@ -46105,7 +46095,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             false,
             {
               fileName: "frontend/index.js",
-              lineNumber: 1151,
+              lineNumber: 1141,
               columnNumber: 25
             },
             this
@@ -46116,7 +46106,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 1138,
+        lineNumber: 1128,
         columnNumber: 9
       },
       this
@@ -46201,7 +46191,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                 false,
                 {
                   fileName: "frontend/index.js",
-                  lineNumber: 1243,
+                  lineNumber: 1233,
                   columnNumber: 25
                 },
                 this
@@ -46212,7 +46202,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           false,
           {
             fileName: "frontend/index.js",
-            lineNumber: 1229,
+            lineNumber: 1219,
             columnNumber: 13
           },
           this
@@ -46222,7 +46212,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 1220,
+        lineNumber: 1210,
         columnNumber: 9
       },
       this
@@ -46256,42 +46246,42 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "px-4 py-3 border-b-2 border-red-300 bg-red-50 flex-shrink-0", children: [
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("h3", { className: "text-sm font-bold text-red-700", children: "Orders" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1292,
+                lineNumber: 1282,
                 columnNumber: 21
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-red-600 mt-1", children: "\u26A0\uFE0F DEBUG MODE" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1293,
+                lineNumber: 1283,
                 columnNumber: 21
               }, this)
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 1291,
+              lineNumber: 1281,
               columnNumber: 17
             }, this),
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1 flex items-center justify-center p-4", children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-red-600 text-center", children: [
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-2 font-bold text-base", children: "\u26A0\uFE0F Order table not found" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1297,
+                lineNumber: 1287,
                 columnNumber: 25
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-600 mt-2 p-2 bg-gray-100 rounded", children: "Check browser console (F12) for available tables" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1298,
+                lineNumber: 1288,
                 columnNumber: 25
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-400 mt-2", children: "This panel should be visible on the right side" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1301,
+                lineNumber: 1291,
                 columnNumber: 25
               }, this)
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 1296,
+              lineNumber: 1286,
               columnNumber: 21
             }, this) }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1295,
+              lineNumber: 1285,
               columnNumber: 17
             }, this)
           ]
@@ -46300,7 +46290,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         true,
         {
           fileName: "frontend/index.js",
-          lineNumber: 1275,
+          lineNumber: 1265,
           columnNumber: 13
         },
         this
@@ -46327,26 +46317,26 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "px-4 py-3 border-b border-gray-200 bg-blue-50 flex-shrink-0", children: [
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("h3", { className: "text-sm font-semibold text-gray-700", children: "Orders" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1328,
+                lineNumber: 1318,
                 columnNumber: 21
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-500 mt-1", children: "0 orders" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1329,
+                lineNumber: 1319,
                 columnNumber: 21
               }, this)
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 1327,
+              lineNumber: 1317,
               columnNumber: 17
             }, this),
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1 flex items-center justify-center p-4", children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-sm text-blue-600 text-center font-medium", children: "No orders are scheduled for this week." }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1332,
+              lineNumber: 1322,
               columnNumber: 21
             }, this) }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1331,
+              lineNumber: 1321,
               columnNumber: 17
             }, this)
           ]
@@ -46355,7 +46345,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         true,
         {
           fileName: "frontend/index.js",
-          lineNumber: 1312,
+          lineNumber: 1302,
           columnNumber: 13
         },
         this
@@ -46429,7 +46419,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "px-4 py-3 border-b border-gray-200 bg-green-50 sticky top-0 z-40 flex-shrink-0", children: [
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("h3", { className: "text-sm font-semibold text-gray-700", children: "Orders" }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1426,
+              lineNumber: 1416,
               columnNumber: 17
             }, this),
             orderData.length > 0 && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-500 mt-1", children: [
@@ -46437,34 +46427,34 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               " orders"
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 1428,
+              lineNumber: 1418,
               columnNumber: 21
             }, this)
           ] }, void 0, true, {
             fileName: "frontend/index.js",
-            lineNumber: 1425,
+            lineNumber: 1415,
             columnNumber: 13
           }, this),
           /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1 overflow-y-auto", style: { minHeight: 0 }, children: orderData.length > 0 ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "w-full", children: [
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "px-4 py-2 border-b-2 border-gray-300 bg-gray-100 sticky top-0 z-30 flex items-center gap-2", style: { minHeight: "32px" }, children: [
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "font-semibold text-gray-700", style: { minWidth: "20px" }, children: "No" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1436,
+                lineNumber: 1426,
                 columnNumber: 29
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "font-semibold text-gray-700 flex-1", children: "Order Number" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1439,
+                lineNumber: 1429,
                 columnNumber: 29
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-xs font-semibold text-gray-700", style: { minWidth: "50px", textAlign: "right" }, children: "Fordon" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1442,
+                lineNumber: 1432,
                 columnNumber: 29
               }, this)
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 1435,
+              lineNumber: 1425,
               columnNumber: 25
             }, this),
             orderData.map(({ sequentialNumber, orderNo, fordon, record }) => {
@@ -46505,22 +46495,22 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                       "."
                     ] }, void 0, true, {
                       fileName: "frontend/index.js",
-                      lineNumber: 1481,
+                      lineNumber: 1471,
                       columnNumber: 37
                     }, this),
                     /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `font-medium flex-1 ${isSelected ? "text-blue-700" : "text-gray-600"}`, children: orderNo }, void 0, false, {
                       fileName: "frontend/index.js",
-                      lineNumber: 1484,
+                      lineNumber: 1474,
                       columnNumber: 37
                     }, this),
                     /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `text-xs ${isSelected ? "text-blue-600" : "text-gray-500"}`, style: { minWidth: "50px", textAlign: "right" }, children: fordon }, void 0, false, {
                       fileName: "frontend/index.js",
-                      lineNumber: 1487,
+                      lineNumber: 1477,
                       columnNumber: 37
                     }, this),
                     isSelected && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "ml-1 text-blue-600 text-xs", children: "\u2713" }, void 0, false, {
                       fileName: "frontend/index.js",
-                      lineNumber: 1491,
+                      lineNumber: 1481,
                       columnNumber: 41
                     }, this)
                   ]
@@ -46529,7 +46519,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                 true,
                 {
                   fileName: "frontend/index.js",
-                  lineNumber: 1450,
+                  lineNumber: 1440,
                   columnNumber: 33
                 },
                 this
@@ -46537,15 +46527,15 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             })
           ] }, void 0, true, {
             fileName: "frontend/index.js",
-            lineNumber: 1433,
+            lineNumber: 1423,
             columnNumber: 21
           }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-sm text-gray-500 p-4 text-center", children: "No order numbers found" }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1498,
+            lineNumber: 1488,
             columnNumber: 21
           }, this) }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1431,
+            lineNumber: 1421,
             columnNumber: 13
           }, this)
         ]
@@ -46554,7 +46544,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       true,
       {
         fileName: "frontend/index.js",
-        lineNumber: 1409,
+        lineNumber: 1399,
         columnNumber: 9
       },
       this
@@ -46576,7 +46566,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 1514,
+        lineNumber: 1504,
         columnNumber: 9
       },
       this
@@ -46664,7 +46654,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             borderLeft: "none"
           }, children: arbetsorder || "Untitled" }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1610,
+            lineNumber: 1600,
             columnNumber: 17
           }, this)
         ) : (
@@ -46681,39 +46671,59 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               false,
               {
                 fileName: "frontend/index.js",
-                lineNumber: 1631,
+                lineNumber: 1621,
                 columnNumber: 29
               },
               this
             ) }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1630,
+              lineNumber: 1620,
               columnNumber: 25
             }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-2 text-xs text-gray-400 italic text-center border border-dashed border-gray-300 rounded", style: { width: `${imageSize}px`, height: `${imageSize}px`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }, children: "No image" }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1638,
+              lineNumber: 1628,
               columnNumber: 25
             }, this),
             showVisualization && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: visualization ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: isScheduled ? "text-red-600" : "text-gray-500", children: visualization }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1647,
+              lineNumber: 1637,
               columnNumber: 33
             }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-400 italic", children: "Not set" }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1649,
+              lineNumber: 1639,
               columnNumber: 33
             }, this) }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1645,
+              lineNumber: 1635,
               columnNumber: 25
             }, this),
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: [
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`, children: "REG: " }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1656,
+                lineNumber: 1646,
                 columnNumber: 25
               }, this),
               fordon ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: isScheduled ? "text-red-600" : "text-gray-500", children: fordon }, void 0, false, {
+                fileName: "frontend/index.js",
+                lineNumber: 1648,
+                columnNumber: 29
+              }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-400 italic", children: "Not set" }, void 0, false, {
+                fileName: "frontend/index.js",
+                lineNumber: 1650,
+                columnNumber: 29
+              }, this)
+            ] }, void 0, true, {
+              fileName: "frontend/index.js",
+              lineNumber: 1645,
+              columnNumber: 21
+            }, this),
+            /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: [
+              /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`, children: "Namn: " }, void 0, false, {
+                fileName: "frontend/index.js",
+                lineNumber: 1656,
+                columnNumber: 25
+              }, this),
+              mekanikerNames ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: isScheduled ? "text-red-600" : "text-gray-500", children: mekanikerNames }, void 0, false, {
                 fileName: "frontend/index.js",
                 lineNumber: 1658,
                 columnNumber: 29
@@ -46726,30 +46736,10 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               fileName: "frontend/index.js",
               lineNumber: 1655,
               columnNumber: 21
-            }, this),
-            /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: [
-              /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`, children: "Namn: " }, void 0, false, {
-                fileName: "frontend/index.js",
-                lineNumber: 1666,
-                columnNumber: 25
-              }, this),
-              mekanikerNames ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: isScheduled ? "text-red-600" : "text-gray-500", children: mekanikerNames }, void 0, false, {
-                fileName: "frontend/index.js",
-                lineNumber: 1668,
-                columnNumber: 29
-              }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-400 italic", children: "Not set" }, void 0, false, {
-                fileName: "frontend/index.js",
-                lineNumber: 1670,
-                columnNumber: 29
-              }, this)
-            ] }, void 0, true, {
-              fileName: "frontend/index.js",
-              lineNumber: 1665,
-              columnNumber: 21
             }, this)
           ] }, void 0, true, {
             fileName: "frontend/index.js",
-            lineNumber: 1627,
+            lineNumber: 1617,
             columnNumber: 17
           }, this)
         )
@@ -46758,7 +46748,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 1576,
+        lineNumber: 1566,
         columnNumber: 9
       },
       this
@@ -46801,70 +46791,70 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             false,
             {
               fileName: "frontend/index.js",
-              lineNumber: 1708,
+              lineNumber: 1698,
               columnNumber: 21
             },
             this
           ) }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1707,
+            lineNumber: 1697,
             columnNumber: 17
           }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-2 text-xs text-gray-400 italic text-center rounded", style: { width: "100px", height: "100px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }, children: "No image" }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1715,
+            lineNumber: 1705,
             columnNumber: 17
           }, this),
           showVisualization && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: visualization ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: isScheduled ? "text-red-600" : "text-gray-500", children: visualization }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1723,
+            lineNumber: 1713,
             columnNumber: 25
           }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-400 italic", children: "Not set" }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1725,
-            columnNumber: 25
+            lineNumber: 1715,
+            columnNumber: 21
           }, this) }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1721,
-            columnNumber: 17
+            lineNumber: 1711,
+            columnNumber: 13
           }, this),
           /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: [
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`, children: "REG: " }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1731,
+              lineNumber: 1721,
               columnNumber: 17
             }, this),
             fordon ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: isScheduled ? "text-red-600" : "text-gray-500", children: fordon }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1733,
+              lineNumber: 1723,
               columnNumber: 21
             }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-400 italic", children: "Not set" }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1735,
+              lineNumber: 1725,
               columnNumber: 21
             }, this)
           ] }, void 0, true, {
             fileName: "frontend/index.js",
-            lineNumber: 1730,
+            lineNumber: 1720,
             columnNumber: 13
           }, this),
           /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: [
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`, children: "Namn: " }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1740,
+              lineNumber: 1730,
               columnNumber: 17
             }, this),
             mekanikerNames ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: isScheduled ? "text-red-600" : "text-gray-500", children: mekanikerNames }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1742,
+              lineNumber: 1732,
               columnNumber: 21
             }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-400 italic", children: "Not set" }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1744,
+              lineNumber: 1734,
               columnNumber: 21
             }, this)
           ] }, void 0, true, {
             fileName: "frontend/index.js",
-            lineNumber: 1739,
+            lineNumber: 1729,
             columnNumber: 13
           }, this)
         ]
@@ -46873,7 +46863,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       true,
       {
         fileName: "frontend/index.js",
-        lineNumber: 1686,
+        lineNumber: 1676,
         columnNumber: 9
       },
       this
@@ -46963,7 +46953,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             width: "100%"
           }, children: eventTitle }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1837,
+            lineNumber: 1827,
             columnNumber: 17
           }, this),
           bookingOrder && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { style: {
@@ -46977,7 +46967,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             width: "100%"
           }, children: bookingOrder }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1852,
+            lineNumber: 1842,
             columnNumber: 21
           }, this),
           mechanicName && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { style: {
@@ -46989,7 +46979,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             width: "100%"
           }, children: mechanicName }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1868,
+            lineNumber: 1858,
             columnNumber: 21
           }, this),
           /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
@@ -47039,14 +47029,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             false,
             {
               fileName: "frontend/index.js",
-              lineNumber: 1881,
+              lineNumber: 1871,
               columnNumber: 17
             },
             this
           )
         ] }, void 0, true, {
           fileName: "frontend/index.js",
-          lineNumber: 1825,
+          lineNumber: 1815,
           columnNumber: 13
         }, this)
       }),
@@ -47054,7 +47044,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 1805,
+        lineNumber: 1795,
         columnNumber: 9
       },
       this
@@ -47785,7 +47775,20 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       const orderNoField = orderTable?.fields?.find(
         (field) => field.name === "Order No" || field.name === "Order No." || field.name.toLowerCase().includes("order no")
       );
-      if (!orderField || !events2 || events2.length === 0 || displayedDates.length === 0) {
+      const starttidField = eventsTable?.fields?.find(
+        (field) => field.name === "Starttid" || field.name.toLowerCase() === "starttid"
+      );
+      const sluttidField = eventsTable?.fields?.find(
+        (field) => field.name === "Sluttid" || field.name.toLowerCase() === "sluttid"
+      );
+      if (!orderField || !starttidField || !sluttidField || !events2 || events2.length === 0 || displayedDates.length === 0) {
+        if (!starttidField || !sluttidField) {
+          console.warn("Starttid or Sluttid fields not found in Calendar Events table:", {
+            starttidField: starttidField?.name || "NOT FOUND",
+            sluttidField: sluttidField?.name || "NOT FOUND",
+            availableFields: eventsTable?.fields?.map((f) => f.name) || []
+          });
+        }
         return [];
       }
       const ordersWithScheduledEvents = orders.filter((order) => {
@@ -47803,8 +47806,8 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           });
           const hasScheduledEventInWeek = matchingEvents.some((event) => {
             try {
-              const starttid = event.getCellValue("Starttid");
-              const sluttid = event.getCellValue("Sluttid");
+              const starttid = event.getCellValue(starttidField.name);
+              const sluttid = event.getCellValue(sluttidField.name);
               if (!starttid || !sluttid) {
                 return false;
               }
@@ -47870,221 +47873,267 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       return 30;
     };
     const getLunchBreakEventsForMechanicAndDate = (mechanicName, date) => {
-      if (!eventsTable || !events2 || events2.length === 0) {
-        console.log("getLunchBreakEventsForMechanicAndDate: No events table or events");
-        return [];
-      }
-      const lunchNameField = eventsTable.fields.find(
-        (f) => f.name === "Lunch setting Name" || f.name.toLowerCase().includes("lunch setting name")
-      );
-      const lunchStarttidField = eventsTable.fields.find(
-        (f) => f.name === "Lunch setting Starttid" || f.name.toLowerCase().includes("lunch setting starttid")
-      );
-      const lunchDurationField = eventsTable.fields.find(
-        (f) => f.name === "Lunch setting Duration" || f.name.toLowerCase().includes("lunch setting duration")
-      );
-      const mekanikerField = eventsTable.fields.find(
-        (f) => f.name === "Mekaniker" || f.name.toLowerCase().includes("mekaniker")
-      );
-      if (!lunchNameField || !lunchStarttidField || !lunchDurationField || !mekanikerField) {
-        console.warn("Lunch setting fields not found:", {
-          lunchNameField: lunchNameField?.name || "NOT FOUND",
-          lunchStarttidField: lunchStarttidField?.name || "NOT FOUND",
-          lunchDurationField: lunchDurationField?.name || "NOT FOUND",
-          mekanikerField: mekanikerField?.name || "NOT FOUND",
-          availableFields: eventsTable.fields.map((f) => f.name)
+      if (!mechanicsTable || !mechanicsRecords || mechanicsRecords.length === 0) {
+        console.log("getLunchBreakEventsForMechanicAndDate: No mechanics table or records", {
+          hasTable: !!mechanicsTable,
+          tableName: mechanicsTable?.name,
+          recordsCount: mechanicsRecords?.length || 0
         });
         return [];
       }
-      console.log(`\u{1F50D} Looking for lunch settings for mechanic: ${mechanicName} on ${date.toDateString()}`);
+      console.log("\u{1F50D} Mechanics table info:", {
+        tableName: mechanicsTable.name,
+        fieldsCount: mechanicsTable.fields.length,
+        recordsCount: mechanicsRecords.length
+      });
+      const nameField = mechanicsTable.fields.find(
+        (f) => f.name === "Name" || f.name === "Mechanic Name" || f.name.toLowerCase().includes("name")
+      );
+      console.log("\u{1F50D} Available fields in Mechanics table:", mechanicsTable.fields.map((f) => ({
+        name: f.name,
+        type: f.type
+      })));
+      const breakField = mechanicsTable.fields.find(
+        (f) => f.name === "Break" || f.name.toLowerCase() === "break"
+      );
+      const starttidFromBreakField = mechanicsTable.fields.find(
+        (f) => f.name === "Starttid (from Break)" || f.name === "Starttid(from Break)" || f.name.toLowerCase() === "starttid (from break)" || f.name.toLowerCase().includes("starttid") && f.name.toLowerCase().includes("break")
+      );
+      const durationField = mechanicsTable.fields.find(
+        (f) => f.name === "Duration" || f.name.toLowerCase() === "duration"
+      );
+      const nameFromBreakField = mechanicsTable.fields.find(
+        (f) => f.name === "Name (from Break)" || f.name === "Name(from Break)" || f.name.toLowerCase().includes("name") && f.name.toLowerCase().includes("break")
+      );
+      console.log("\u{1F50D} Found fields:", {
+        nameField: nameField?.name || "NOT FOUND",
+        breakField: breakField?.name || "NOT FOUND",
+        starttidFromBreakField: starttidFromBreakField?.name || "NOT FOUND",
+        durationField: durationField?.name || "NOT FOUND",
+        nameFromBreakField: nameFromBreakField?.name || "NOT FOUND"
+      });
+      if (!nameField || !breakField || !starttidFromBreakField || !durationField) {
+        console.warn("\u26A0\uFE0F Break setting fields not found in Mechanics table:", {
+          nameField: nameField?.name || "NOT FOUND",
+          breakField: breakField?.name || "NOT FOUND",
+          starttidFromBreakField: starttidFromBreakField?.name || "NOT FOUND",
+          durationField: durationField?.name || "NOT FOUND",
+          availableFields: mechanicsTable.fields.map((f) => `${f.name} (${f.type})`)
+        });
+        return [];
+      }
+      console.log(`\u{1F50D} Looking for break settings for mechanic: ${mechanicName} on ${date.toDateString()}`);
+      const mechanicRecord = mechanicsRecords.find((mech) => {
+        if (!nameField) return false;
+        const mechName = mech.getCellValueAsString(nameField.name);
+        return mechName && mechName.trim().toLowerCase() === mechanicName.trim().toLowerCase();
+      });
+      if (!mechanicRecord) {
+        console.log(`\u26A0\uFE0F Mechanic "${mechanicName}" not found in Mechanics table`);
+        return [];
+      }
+      console.log(`\u2705 Found mechanic record: ${mechanicRecord.id}`);
       const lunchEvents = [];
       const seenLunchEntries = /* @__PURE__ */ new Set();
-      events2.forEach((event) => {
-        try {
-          const mekanikerValue = event.getCellValue(mekanikerField.name);
-          if (!mekanikerValue) return;
-          let eventMechanicNames = [];
-          if (Array.isArray(mekanikerValue)) {
-            eventMechanicNames = mekanikerValue.map((m) => {
-              if (typeof m === "string") return m.trim();
-              if (m && m.name) return m.name.trim();
-              if (m && m.value) return m.value.trim();
-              return String(m).trim();
-            }).filter((name) => name && name !== "" && name !== "undefined");
-          } else if (typeof mekanikerValue === "string") {
-            eventMechanicNames = [mekanikerValue.trim()];
+      try {
+        const breakValue = mechanicRecord.getCellValue(breakField.name);
+        const breakStarttidValue = mechanicRecord.getCellValue(starttidFromBreakField.name);
+        const breakDurationValue = mechanicRecord.getCellValue(durationField.name);
+        const breakValueStr = mechanicRecord.getCellValueAsString(breakField.name) || "";
+        const breakStarttidValueStr = mechanicRecord.getCellValueAsString(starttidFromBreakField.name) || "";
+        const breakDurationValueStr = mechanicRecord.getCellValueAsString(durationField.name) || "";
+        console.log(`\u{1F4CB} Break settings from Mechanics table for ${mechanicName}:`, {
+          breakValue,
+          breakStarttidValue,
+          breakDurationValue,
+          breakValueStr,
+          breakStarttidValueStr,
+          breakDurationValueStr,
+          fieldTypes: {
+            break: breakField.type,
+            starttid: starttidFromBreakField.type,
+            duration: durationField.type
           }
-          const hasOurMechanic = eventMechanicNames.some(
-            (mechName) => mechName.toLowerCase() === mechanicName.trim().toLowerCase()
-          );
-          if (!hasOurMechanic) return;
-          let lunchName = "";
-          let lunchStarttid = "";
-          let lunchDuration = "";
-          try {
-            lunchName = event.getCellValueAsString(lunchNameField.name) || "";
-            lunchStarttid = event.getCellValueAsString(lunchStarttidField.name) || "";
-            lunchDuration = event.getCellValueAsString(lunchDurationField.name) || "";
-            if (!lunchName) {
-              const lunchNameValue = event.getCellValue(lunchNameField.name);
-              if (Array.isArray(lunchNameValue) && lunchNameValue.length > 0) {
-                lunchName = lunchNameValue.map((v) => String(v)).join(", ");
-              } else if (lunchNameValue) {
-                lunchName = String(lunchNameValue);
-              }
-            }
-            if (!lunchStarttid) {
-              const lunchStarttidValue = event.getCellValue(lunchStarttidField.name);
-              if (Array.isArray(lunchStarttidValue) && lunchStarttidValue.length > 0) {
-                lunchStarttid = lunchStarttidValue.map((v) => String(v)).join(", ");
-              } else if (lunchStarttidValue) {
-                lunchStarttid = String(lunchStarttidValue);
-              }
-            }
-            if (!lunchDuration) {
-              const lunchDurationValue = event.getCellValue(lunchDurationField.name);
-              if (Array.isArray(lunchDurationValue) && lunchDurationValue.length > 0) {
-                lunchDuration = lunchDurationValue.map((v) => String(v)).join(", ");
-              } else if (lunchDurationValue) {
-                lunchDuration = String(lunchDurationValue);
-              }
-            }
-          } catch (e) {
-            console.error(`Error getting lookup field values for event ${event.id}:`, e);
-          }
-          console.log(`\u{1F4CB} Lunch settings from lookup fields for event ${event.id}:`, {
-            lunchName,
-            lunchStarttid,
-            lunchDuration,
-            mechanic: mechanicName,
-            fieldTypes: {
-              name: lunchNameField.type,
-              starttid: lunchStarttidField.type,
-              duration: lunchDurationField.type
-            }
+        });
+        let breakNames = [];
+        let starttidValues = [];
+        let durationValues = [];
+        if (breakValueStr && breakValueStr.includes(",")) {
+          breakNames = breakValueStr.split(",").map((s) => s.trim()).filter((s) => s);
+          starttidValues = breakStarttidValueStr.split(",").map((s) => s.trim()).filter((s) => s);
+          durationValues = breakDurationValueStr.split(",").map((s) => s.trim()).filter((s) => s);
+          console.log(`\u{1F4DD} Parsed comma-separated values:`, {
+            breakNames,
+            starttidValues,
+            durationValues
           });
-          if (!lunchName || !lunchStarttid) {
-            if (lunchName || lunchStarttid) {
-              console.log(`\u26A0\uFE0F Event ${event.id} has partial lunch settings:`, { lunchName, lunchStarttid, lunchDuration });
-            }
-            return;
+        } else if (Array.isArray(breakValue)) {
+          const breakRecords = breakValue;
+          const starttidArray = Array.isArray(breakStarttidValue) ? breakStarttidValue : breakStarttidValue ? [breakStarttidValue] : [];
+          const durationArray = Array.isArray(breakDurationValue) ? breakDurationValue : breakDurationValue ? [breakDurationValue] : [];
+          let breakNameValues = null;
+          if (nameFromBreakField) {
+            breakNameValues = mechanicRecord.getCellValue(nameFromBreakField.name);
           }
-          console.log(`\u2705 Found lunch settings in event ${event.id}:`, {
-            lunchName,
-            lunchStarttid,
-            lunchDuration,
-            mechanic: mechanicName
-          });
-          const lunchNames = lunchName.split(",").map((s) => s.trim()).filter((s) => s);
-          const starttidValues = lunchStarttid.split(",").map((s) => s.trim()).filter((s) => s);
-          const durationValues = lunchDuration.split(",").map((s) => s.trim()).filter((s) => s);
-          console.log(`\u{1F4DD} Parsed lunch settings from event ${event.id}:`, {
-            names: lunchNames,
-            starttids: starttidValues,
-            durations: durationValues,
-            mechanic: mechanicName
-          });
-          const maxLength = Math.max(lunchNames.length, starttidValues.length, durationValues.length);
-          console.log(`\u{1F504} Processing ${maxLength} lunch/break entries from this event...`);
-          for (let i = 0; i < maxLength; i++) {
-            const name = lunchNames[i] !== void 0 ? lunchNames[i] : lunchNames.length > 0 ? lunchNames[0] : "Lunch/Coffee Break";
-            const starttidStr = starttidValues[i] !== void 0 ? starttidValues[i] : starttidValues.length > 0 ? starttidValues[0] : null;
-            const durationStr = durationValues[i] !== void 0 ? durationValues[i] : durationValues.length > 0 ? durationValues[0] : "0:30";
-            console.log(`\u{1F50D} Processing entry ${i}:`, {
-              name,
-              starttidStr,
-              durationStr,
-              nameExists: lunchNames[i] !== void 0,
-              starttidExists: starttidValues[i] !== void 0,
-              durationExists: durationValues[i] !== void 0
-            });
-            if (!starttidStr || starttidStr.trim() === "") {
-              console.log(`\u26A0\uFE0F Skipping entry ${i} - no Starttid value`);
-              continue;
-            }
-            const startDate2 = convertStarttidToDate(starttidStr.trim(), date);
-            if (!startDate2) {
-              console.log(`\u26A0\uFE0F Skipping entry ${i} - invalid Starttid: "${starttidStr}" (could not convert to date)`);
-              continue;
-            }
-            const durationMinutes = parseDurationToMinutes(durationStr.trim());
-            const endDate2 = new Date(startDate2);
-            endDate2.setMinutes(endDate2.getMinutes() + durationMinutes);
-            console.log(`\u2713 Entry ${i} converted successfully:`, {
-              name,
-              starttid: starttidStr,
-              startDate: startDate2.toTimeString(),
-              duration: durationStr,
-              durationMinutes,
-              endDate: endDate2.toTimeString()
-            });
-            const entryKey = `${mechanicName.toLowerCase()}-${name.toLowerCase().trim()}-${starttidStr.trim()}-${durationStr.trim()}`;
-            if (seenLunchEntries.has(entryKey)) {
-              console.log(`\u23ED\uFE0F Skipping duplicate entry: "${name}" at ${starttidStr} (already shown)`);
-              continue;
-            }
-            seenLunchEntries.add(entryKey);
-            console.log(`\u2795 Adding new lunch entry: "${name}" at ${starttidStr}`);
-            console.log(`\u2728 Creating separate event ${i + 1}/${maxLength}:`, {
-              name,
-              starttid: starttidStr,
-              duration: durationStr,
-              startTime: startDate2.toTimeString(),
-              endTime: endDate2.toTimeString(),
-              durationMinutes
-            });
-            const lunchEvent = {
-              id: `lunch-${mechanicName}-${name.replace(/\s+/g, "-")}-${starttidStr}-${date.toISOString()}-${i}-${event.id}`,
-              isLunchBreak: true,
-              getCellValue: (fieldName) => {
-                if (fieldName === "Starttid" || fieldName.toLowerCase().includes("starttid")) {
-                  return startDate2;
-                }
-                if (fieldName === "Sluttid" || fieldName.toLowerCase().includes("sluttid")) {
-                  return endDate2;
-                }
-                if (fieldName === "Mekaniker" || fieldName.toLowerCase().includes("mekaniker")) {
-                  return [mechanicName];
-                }
-                if (fieldName === "Arbetsorder beskrivning" || fieldName.toLowerCase().includes("beskrivning")) {
-                  return name;
-                }
-                return null;
-              },
-              getCellValueAsString: (fieldName) => {
-                if (fieldName === "Arbetsorder beskrivning" || fieldName.toLowerCase().includes("beskrivning")) {
-                  return name;
-                }
-                if (fieldName === "Mekaniker" || fieldName.toLowerCase().includes("mekaniker")) {
-                  return mechanicName;
-                }
-                return "";
+          for (let i = 0; i < breakRecords.length; i++) {
+            let breakName = "";
+            if (breakNameValues) {
+              const nameArray = Array.isArray(breakNameValues) ? breakNameValues : [breakNameValues];
+              if (i < nameArray.length && nameArray[i]) {
+                breakName = String(nameArray[i]);
               }
-            };
-            lunchEvents.push(lunchEvent);
-            console.log(`\u2705 Created separate lunch event: "${name}" at ${startDate2.toTimeString()} (${durationMinutes} min) for ${mechanicName}`);
+            }
+            if (!breakName) {
+              breakName = `Break ${i + 1}`;
+            }
+            breakNames.push(breakName);
+            if (i < starttidArray.length) {
+              const starttidValue = starttidArray[i];
+              starttidValues.push(String(starttidValue || ""));
+            } else {
+              starttidValues.push("");
+            }
+            if (i < durationArray.length) {
+              const durationValue = durationArray[i];
+              durationValues.push(String(durationValue || ""));
+            } else {
+              durationValues.push("0:30");
+            }
           }
-        } catch (e) {
-          console.error("Error processing lunch settings from event:", event.id, e);
+        } else if (breakValue || breakValueStr) {
+          breakNames = [breakValueStr || String(breakValue || "Break")];
+          starttidValues = [breakStarttidValueStr || String(breakStarttidValue || "")];
+          durationValues = [breakDurationValueStr || String(breakDurationValue || "0:30")];
         }
-      });
-      console.log(`\u{1F4CA} Total lunch events created for ${mechanicName} on ${date.toDateString()}: ${lunchEvents.length}`);
+        if (breakNames.length === 0) {
+          console.log(`\u2139\uFE0F No break settings found for mechanic ${mechanicName}`);
+          return [];
+        }
+        const maxLength = Math.max(breakNames.length, starttidValues.length, durationValues.length);
+        while (breakNames.length < maxLength) {
+          breakNames.push(`Break ${breakNames.length + 1}`);
+        }
+        while (starttidValues.length < maxLength) {
+          starttidValues.push("");
+        }
+        while (durationValues.length < maxLength) {
+          durationValues.push("0:30");
+        }
+        console.log(`\u{1F4CA} Aligned break arrays (length: ${maxLength}):`, {
+          breakNames,
+          starttidValues,
+          durationValues
+        });
+        const validEntries = breakNames.map((name, idx) => ({
+          name,
+          starttid: starttidValues[idx] || "",
+          duration: durationValues[idx] || "0:30"
+        })).filter((entry) => entry.starttid && entry.starttid.trim() !== "");
+        if (validEntries.length === 0) {
+          console.log(`\u2139\uFE0F No valid break settings found for mechanic ${mechanicName} (missing starttid values)`);
+          return [];
+        }
+        console.log(`\u2705 Found ${validEntries.length} break settings for mechanic ${mechanicName}:`, {
+          entries: validEntries.map((e) => ({ name: e.name, starttid: e.starttid, duration: e.duration }))
+        });
+        const breakNamesFiltered = validEntries.map((e) => e.name);
+        const starttidValuesFiltered = validEntries.map((e) => e.starttid);
+        const durationValuesFiltered = validEntries.map((e) => e.duration);
+        console.log(`\u{1F4DD} Processing ${validEntries.length} break entries for ${mechanicName}...`);
+        for (let i = 0; i < validEntries.length; i++) {
+          const name = breakNamesFiltered[i] || "Lunch/Coffee Break";
+          const starttidStr = starttidValuesFiltered[i] || null;
+          const durationStr = durationValuesFiltered[i] || "0:30";
+          console.log(`\u{1F50D} Processing entry ${i}:`, {
+            name,
+            starttidStr,
+            durationStr
+          });
+          if (!starttidStr || starttidStr.trim() === "") {
+            console.log(`\u26A0\uFE0F Skipping entry ${i} - no Starttid value`);
+            continue;
+          }
+          const startDate2 = convertStarttidToDate(starttidStr.trim(), date);
+          if (!startDate2) {
+            console.log(`\u26A0\uFE0F Skipping entry ${i} - invalid Starttid: "${starttidStr}" (could not convert to date)`);
+            continue;
+          }
+          const durationMinutes = parseDurationToMinutes(durationStr.trim());
+          const endDate2 = new Date(startDate2);
+          endDate2.setMinutes(endDate2.getMinutes() + durationMinutes);
+          console.log(`\u2713 Entry ${i} converted successfully:`, {
+            name,
+            starttid: starttidStr,
+            startDate: startDate2.toTimeString(),
+            duration: durationStr,
+            durationMinutes,
+            endDate: endDate2.toTimeString()
+          });
+          const entryKey = `${mechanicName.toLowerCase()}-${name.toLowerCase().trim()}-${starttidStr.trim()}-${durationStr.trim()}`;
+          if (seenLunchEntries.has(entryKey)) {
+            console.log(`\u23ED\uFE0F Skipping duplicate entry: "${name}" at ${starttidStr} (already shown)`);
+            continue;
+          }
+          seenLunchEntries.add(entryKey);
+          console.log(`\u2795 Adding new break entry: "${name}" at ${starttidStr}`);
+          console.log(`\u2728 Creating break event ${i + 1}/${validEntries.length}:`, {
+            name,
+            starttid: starttidStr,
+            duration: durationStr,
+            startTime: startDate2.toTimeString(),
+            endTime: endDate2.toTimeString(),
+            durationMinutes
+          });
+          const lunchEvent = {
+            id: `lunch-${mechanicName}-${name.replace(/\s+/g, "-")}-${starttidStr}-${date.toISOString()}-${i}-${mechanicRecord.id}`,
+            isLunchBreak: true,
+            getCellValue: (fieldName) => {
+              if (fieldName === "Starttid" || fieldName.toLowerCase().includes("starttid")) {
+                return startDate2;
+              }
+              if (fieldName === "Sluttid" || fieldName.toLowerCase().includes("sluttid")) {
+                return endDate2;
+              }
+              if (fieldName === "Mekaniker" || fieldName.toLowerCase().includes("mekaniker")) {
+                return [mechanicName];
+              }
+              if (fieldName === "Arbetsorder beskrivning" || fieldName.toLowerCase().includes("beskrivning")) {
+                return name;
+              }
+              return null;
+            },
+            getCellValueAsString: (fieldName) => {
+              if (fieldName === "Arbetsorder beskrivning" || fieldName.toLowerCase().includes("beskrivning")) {
+                return name;
+              }
+              if (fieldName === "Mekaniker" || fieldName.toLowerCase().includes("mekaniker")) {
+                return mechanicName;
+              }
+              return "";
+            }
+          };
+          lunchEvents.push(lunchEvent);
+          console.log(`\u2705 Created break event: "${name}" at ${startDate2.toTimeString()} (${durationMinutes} min) for ${mechanicName}`);
+        }
+      } catch (e) {
+        console.error(`Error processing break settings from Mechanics table for mechanic ${mechanicName}:`, e);
+      }
+      console.log(`\u{1F4CA} Total break events created for ${mechanicName} on ${date.toDateString()}: ${lunchEvents.length}`);
       return lunchEvents;
     };
     const getEventsForMechanicAndDate = (mechanicName, date) => {
       if (!mechanicName || mechanicName.trim() === "" || mechanicName === "undefined") {
         return [];
       }
+      const targetDateStart = new Date(date);
+      targetDateStart.setHours(0, 0, 0, 0);
+      const targetDateEnd = new Date(date);
+      targetDateEnd.setHours(23, 59, 59, 999);
       const regularEvents = events2.filter((ev) => {
         const mekaniker = ev.getCellValue("Mekaniker") || [];
-        const start = ev.getCellValue("Starttid");
-        if (!start) return false;
-        const startDate2 = new Date(start);
-        if (startDate2.toDateString() !== date.toDateString()) {
-          return false;
-        }
+        let matchesMechanic = false;
         if (Array.isArray(mekaniker) && mekaniker.length > 0) {
-          return mekaniker.some((m) => {
+          matchesMechanic = mekaniker.some((m) => {
             let eventMechName = "";
             if (typeof m === "string") {
               eventMechName = m;
@@ -48101,7 +48150,25 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             return false;
           });
         }
-        return false;
+        if (!matchesMechanic) {
+          return false;
+        }
+        const starttid = ev.getCellValue("Starttid");
+        if (!starttid) {
+          return false;
+        }
+        let eventDate = null;
+        if (starttid instanceof Date) {
+          eventDate = starttid;
+        } else if (typeof starttid === "string" || typeof starttid === "number") {
+          eventDate = new Date(starttid);
+        }
+        if (!eventDate || isNaN(eventDate.getTime())) {
+          return false;
+        }
+        const eventDateOnly = new Date(eventDate);
+        eventDateOnly.setHours(0, 0, 0, 0);
+        return eventDateOnly.getTime() === targetDateStart.getTime();
       });
       const lunchBreakEvents = getLunchBreakEventsForMechanicAndDate(mechanicName, date);
       return [...regularEvents, ...lunchBreakEvents];
@@ -48186,7 +48253,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
     return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "p-4 font-sans w-full h-full bg-white text-gray-900", style: { width: "100%", height: "100%", overflow: "visible" }, children: [
       /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(CalendarImagesGallery, { events: events2, eventsTable }, void 0, false, {
         fileName: "frontend/index.js",
-        lineNumber: 3455,
+        lineNumber: 3559,
         columnNumber: 13
       }, this),
       /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex items-center gap-2 mb-4 flex-nowrap overflow-x-auto", children: [
@@ -48201,7 +48268,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           false,
           {
             fileName: "frontend/index.js",
-            lineNumber: 3459,
+            lineNumber: 3563,
             columnNumber: 17
           },
           this
@@ -48227,7 +48294,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           false,
           {
             fileName: "frontend/index.js",
-            lineNumber: 3465,
+            lineNumber: 3569,
             columnNumber: 17
           },
           this
@@ -48243,14 +48310,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           false,
           {
             fileName: "frontend/index.js",
-            lineNumber: 3481,
+            lineNumber: 3585,
             columnNumber: 17
           },
           this
         )
       ] }, void 0, true, {
         fileName: "frontend/index.js",
-        lineNumber: 3458,
+        lineNumber: 3562,
         columnNumber: 13
       }, this),
       displayedDates.length === 0 ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(import_jsx_dev_runtime.Fragment, { children: [
@@ -48272,19 +48339,19 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           false,
           {
             fileName: "frontend/index.js",
-            lineNumber: 3494,
+            lineNumber: 3598,
             columnNumber: 25
           },
           this
         ),
         /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1 py-10 text-center text-gray-500 flex items-center justify-center", style: { minWidth: 0 }, children: "Please select Start Date and End Date to view the calendar." }, void 0, false, {
           fileName: "frontend/index.js",
-          lineNumber: 3507,
+          lineNumber: 3611,
           columnNumber: 21
         }, this)
       ] }, void 0, true, {
         fileName: "frontend/index.js",
-        lineNumber: 3491,
+        lineNumber: 3595,
         columnNumber: 17
       }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
         DndContext,
@@ -48312,7 +48379,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               false,
               {
                 fileName: "frontend/index.js",
-                lineNumber: 3520,
+                lineNumber: 3624,
                 columnNumber: 25
               },
               this
@@ -48358,7 +48425,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                         false,
                         {
                           fileName: "frontend/index.js",
-                          lineNumber: 3558,
+                          lineNumber: 3662,
                           columnNumber: 33
                         },
                         this
@@ -48368,7 +48435,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                     false,
                     {
                       fileName: "frontend/index.js",
-                      lineNumber: 3548,
+                      lineNumber: 3652,
                       columnNumber: 29
                     },
                     this
@@ -48385,13 +48452,13 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                       false,
                       {
                         fileName: "frontend/index.js",
-                        lineNumber: 3579,
+                        lineNumber: 3683,
                         columnNumber: 33
                       },
                       this
                     )) }, void 0, false, {
                       fileName: "frontend/index.js",
-                      lineNumber: 3577,
+                      lineNumber: 3681,
                       columnNumber: 25
                     }, this),
                     /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "main-section flex gap-3", children: mechanics.map((mech, mechIndex) => /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
@@ -48433,7 +48500,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                   false,
                                   {
                                     fileName: "frontend/index.js",
-                                    lineNumber: 3614,
+                                    lineNumber: 3718,
                                     columnNumber: 45
                                   },
                                   this
@@ -48458,14 +48525,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                   false,
                                   {
                                     fileName: "frontend/index.js",
-                                    lineNumber: 3626,
+                                    lineNumber: 3730,
                                     columnNumber: 45
                                   },
                                   this
                                 ),
                                 /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("h3", { className: "m-0 text-sm font-semibold", style: { margin: 0 }, children: mech.name }, void 0, false, {
                                   fileName: "frontend/index.js",
-                                  lineNumber: 3643,
+                                  lineNumber: 3747,
                                   columnNumber: 41
                                 }, this)
                               ]
@@ -48474,7 +48541,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                             true,
                             {
                               fileName: "frontend/index.js",
-                              lineNumber: 3599,
+                              lineNumber: 3703,
                               columnNumber: 37
                             },
                             this
@@ -48500,7 +48567,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                 false,
                                 {
                                   fileName: "frontend/index.js",
-                                  lineNumber: 3658,
+                                  lineNumber: 3762,
                                   columnNumber: 45
                                 },
                                 this
@@ -48510,7 +48577,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                             false,
                             {
                               fileName: "frontend/index.js",
-                              lineNumber: 3647,
+                              lineNumber: 3751,
                               columnNumber: 37
                             },
                             this
@@ -48533,14 +48600,28 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                   false,
                                   {
                                     fileName: "frontend/index.js",
-                                    lineNumber: 3675,
+                                    lineNumber: 3779,
                                     columnNumber: 53
                                   },
                                   this
                                 )),
                                 getEventsForMechanicAndDate(mech.name, date).map((ev) => {
-                                  const start = new Date(ev.getCellValue("Starttid"));
-                                  const end = new Date(ev.getCellValue("Sluttid"));
+                                  let start = null;
+                                  let end = null;
+                                  const starttid = ev.getCellValue("Starttid");
+                                  if (starttid) {
+                                    start = starttid instanceof Date ? starttid : new Date(starttid);
+                                  }
+                                  const sluttid = ev.getCellValue("Sluttid");
+                                  if (sluttid) {
+                                    end = sluttid instanceof Date ? sluttid : new Date(sluttid);
+                                  }
+                                  if (!start || !end) {
+                                    if (ev.isLunchBreak === true) {
+                                      console.warn("Lunch break event missing Starttid or Sluttid:", ev.id);
+                                    }
+                                    return null;
+                                  }
                                   const adjustedStartHour = start.getHours() - 5;
                                   const adjustedEndHour = end.getHours() - 5;
                                   if (adjustedStartHour < 0 || adjustedStartHour >= 15) {
@@ -48571,15 +48652,15 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                     false,
                                     {
                                       fileName: "frontend/index.js",
-                                      lineNumber: 3712,
-                                      columnNumber: 57
+                                      lineNumber: 3840,
+                                      columnNumber: 53
                                     },
                                     this
                                   );
                                 })
                               ] }, date.toDateString(), true, {
                                 fileName: "frontend/index.js",
-                                lineNumber: 3673,
+                                lineNumber: 3777,
                                 columnNumber: 45
                               }, this))
                             },
@@ -48587,7 +48668,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                             false,
                             {
                               fileName: "frontend/index.js",
-                              lineNumber: 3668,
+                              lineNumber: 3772,
                               columnNumber: 37
                             },
                             this
@@ -48598,22 +48679,22 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                       true,
                       {
                         fileName: "frontend/index.js",
-                        lineNumber: 3592,
+                        lineNumber: 3696,
                         columnNumber: 33
                       },
                       this
                     )) }, void 0, false, {
                       fileName: "frontend/index.js",
-                      lineNumber: 3590,
+                      lineNumber: 3694,
                       columnNumber: 25
                     }, this)
                   ] }, void 0, true, {
                     fileName: "frontend/index.js",
-                    lineNumber: 3574,
+                    lineNumber: 3678,
                     columnNumber: 25
                   }, this) }, void 0, false, {
                     fileName: "frontend/index.js",
-                    lineNumber: 3572,
+                    lineNumber: 3676,
                     columnNumber: 25
                   }, this),
                   (() => {
@@ -48632,8 +48713,8 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                       false,
                       {
                         fileName: "frontend/index.js",
-                        lineNumber: 3741,
-                        columnNumber: 29
+                        lineNumber: 3869,
+                        columnNumber: 33
                       },
                       this
                     );
@@ -48644,7 +48725,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               true,
               {
                 fileName: "frontend/index.js",
-                lineNumber: 3535,
+                lineNumber: 3639,
                 columnNumber: 21
               },
               this
@@ -48655,14 +48736,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         true,
         {
           fileName: "frontend/index.js",
-          lineNumber: 3512,
+          lineNumber: 3616,
           columnNumber: 17
         },
         this
       )
     ] }, void 0, true, {
       fileName: "frontend/index.js",
-      lineNumber: 3453,
+      lineNumber: 3557,
       columnNumber: 9
     }, this);
   }
@@ -48679,7 +48760,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       import_jsx_dev_runtime = __toESM(require_jsx_dev_runtime());
       initializeBlock({ interface: () => /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(CalendarInterfaceExtension, {}, void 0, false, {
         fileName: "frontend/index.js",
-        lineNumber: 3756,
+        lineNumber: 3884,
         columnNumber: 36
       }) });
     }

@@ -247,109 +247,103 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
             orderRecordTable: orderRecord?.table?.name
         });
     }
-
+    
     const eventDetails = matchingEvents.map((event, index) => {
-        let imageUrl = null;
-        if (event && eventsTable) {
-            try {
-                const attachmentField =
-                    eventsTable.fields.find(
-                        f => f.name.toLowerCase().trim() === 'attachments'
-                    );
-                if (attachmentField) {
-                    const attachments = event.getCellValue(attachmentField.name);
-                    if (attachments && Array.isArray(attachments) && attachments.length > 0) {
-                        imageUrl =
-                            attachments[0].url ||
-                            attachments[0].thumbnails?.large?.url ||
-                            attachments[0].thumbnails?.small?.url;
-                    }
-                } else {
-                    console.warn("⚠️ Attachments field not found in Calendar Events table. Available fields:", eventsTable.fields.map(f => f.name));
-                }
-            } catch (e) {
-                console.error('Error getting image:', e);
-            }
-        }
-
-        let visualization = '';
-        let arbetsorder = '';
-        let mekanikerNames = '';
+                            let imageUrl = null;
+                                if (event && eventsTable) {
+                                    try {
+                                        const attachmentField =
+                                            eventsTable.fields.find(
+                                                f => f.name.toLowerCase().trim() === 'attachments'
+                                            );
+                                        if (attachmentField) {
+                                            const attachments = event.getCellValue(attachmentField.name);
+                                            if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+                                                imageUrl =
+                                                    attachments[0].url ||
+                                                    attachments[0].thumbnails?.large?.url ||
+                                                    attachments[0].thumbnails?.small?.url;
+                                            }
+                                        } else {
+                                            console.warn("⚠️ Attachments field not found in Calendar Events table. Available fields:", eventsTable.fields.map(f => f.name));
+                                        }
+                                    } catch (e) {
+                                        console.error('Error getting image:', e);
+                                    }
+                                }
+                            
+                            let visualization = '';
+                            let arbetsorder = '';
+                            let mekanikerNames = '';
+                            
+                            try {
+                                if (event && visualizationField) {
+                                    visualization = event.getCellValueAsString(visualizationField.name) || '';
+                                }
+                            } catch (e) {
+                                console.error('Error getting Visualization:', e);
+                            }
+                            
+                            try {
+                                if (event && arbetsorderField) {
+                                    arbetsorder = event.getCellValueAsString(arbetsorderField.name) || '';
+                                    console.log(`Arbetsorder value for event ${index + 1}:`, arbetsorder || 'empty');
+                                } else {
+                                    console.log(`Arbetsorder field not found for event ${index + 1}`);
+                                }
+                            } catch (e) {
+                                console.error('Error getting Arbetsorder:', e);
+                            }
+                            
+                            try {
+                                if (event && mekanikerField) {
+                                    const mekaniker = event.getCellValue(mekanikerField.name) || [];
+                                    if (Array.isArray(mekaniker)) {
+                                        mekanikerNames = mekaniker.map(m => {
+                                            if (typeof m === 'string') return m;
+                                            if (m && m.name) return m.name;
+                                            if (m && m.value) return m.value;
+                                            return String(m);
+                                        }).filter(Boolean).join(', ');
+                                    }
+                                }
+                            } catch (e) {
+                                console.error('Error getting Mekaniker:', e);
+                            }
+                            
+                            console.log(`Event ${index + 1} (${event.id}) data:`, {
+                                hasImage: !!imageUrl,
+                                hasArbetsorderField: !!arbetsorderField,
+                                arbetsorderFieldName: arbetsorderField?.name,
+                                visualization: visualization || 'empty',
+                                arbetsorder: arbetsorder || 'empty',
+                                mekanikerNames: mekanikerNames || 'empty'
+                            });
+                            
+                            let status = 'Inget';
+                            let statusIcon = '❓';
+                            let backgroundColor = '#6b7280';
+                            
+                            try {
+                                const orderStatus = event.getCellValue('Order Status');
+                                if (orderStatus && Array.isArray(orderStatus) && orderStatus.length > 0) {
+                                    status = orderStatus[0]?.value || orderStatus[0]?.name || 'Inget';
+                                } else if (orderStatus && typeof orderStatus === 'string') {
+                                    status = orderStatus;
+                                }
+                                
+                                if (statusColors && statusColors[status]) {
+                                    backgroundColor = statusColors[status];
+                                }
+                                if (statusIcons && statusIcons[status]) {
+                                    statusIcon = statusIcons[status];
+                                }
+                            } catch (e) {
+                                console.error('Error getting Order Status:', e);
+                            }
         
-        try {
-            if (event && visualizationField) {
-                visualization = event.getCellValueAsString(visualizationField.name) || '';
-            }
-        } catch (e) {
-            console.error('Error getting Visualization:', e);
-        }
-        
-        try {
-            if (event && arbetsorderField) {
-                arbetsorder = event.getCellValueAsString(arbetsorderField.name) || '';
-                console.log(`Arbetsorder value for event ${index + 1}:`, arbetsorder || 'empty');
-            } else {
-                console.log(`Arbetsorder field not found for event ${index + 1}`);
-            }
-        } catch (e) {
-            console.error('Error getting Arbetsorder:', e);
-        }
-        
-        try {
-            if (event && mekanikerField) {
-                const mekaniker = event.getCellValue(mekanikerField.name) || [];
-                if (Array.isArray(mekaniker)) {
-                    mekanikerNames = mekaniker.map(m => {
-                        if (typeof m === 'string') return m;
-                        if (m && m.name) return m.name;
-                        if (m && m.value) return m.value;
-                        return String(m);
-                    }).filter(Boolean).join(', ');
-                }
-            }
-        } catch (e) {
-            console.error('Error getting Mekaniker:', e);
-        }
-        
-        console.log(`Event ${index + 1} (${event.id}) data:`, {
-            hasImage: !!imageUrl,
-            hasArbetsorderField: !!arbetsorderField,
-            arbetsorderFieldName: arbetsorderField?.name,
-            visualization: visualization || 'empty',
-            arbetsorder: arbetsorder || 'empty',
-            mekanikerNames: mekanikerNames || 'empty'
-        });
-        
-        let status = 'Inget';
-        let statusIcon = '❓';
-        let backgroundColor = '#6b7280';
-        
-        try {
-            const orderStatus = event.getCellValue('Order Status');
-            if (orderStatus && Array.isArray(orderStatus) && orderStatus.length > 0) {
-                status = orderStatus[0]?.value || orderStatus[0]?.name || 'Inget';
-            } else if (orderStatus && typeof orderStatus === 'string') {
-                status = orderStatus;
-            }
-            
-            if (statusColors && statusColors[status]) {
-                backgroundColor = statusColors[status];
-            }
-            if (statusIcons && statusIcons[status]) {
-                statusIcon = statusIcons[status];
-            }
-        } catch (e) {
-            console.error('Error getting Order Status:', e);
-        }
-        
-        let isScheduled = false;
-        try {
-            const starttid = event.getCellValue('Starttid');
-            const sluttid = event.getCellValue('Sluttid');
-            isScheduled = !!(starttid && sluttid);
-        } catch (e) {
-            console.error('Error checking if event is scheduled:', e);
-        }
+        // Note: Starttid and Sluttid fields don't exist, so events are not scheduled/unscheduled
+        const isScheduled = false;
 
         return {
             key: event.id || index,
@@ -373,7 +367,7 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
         id: `order-detail-drop-${orderNo || 'unknown'}`
     });
 
-    return (
+                            return (
         <div 
             ref={setOrderDropRef}
             className="order-detail-card p-3 flex-shrink-0"
@@ -414,12 +408,12 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
                             >
                                 <>
                                     {unscheduledEvents.map(detail => (
-                                        <DraggableOrderEvent
+                                <DraggableOrderEvent
                                             key={detail.key}
                                             event={detail.event}
                                             imageUrl={detail.imageUrl}
                                             visualization={detail.visualization}
-                                            fordon={fordon}
+                                    fordon={fordon}
                                             mekanikerNames={detail.mekanikerNames}
                                             status={detail.status}
                                             statusIcon={detail.statusIcon}
@@ -660,33 +654,9 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
         return eventOrderNo === orderNoStr;
     }) : [];
     
-    // Separate events into scheduled and unscheduled
-    const unscheduledEvents = matchingEvents.filter(event => {
-        try {
-            const starttid = event.getCellValue('Starttid');
-            const sluttid = event.getCellValue('Sluttid');
-            // Event is unscheduled if either Starttid or Sluttid is missing
-            return !(starttid && sluttid);
-        } catch (e) {
-            console.error('Error checking if event is scheduled:', e);
-            // If we can't check, include it (assume unscheduled)
-            return true;
-        }
-    });
-    
-    const scheduledEvents = matchingEvents.filter(event => {
-        try {
-            const starttid = event.getCellValue('Starttid');
-            const sluttid = event.getCellValue('Sluttid');
-            // Event is scheduled if both Starttid and Sluttid are present
-            return !!(starttid && sluttid);
-        } catch (e) {
-            console.error('Error checking if event is scheduled:', e);
-            return false;
-        }
-    });
-    
-    // All events (both scheduled and unscheduled)
+    // Note: Starttid and Sluttid fields don't exist, so all events are treated as unscheduled
+    const unscheduledEvents = matchingEvents;
+    const scheduledEvents = [];
     const allEvents = matchingEvents;
     
     const visualizationField = eventsTable.fields.find(f => f.name === 'Visualization');
@@ -1090,6 +1060,16 @@ function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsT
     
     const orderField = eventsTable.fields.find(field => field.name === 'Order');
     
+    // Find Starttid and Sluttid fields
+    const starttidField = eventsTable.fields.find(field => 
+        field.name === 'Starttid' || 
+        field.name.toLowerCase() === 'starttid'
+    );
+    const sluttidField = eventsTable.fields.find(field => 
+        field.name === 'Sluttid' || 
+        field.name.toLowerCase() === 'sluttid'
+    );
+    
     if (!orderField || !calendarEvents) {
         console.log('LeftSideOrderDetailsPanel - Missing orderField or calendarEvents');
         return (
@@ -1099,6 +1079,13 @@ function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsT
                 </div>
             </div>
         );
+    }
+    
+    if (!starttidField || !sluttidField) {
+        console.warn('LeftSideOrderDetailsPanel - Starttid or Sluttid fields not found:', {
+            starttidField: starttidField?.name || 'NOT FOUND',
+            sluttidField: sluttidField?.name || 'NOT FOUND'
+        });
     }
     
     // Filter orders that have at least one undelegated (unscheduled) sub order
@@ -1122,8 +1109,11 @@ function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsT
         // Return true only if there is at least one unscheduled event
         return matchingEvents.some(event => {
             try {
-                const starttid = event.getCellValue('Starttid');
-                const sluttid = event.getCellValue('Sluttid');
+                if (!starttidField || !sluttidField) {
+                    return true; // If fields not found, assume unscheduled
+                }
+                const starttid = event.getCellValue(starttidField.name);
+                const sluttid = event.getCellValue(sluttidField.name);
                 return !(starttid && sluttid);
             } catch (e) {
                 console.error('Error checking event schedule for left panel:', e);
@@ -1363,7 +1353,7 @@ function OrderList({ orders, orderTable, selectedOrderNumbers = new Set(), onOrd
     } else {
         console.log('Order No field found:', orderNoField.name);
     }
-    
+
     if (!fordonField) {
         console.log('Fordon field not found. Available fields:', orderTable.fields.map(f => f.name));
     } else {
@@ -1718,13 +1708,13 @@ function StaticOrderEvent({ imageUrl, visualization, fordon, mekanikerNames, sta
             )}
             
             {showVisualization && (
-                <div className="mb-1 text-xs text-center">
-                    {visualization ? (
+            <div className="mb-1 text-xs text-center">
+                {visualization ? (
                         <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{visualization}</span>
-                    ) : (
-                        <span className="text-gray-400 italic">Not set</span>
-                    )}
-                </div>
+                ) : (
+                    <span className="text-gray-400 italic">Not set</span>
+                )}
+            </div>
             )}
             
             <div className="mb-1 text-xs text-center">
@@ -2914,8 +2904,25 @@ function CalendarInterfaceExtension() {
             field.name.toLowerCase().includes('order no')
         );
 
+        // Find Starttid and Sluttid fields in Calendar Events table
+        const starttidField = eventsTable?.fields?.find(field => 
+            field.name === 'Starttid' || 
+            field.name.toLowerCase() === 'starttid'
+        );
+        const sluttidField = eventsTable?.fields?.find(field => 
+            field.name === 'Sluttid' || 
+            field.name.toLowerCase() === 'sluttid'
+        );
+
         // Check if order has scheduled event in displayed week (no status filter)
-        if (!orderField || !events || events.length === 0 || displayedDates.length === 0) {
+        if (!orderField || !starttidField || !sluttidField || !events || events.length === 0 || displayedDates.length === 0) {
+            if (!starttidField || !sluttidField) {
+                console.warn('Starttid or Sluttid fields not found in Calendar Events table:', {
+                    starttidField: starttidField?.name || 'NOT FOUND',
+                    sluttidField: sluttidField?.name || 'NOT FOUND',
+                    availableFields: eventsTable?.fields?.map(f => f.name) || []
+                });
+            }
             return [];
         }
 
@@ -2943,8 +2950,8 @@ function CalendarInterfaceExtension() {
                 // Check if any matching event is scheduled in the displayed week
                 const hasScheduledEventInWeek = matchingEvents.some(event => {
                     try {
-                        const starttid = event.getCellValue('Starttid');
-                        const sluttid = event.getCellValue('Sluttid');
+                        const starttid = event.getCellValue(starttidField.name);
+                        const sluttid = event.getCellValue(sluttidField.name);
                         
                         // Both Starttid and Sluttid must have values (scheduled)
                         if (!starttid || !sluttid) {
@@ -3040,261 +3047,333 @@ function CalendarInterfaceExtension() {
         return 30; // Default 30 minutes
     };
 
-    // Extract lunch settings from Calendar Events and create lunch/break events
-    // Deduplicate by mechanic so each mechanic only shows their lunch settings once
+    // Extract break settings from Mechanics table and create break events
+    // Fields: Break, Starttid (from Break), Duration
     const getLunchBreakEventsForMechanicAndDate = (mechanicName, date) => {
-        if (!eventsTable || !events || events.length === 0) {
-            console.log('getLunchBreakEventsForMechanicAndDate: No events table or events');
-            return [];
-        }
-        // Find lunch setting fields
-        const lunchNameField = eventsTable.fields.find(f => 
-            f.name === 'Lunch setting Name' || 
-            f.name.toLowerCase().includes('lunch setting name')
-        );
-        const lunchStarttidField = eventsTable.fields.find(f => 
-            f.name === 'Lunch setting Starttid' || 
-            f.name.toLowerCase().includes('lunch setting starttid')
-        );
-        const lunchDurationField = eventsTable.fields.find(f => 
-            f.name === 'Lunch setting Duration' || 
-            f.name.toLowerCase().includes('lunch setting duration')
-        );
-        const mekanikerField = eventsTable.fields.find(f => 
-            f.name === 'Mekaniker' || 
-            f.name.toLowerCase().includes('mekaniker')
-        );
-
-        if (!lunchNameField || !lunchStarttidField || !lunchDurationField || !mekanikerField) {
-            console.warn('Lunch setting fields not found:', {
-                lunchNameField: lunchNameField?.name || 'NOT FOUND',
-                lunchStarttidField: lunchStarttidField?.name || 'NOT FOUND',
-                lunchDurationField: lunchDurationField?.name || 'NOT FOUND',
-                mekanikerField: mekanikerField?.name || 'NOT FOUND',
-                availableFields: eventsTable.fields.map(f => f.name)
+        if (!mechanicsTable || !mechanicsRecords || mechanicsRecords.length === 0) {
+            console.log('getLunchBreakEventsForMechanicAndDate: No mechanics table or records', {
+                hasTable: !!mechanicsTable,
+                tableName: mechanicsTable?.name,
+                recordsCount: mechanicsRecords?.length || 0
             });
             return [];
         }
 
-        console.log(`🔍 Looking for lunch settings for mechanic: ${mechanicName} on ${date.toDateString()}`);
-
-        const lunchEvents = [];
-        // Track individual lunch entries to avoid exact duplicates (same name, time, duration)
-        // But allow different lunch settings to show
-        const seenLunchEntries = new Set(); // Format: "mechanic-name-starttid-duration"
-
-        events.forEach(event => {
-            try {
-                // Get Mekaniker from event
-                const mekanikerValue = event.getCellValue(mekanikerField.name);
-                if (!mekanikerValue) return;
-
-                // Extract mechanic names
-                let eventMechanicNames = [];
-                if (Array.isArray(mekanikerValue)) {
-                    eventMechanicNames = mekanikerValue.map(m => {
-                        if (typeof m === 'string') return m.trim();
-                        if (m && m.name) return m.name.trim();
-                        if (m && m.value) return m.value.trim();
-                        return String(m).trim();
-                    }).filter(name => name && name !== '' && name !== 'undefined');
-                } else if (typeof mekanikerValue === 'string') {
-                    eventMechanicNames = [mekanikerValue.trim()];
-                }
-
-                // Check if this event has our mechanic
-                const hasOurMechanic = eventMechanicNames.some(mechName => 
-                    mechName.toLowerCase() === mechanicName.trim().toLowerCase()
-                );
-
-                if (!hasOurMechanic) return;
-
-                // Get lunch setting values (these are lookup fields from Mekaniker table)
-                // Lookup fields can return arrays or single values, so handle both cases
-                let lunchName = '';
-                let lunchStarttid = '';
-                let lunchDuration = '';
-
-                try {
-                    // Try getCellValueAsString first (works for most lookup fields)
-                    lunchName = event.getCellValueAsString(lunchNameField.name) || '';
-                    lunchStarttid = event.getCellValueAsString(lunchStarttidField.name) || '';
-                    lunchDuration = event.getCellValueAsString(lunchDurationField.name) || '';
-
-                    // If getCellValueAsString returns empty, try getCellValue (for array values)
-                    if (!lunchName) {
-                        const lunchNameValue = event.getCellValue(lunchNameField.name);
-                        if (Array.isArray(lunchNameValue) && lunchNameValue.length > 0) {
-                            lunchName = lunchNameValue.map(v => String(v)).join(', ');
-                        } else if (lunchNameValue) {
-                            lunchName = String(lunchNameValue);
-                        }
-                    }
-
-                    if (!lunchStarttid) {
-                        const lunchStarttidValue = event.getCellValue(lunchStarttidField.name);
-                        if (Array.isArray(lunchStarttidValue) && lunchStarttidValue.length > 0) {
-                            lunchStarttid = lunchStarttidValue.map(v => String(v)).join(', ');
-                        } else if (lunchStarttidValue) {
-                            lunchStarttid = String(lunchStarttidValue);
-                        }
-                    }
-
-                    if (!lunchDuration) {
-                        const lunchDurationValue = event.getCellValue(lunchDurationField.name);
-                        if (Array.isArray(lunchDurationValue) && lunchDurationValue.length > 0) {
-                            lunchDuration = lunchDurationValue.map(v => String(v)).join(', ');
-                        } else if (lunchDurationValue) {
-                            lunchDuration = String(lunchDurationValue);
-                        }
-                    }
-                } catch (e) {
-                    console.error(`Error getting lookup field values for event ${event.id}:`, e);
-                }
-
-                console.log(`📋 Lunch settings from lookup fields for event ${event.id}:`, {
-                    lunchName,
-                    lunchStarttid,
-                    lunchDuration,
-                    mechanic: mechanicName,
-                    fieldTypes: {
-                        name: lunchNameField.type,
-                        starttid: lunchStarttidField.type,
-                        duration: lunchDurationField.type
-                    }
-                });
-
-                if (!lunchName || !lunchStarttid) {
-                    if (lunchName || lunchStarttid) {
-                        console.log(`⚠️ Event ${event.id} has partial lunch settings:`, { lunchName, lunchStarttid, lunchDuration });
-                    }
-                    return;
-                }
-
-                console.log(`✅ Found lunch settings in event ${event.id}:`, {
-                    lunchName,
-                    lunchStarttid,
-                    lunchDuration,
-                    mechanic: mechanicName
-                });
-
-                // Parse comma-separated values
-                const lunchNames = lunchName.split(',').map(s => s.trim()).filter(s => s);
-                const starttidValues = lunchStarttid.split(',').map(s => s.trim()).filter(s => s);
-                const durationValues = lunchDuration.split(',').map(s => s.trim()).filter(s => s);
-
-                console.log(`📝 Parsed lunch settings from event ${event.id}:`, {
-                    names: lunchNames,
-                    starttids: starttidValues,
-                    durations: durationValues,
-                    mechanic: mechanicName
-                });
-
-                // Create lunch events for each lunch/break entry
-                // Match each name with its corresponding starttid and duration by index
-                const maxLength = Math.max(lunchNames.length, starttidValues.length, durationValues.length);
-                console.log(`🔄 Processing ${maxLength} lunch/break entries from this event...`);
-
-                for (let i = 0; i < maxLength; i++) {
-                    // Get values by index - each entry should match by position
-                    // Only use fallback to [0] if the array is shorter, but prefer the actual index value
-                    const name = lunchNames[i] !== undefined ? lunchNames[i] : (lunchNames.length > 0 ? lunchNames[0] : 'Lunch/Coffee Break');
-                    const starttidStr = starttidValues[i] !== undefined ? starttidValues[i] : (starttidValues.length > 0 ? starttidValues[0] : null);
-                    const durationStr = durationValues[i] !== undefined ? durationValues[i] : (durationValues.length > 0 ? durationValues[0] : '0:30');
-
-                    console.log(`🔍 Processing entry ${i}:`, {
-                        name,
-                        starttidStr,
-                        durationStr,
-                        nameExists: lunchNames[i] !== undefined,
-                        starttidExists: starttidValues[i] !== undefined,
-                        durationExists: durationValues[i] !== undefined
-                    });
-
-                    if (!starttidStr || starttidStr.trim() === '') {
-                        console.log(`⚠️ Skipping entry ${i} - no Starttid value`);
-                        continue;
-                    }
-
-                    // Convert Starttid to Date
-                    const startDate = convertStarttidToDate(starttidStr.trim(), date);
-                    if (!startDate) {
-                        console.log(`⚠️ Skipping entry ${i} - invalid Starttid: "${starttidStr}" (could not convert to date)`);
-                        continue;
-                    }
-
-                    // Parse duration and calculate end time
-                    const durationMinutes = parseDurationToMinutes(durationStr.trim());
-                    const endDate = new Date(startDate);
-                    endDate.setMinutes(endDate.getMinutes() + durationMinutes);
-
-                    console.log(`✓ Entry ${i} converted successfully:`, {
-                        name,
-                        starttid: starttidStr,
-                        startDate: startDate.toTimeString(),
-                        duration: durationStr,
-                        durationMinutes,
-                        endDate: endDate.toTimeString()
-                    });
-
-                    // Create a unique key for this specific lunch entry to avoid exact duplicates
-                    // Only skip if we've already created this exact same lunch entry (same name, time, duration)
-                    const entryKey = `${mechanicName.toLowerCase()}-${name.toLowerCase().trim()}-${starttidStr.trim()}-${durationStr.trim()}`;
-                    if (seenLunchEntries.has(entryKey)) {
-                        console.log(`⏭️ Skipping duplicate entry: "${name}" at ${starttidStr} (already shown)`);
-                        continue;
-                    }
-                    seenLunchEntries.add(entryKey);
-                    console.log(`➕ Adding new lunch entry: "${name}" at ${starttidStr}`);
-
-                    console.log(`✨ Creating separate event ${i + 1}/${maxLength}:`, {
-                        name,
-                        starttid: starttidStr,
-                        duration: durationStr,
-                        startTime: startDate.toTimeString(),
-                        endTime: endDate.toTimeString(),
-                        durationMinutes
-                    });
-
-                    // Create virtual lunch event with unique ID for each separate entry
-                    const lunchEvent = {
-                        id: `lunch-${mechanicName}-${name.replace(/\s+/g, '-')}-${starttidStr}-${date.toISOString()}-${i}-${event.id}`,
-                        isLunchBreak: true,
-                        getCellValue: (fieldName) => {
-                            if (fieldName === 'Starttid' || fieldName.toLowerCase().includes('starttid')) {
-                                return startDate;
-                            }
-                            if (fieldName === 'Sluttid' || fieldName.toLowerCase().includes('sluttid')) {
-                                return endDate;
-                            }
-                            if (fieldName === 'Mekaniker' || fieldName.toLowerCase().includes('mekaniker')) {
-                                return [mechanicName];
-                            }
-                            if (fieldName === 'Arbetsorder beskrivning' || fieldName.toLowerCase().includes('beskrivning')) {
-                                return name;
-                            }
-                            return null;
-                        },
-                        getCellValueAsString: (fieldName) => {
-                            if (fieldName === 'Arbetsorder beskrivning' || fieldName.toLowerCase().includes('beskrivning')) {
-                                return name;
-                            }
-                            if (fieldName === 'Mekaniker' || fieldName.toLowerCase().includes('mekaniker')) {
-                                return mechanicName;
-                            }
-                            return '';
-                        }
-                    };
-
-                    lunchEvents.push(lunchEvent);
-                    console.log(`✅ Created separate lunch event: "${name}" at ${startDate.toTimeString()} (${durationMinutes} min) for ${mechanicName}`);
-                }
-            } catch (e) {
-                console.error('Error processing lunch settings from event:', event.id, e);
-            }
+        console.log('🔍 Mechanics table info:', {
+            tableName: mechanicsTable.name,
+            fieldsCount: mechanicsTable.fields.length,
+            recordsCount: mechanicsRecords.length
         });
 
-        console.log(`📊 Total lunch events created for ${mechanicName} on ${date.toDateString()}: ${lunchEvents.length}`);
+        // Find the name field in Mechanics table to match mechanic by name
+        const nameField = mechanicsTable.fields.find(f => 
+            f.name === 'Name' || 
+            f.name === 'Mechanic Name' ||
+            f.name.toLowerCase().includes('name')
+        );
+
+        // Log all available fields for debugging
+        console.log('🔍 Available fields in Mechanics table:', mechanicsTable.fields.map(f => ({
+            name: f.name,
+            type: f.type
+        })));
+
+        // Find break setting fields in Mechanics table
+        // Field names: Break (linked record), Starttid (from Break) (lookup), Duration (lookup)
+        const breakField = mechanicsTable.fields.find(f => 
+            f.name === 'Break' || 
+            f.name.toLowerCase() === 'break'
+        );
+        const starttidFromBreakField = mechanicsTable.fields.find(f => 
+            f.name === 'Starttid (from Break)' ||
+            f.name === 'Starttid(from Break)' ||
+            f.name.toLowerCase() === 'starttid (from break)' ||
+            f.name.toLowerCase().includes('starttid') && f.name.toLowerCase().includes('break')
+        );
+        const durationField = mechanicsTable.fields.find(f => 
+            f.name === 'Duration' ||
+            f.name.toLowerCase() === 'duration'
+        );
+        // Try to find a Name lookup field from Break (if it exists)
+        const nameFromBreakField = mechanicsTable.fields.find(f => 
+            f.name === 'Name (from Break)' ||
+            f.name === 'Name(from Break)' ||
+            (f.name.toLowerCase().includes('name') && f.name.toLowerCase().includes('break'))
+        );
+
+        console.log('🔍 Found fields:', {
+            nameField: nameField?.name || 'NOT FOUND',
+            breakField: breakField?.name || 'NOT FOUND',
+            starttidFromBreakField: starttidFromBreakField?.name || 'NOT FOUND',
+            durationField: durationField?.name || 'NOT FOUND',
+            nameFromBreakField: nameFromBreakField?.name || 'NOT FOUND'
+        });
+
+        if (!nameField || !breakField || !starttidFromBreakField || !durationField) {
+            console.warn('⚠️ Break setting fields not found in Mechanics table:', {
+                nameField: nameField?.name || 'NOT FOUND',
+                breakField: breakField?.name || 'NOT FOUND',
+                starttidFromBreakField: starttidFromBreakField?.name || 'NOT FOUND',
+                durationField: durationField?.name || 'NOT FOUND',
+                availableFields: mechanicsTable.fields.map(f => `${f.name} (${f.type})`)
+            });
+            return [];
+        }
+
+        console.log(`🔍 Looking for break settings for mechanic: ${mechanicName} on ${date.toDateString()}`);
+
+        // Find the mechanic record by name
+        const mechanicRecord = mechanicsRecords.find(mech => {
+            if (!nameField) return false;
+            const mechName = mech.getCellValueAsString(nameField.name);
+            return mechName && mechName.trim().toLowerCase() === mechanicName.trim().toLowerCase();
+        });
+
+        if (!mechanicRecord) {
+            console.log(`⚠️ Mechanic "${mechanicName}" not found in Mechanics table`);
+            return [];
+        }
+
+        console.log(`✅ Found mechanic record: ${mechanicRecord.id}`);
+
+        const lunchEvents = [];
+        // Track individual lunch entries to avoid exact duplicates
+        const seenLunchEntries = new Set(); // Format: "mechanic-name-starttid-duration"
+
+        try {
+            // Get cell values - these can be comma-separated strings or arrays
+            const breakValue = mechanicRecord.getCellValue(breakField.name);
+            const breakStarttidValue = mechanicRecord.getCellValue(starttidFromBreakField.name);
+            const breakDurationValue = mechanicRecord.getCellValue(durationField.name);
+
+            // Also try getting as strings for comma-separated format
+            const breakValueStr = mechanicRecord.getCellValueAsString(breakField.name) || '';
+            const breakStarttidValueStr = mechanicRecord.getCellValueAsString(starttidFromBreakField.name) || '';
+            const breakDurationValueStr = mechanicRecord.getCellValueAsString(durationField.name) || '';
+
+            console.log(`📋 Break settings from Mechanics table for ${mechanicName}:`, {
+                breakValue: breakValue,
+                breakStarttidValue: breakStarttidValue,
+                breakDurationValue: breakDurationValue,
+                breakValueStr: breakValueStr,
+                breakStarttidValueStr: breakStarttidValueStr,
+                breakDurationValueStr: breakDurationValueStr,
+                fieldTypes: {
+                    break: breakField.type,
+                    starttid: starttidFromBreakField.type,
+                    duration: durationField.type
+                }
+            });
+
+            // Parse comma-separated strings or handle arrays
+            let breakNames = [];
+            let starttidValues = [];
+            let durationValues = [];
+
+            // Check if values are comma-separated strings (e.g., "Lunch, Coffe break")
+            if (breakValueStr && breakValueStr.includes(',')) {
+                // Parse comma-separated format
+                breakNames = breakValueStr.split(',').map(s => s.trim()).filter(s => s);
+                starttidValues = breakStarttidValueStr.split(',').map(s => s.trim()).filter(s => s);
+                durationValues = breakDurationValueStr.split(',').map(s => s.trim()).filter(s => s);
+                
+                console.log(`📝 Parsed comma-separated values:`, {
+                    breakNames,
+                    starttidValues,
+                    durationValues
+                });
+            } else if (Array.isArray(breakValue)) {
+                // Handle linked records array format
+                const breakRecords = breakValue;
+                const starttidArray = Array.isArray(breakStarttidValue) ? breakStarttidValue : (breakStarttidValue ? [breakStarttidValue] : []);
+                const durationArray = Array.isArray(breakDurationValue) ? breakDurationValue : (breakDurationValue ? [breakDurationValue] : []);
+
+                // Get break names - try lookup field if available
+                let breakNameValues = null;
+                if (nameFromBreakField) {
+                    breakNameValues = mechanicRecord.getCellValue(nameFromBreakField.name);
+                }
+                
+                // Process each linked break record
+                for (let i = 0; i < breakRecords.length; i++) {
+                    // Get break name from lookup field if available
+                    let breakName = '';
+                    if (breakNameValues) {
+                        const nameArray = Array.isArray(breakNameValues) ? breakNameValues : [breakNameValues];
+                        if (i < nameArray.length && nameArray[i]) {
+                            breakName = String(nameArray[i]);
+                        }
+                    }
+                    
+                    // Fallback: use generic name if lookup field not available
+                    if (!breakName) {
+                        breakName = `Break ${i + 1}`;
+                    }
+                    
+                    breakNames.push(breakName);
+                    
+                    // Get corresponding starttid and duration values by index
+                    if (i < starttidArray.length) {
+                        const starttidValue = starttidArray[i];
+                        starttidValues.push(String(starttidValue || ''));
+                    } else {
+                        starttidValues.push('');
+                    }
+                    
+                    if (i < durationArray.length) {
+                        const durationValue = durationArray[i];
+                        durationValues.push(String(durationValue || ''));
+                    } else {
+                        durationValues.push('0:30'); // Default duration
+                    }
+                }
+            } else if (breakValue || breakValueStr) {
+                // Single value (not comma-separated, not array)
+                breakNames = [breakValueStr || String(breakValue || 'Break')];
+                starttidValues = [breakStarttidValueStr || String(breakStarttidValue || '')];
+                durationValues = [breakDurationValueStr || String(breakDurationValue || '0:30')];
+            }
+
+            if (breakNames.length === 0) {
+                console.log(`ℹ️ No break settings found for mechanic ${mechanicName}`);
+                return [];
+            }
+
+            // Ensure all arrays have the same length (pad with empty/default values if needed)
+            const maxLength = Math.max(breakNames.length, starttidValues.length, durationValues.length);
+            while (breakNames.length < maxLength) {
+                breakNames.push(`Break ${breakNames.length + 1}`);
+            }
+            while (starttidValues.length < maxLength) {
+                starttidValues.push('');
+            }
+            while (durationValues.length < maxLength) {
+                durationValues.push('0:30');
+            }
+
+            console.log(`📊 Aligned break arrays (length: ${maxLength}):`, {
+                breakNames,
+                starttidValues,
+                durationValues
+            });
+
+            // Filter out entries without starttid
+            const validEntries = breakNames.map((name, idx) => ({
+                name,
+                starttid: starttidValues[idx] || '',
+                duration: durationValues[idx] || '0:30'
+            })).filter(entry => entry.starttid && entry.starttid.trim() !== '');
+
+            if (validEntries.length === 0) {
+                console.log(`ℹ️ No valid break settings found for mechanic ${mechanicName} (missing starttid values)`);
+                return [];
+            }
+
+            console.log(`✅ Found ${validEntries.length} break settings for mechanic ${mechanicName}:`, {
+                entries: validEntries.map(e => ({ name: e.name, starttid: e.starttid, duration: e.duration }))
+            });
+
+            // Use the filtered valid entries
+            const breakNamesFiltered = validEntries.map(e => e.name);
+            const starttidValuesFiltered = validEntries.map(e => e.starttid);
+            const durationValuesFiltered = validEntries.map(e => e.duration);
+
+            console.log(`📝 Processing ${validEntries.length} break entries for ${mechanicName}...`);
+
+            // Create break events for each break entry
+            for (let i = 0; i < validEntries.length; i++) {
+                const name = breakNamesFiltered[i] || 'Lunch/Coffee Break';
+                const starttidStr = starttidValuesFiltered[i] || null;
+                const durationStr = durationValuesFiltered[i] || '0:30';
+
+                console.log(`🔍 Processing entry ${i}:`, {
+                    name,
+                    starttidStr,
+                    durationStr
+                });
+
+                if (!starttidStr || starttidStr.trim() === '') {
+                    console.log(`⚠️ Skipping entry ${i} - no Starttid value`);
+                    continue;
+                }
+
+                // Convert Starttid to Date
+                const startDate = convertStarttidToDate(starttidStr.trim(), date);
+                if (!startDate) {
+                    console.log(`⚠️ Skipping entry ${i} - invalid Starttid: "${starttidStr}" (could not convert to date)`);
+                    continue;
+                }
+
+                // Parse duration and calculate end time
+                const durationMinutes = parseDurationToMinutes(durationStr.trim());
+                const endDate = new Date(startDate);
+                endDate.setMinutes(endDate.getMinutes() + durationMinutes);
+
+                console.log(`✓ Entry ${i} converted successfully:`, {
+                    name,
+                    starttid: starttidStr,
+                    startDate: startDate.toTimeString(),
+                    duration: durationStr,
+                    durationMinutes,
+                    endDate: endDate.toTimeString()
+                });
+
+                // Create a unique key for this specific lunch entry to avoid exact duplicates
+                const entryKey = `${mechanicName.toLowerCase()}-${name.toLowerCase().trim()}-${starttidStr.trim()}-${durationStr.trim()}`;
+                if (seenLunchEntries.has(entryKey)) {
+                    console.log(`⏭️ Skipping duplicate entry: "${name}" at ${starttidStr} (already shown)`);
+                    continue;
+                }
+                seenLunchEntries.add(entryKey);
+                console.log(`➕ Adding new break entry: "${name}" at ${starttidStr}`);
+
+                console.log(`✨ Creating break event ${i + 1}/${validEntries.length}:`, {
+                    name,
+                    starttid: starttidStr,
+                    duration: durationStr,
+                    startTime: startDate.toTimeString(),
+                    endTime: endDate.toTimeString(),
+                    durationMinutes
+                });
+
+                // Create virtual lunch event with unique ID for each separate entry
+                const lunchEvent = {
+                    id: `lunch-${mechanicName}-${name.replace(/\s+/g, '-')}-${starttidStr}-${date.toISOString()}-${i}-${mechanicRecord.id}`,
+                    isLunchBreak: true,
+                    getCellValue: (fieldName) => {
+                        if (fieldName === 'Starttid' || fieldName.toLowerCase().includes('starttid')) {
+                            return startDate;
+                        }
+                        if (fieldName === 'Sluttid' || fieldName.toLowerCase().includes('sluttid')) {
+                            return endDate;
+                        }
+                        if (fieldName === 'Mekaniker' || fieldName.toLowerCase().includes('mekaniker')) {
+                            return [mechanicName];
+                        }
+                        if (fieldName === 'Arbetsorder beskrivning' || fieldName.toLowerCase().includes('beskrivning')) {
+                            return name;
+                        }
+                        return null;
+                    },
+                    getCellValueAsString: (fieldName) => {
+                        if (fieldName === 'Arbetsorder beskrivning' || fieldName.toLowerCase().includes('beskrivning')) {
+                            return name;
+                        }
+                        if (fieldName === 'Mekaniker' || fieldName.toLowerCase().includes('mekaniker')) {
+                            return mechanicName;
+                        }
+                        return '';
+                    }
+                };
+
+                lunchEvents.push(lunchEvent);
+                console.log(`✅ Created break event: "${name}" at ${startDate.toTimeString()} (${durationMinutes} min) for ${mechanicName}`);
+            }
+        } catch (e) {
+            console.error(`Error processing break settings from Mechanics table for mechanic ${mechanicName}:`, e);
+        }
+
+        console.log(`📊 Total break events created for ${mechanicName} on ${date.toDateString()}: ${lunchEvents.length}`);
         return lunchEvents;
     };
 
@@ -3303,23 +3382,21 @@ function CalendarInterfaceExtension() {
             return []; // Don't return events for invalid mechanic names
         }
         
+        // Normalize the target date to compare only year, month, and day
+        const targetDateStart = new Date(date);
+        targetDateStart.setHours(0, 0, 0, 0);
+        const targetDateEnd = new Date(date);
+        targetDateEnd.setHours(23, 59, 59, 999);
+        
         // Get regular events from Calendar Events table
         const regularEvents = events.filter(ev => {
+            // First check if the event matches the mechanic
             const mekaniker = ev.getCellValue('Mekaniker') || [];
-            const start = ev.getCellValue('Starttid');
-            
-            if (!start) return false;
-            
-            const startDate = new Date(start);
-            
-            // Check if date matches
-            if (startDate.toDateString() !== date.toDateString()) {
-                return false;
-            }
+            let matchesMechanic = false;
             
             // Check if any mechanic in the event matches the mechanic name
             if (Array.isArray(mekaniker) && mekaniker.length > 0) {
-                return mekaniker.some(m => {
+                matchesMechanic = mekaniker.some(m => {
                     // Try multiple ways to get the mechanic name from the event
                     let eventMechName = '';
                     if (typeof m === 'string') {
@@ -3340,7 +3417,34 @@ function CalendarInterfaceExtension() {
                 });
             }
             
-            return false;
+            if (!matchesMechanic) {
+                return false;
+            }
+            
+            // Now check if the event matches the date
+            // Get Starttid field to check the date
+            const starttid = ev.getCellValue('Starttid');
+            if (!starttid) {
+                return false; // No Starttid means event can't be scheduled for a specific date
+            }
+            
+            // Convert Starttid to Date if it's not already
+            let eventDate = null;
+            if (starttid instanceof Date) {
+                eventDate = starttid;
+            } else if (typeof starttid === 'string' || typeof starttid === 'number') {
+                eventDate = new Date(starttid);
+            }
+            
+            if (!eventDate || isNaN(eventDate.getTime())) {
+                return false; // Invalid date
+            }
+            
+            // Compare only the date part (year, month, day)
+            const eventDateOnly = new Date(eventDate);
+            eventDateOnly.setHours(0, 0, 0, 0);
+            
+            return eventDateOnly.getTime() === targetDateStart.getTime();
         });
 
         // Get lunch/break events for this mechanic
@@ -3436,10 +3540,10 @@ function CalendarInterfaceExtension() {
         const orderNoTrimmed = orderNo ? orderNo.toString().trim() : '';
         if (fromPanel === 'top') {
             setTopSelectedOrderNumbers(prev => {
-                const newSet = new Set(prev);
+            const newSet = new Set(prev);
                 newSet.delete(orderNoTrimmed);
-                return newSet;
-            });
+            return newSet;
+        });
         } else {
             setSideSelectedOrderNumbers(prev => {
                 const newSet = new Set(prev);
@@ -3683,44 +3787,68 @@ function CalendarInterfaceExtension() {
 
                                                 {/* EVENTS: Overlay on calendar cells */}
                                             {getEventsForMechanicAndDate(mech.name, date).map(ev => {
-                                                const start = new Date(ev.getCellValue('Starttid'));
-                                                const end = new Date(ev.getCellValue('Sluttid'));
-                                                    
-                                                    // Adjust for 05:00-19:00 time range (subtract 5 hours from start time)
-                                                    const adjustedStartHour = start.getHours() - 5;
-                                                    const adjustedEndHour = end.getHours() - 5;
-                                                    
-                                                    // Only show events that fall within our 05:00-19:00 range
-                                                    if (adjustedStartHour < 0 || adjustedStartHour >= 15) {
-                                                        return null;
+                                                // Get Starttid and Sluttid from event
+                                                // For lunch/break events, these come from getCellValue
+                                                // For regular events, try to get from fields
+                                                let start = null;
+                                                let end = null;
+                                                
+                                                // Try to get Starttid
+                                                const starttid = ev.getCellValue('Starttid');
+                                                if (starttid) {
+                                                    start = starttid instanceof Date ? starttid : new Date(starttid);
+                                                }
+                                                
+                                                // Try to get Sluttid
+                                                const sluttid = ev.getCellValue('Sluttid');
+                                                if (sluttid) {
+                                                    end = sluttid instanceof Date ? sluttid : new Date(sluttid);
+                                                }
+                                                
+                                                // If no time fields found, skip this event (unless it's a lunch break which should have them)
+                                                if (!start || !end) {
+                                                    // Check if it's a lunch break event - these should always have times
+                                                    if (ev.isLunchBreak === true) {
+                                                        console.warn('Lunch break event missing Starttid or Sluttid:', ev.id);
                                                     }
-                                                    
-                                                    const top = adjustedStartHour * hourHeight + (start.getMinutes() / 60) * hourHeight;
+                                                    return null;
+                                                }
+                                                
+                                                // Adjust for 05:00-19:00 time range (subtract 5 hours from start time)
+                                                const adjustedStartHour = start.getHours() - 5;
+                                                const adjustedEndHour = end.getHours() - 5;
+                                                
+                                                // Only show events that fall within our 05:00-19:00 range
+                                                if (adjustedStartHour < 0 || adjustedStartHour >= 15) {
+                                                    return null;
+                                                }
+                                                
+                                                const top = adjustedStartHour * hourHeight + (start.getMinutes() / 60) * hourHeight;
                                                 const height = ((end - start) / (1000 * 60 * 60)) * hourHeight;
 
                                                 // Check if this is a lunch/break event - use green color
                                                 const isLunchBreak = ev.isLunchBreak === true;
                                                 const status = ev.getCellValue('Order Status')?.[0]?.value || 'Inget';
-                                                    // Use green color (#22c55e) for lunch/break events, otherwise use status color
-                                                    const backgroundColor = isLunchBreak ? '#22c55e' : (statusColors[status] || '#6b7280');
-                                                    const statusIcon = statusIcons[status] || '❓';
+                                                // Use green color (#22c55e) for lunch/break events, otherwise use status color
+                                                const backgroundColor = isLunchBreak ? '#22c55e' : (statusColors[status] || '#6b7280');
+                                                const statusIcon = statusIcons[status] || '❓';
 
                                                 // For lunch/break events, don't allow expansion (they're virtual events)
                                                 const handleExpand = isLunchBreak ? () => {} : expandRecord;
 
                                                 return (
-                                                        <DraggableEvent
-                                                            key={ev.id}
-                                                            event={ev}
-                                                            top={top}
-                                                            height={height}
-                                                            backgroundColor={backgroundColor}
-                                                            onExpand={handleExpand}
-                                                            isUpdating={updatingRecords.has(ev.id)}
-                                                            isRecentlyUpdated={recentlyUpdatedRecords.has(ev.id)}
-                                                            status={status}
-                                                            statusIcon={statusIcon}
-                                                        />
+                                                    <DraggableEvent
+                                                        key={ev.id}
+                                                        event={ev}
+                                                        top={top}
+                                                        height={height}
+                                                        backgroundColor={backgroundColor}
+                                                        onExpand={handleExpand}
+                                                        isUpdating={updatingRecords.has(ev.id)}
+                                                        isRecentlyUpdated={recentlyUpdatedRecords.has(ev.id)}
+                                                        status={status}
+                                                        statusIcon={statusIcon}
+                                                    />
                                                 );
                                             })}
                                         </div>
@@ -3738,12 +3866,12 @@ function CalendarInterfaceExtension() {
                             console.log('filteredOrderRecords:', filteredOrderRecords.length);
                             console.log('orderTable:', orderTable?.name);
                             return (
-                            <OrderList
+                                <OrderList 
                                 orders={filteredOrderRecords}
-                                orderTable={orderTable}
+                                    orderTable={orderTable}
                                 selectedOrderNumbers={topSelectedOrderNumbers}
-                                onOrderClick={handleOrderClick}
-                            />
+                                    onOrderClick={handleOrderClick}
+                                />
                             );
                         })()}
                     </div>
