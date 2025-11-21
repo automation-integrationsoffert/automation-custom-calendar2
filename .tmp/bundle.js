@@ -44813,7 +44813,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
   var init_style = __esm({
     "frontend/style.css"() {
       style = document.createElement("style");
-      style.textContent = '*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }\n\n/*! tailwindcss v3.4.18 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Courier,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.visible{visibility:visible}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.right-2{right:.5rem}.top-0{top:0}.top-2{top:.5rem}.z-10{z-index:10}.z-30{z-index:30}.z-40{z-index:40}.m-0{margin:0}.mb-1{margin-bottom:.25rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.ml-1{margin-left:.25rem}.ml-2{margin-left:.5rem}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-4{margin-top:1rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.table{display:table}.grid{display:grid}.hidden{display:none}.h-6{height:1.5rem}.h-full{height:100%}.w-6{width:1.5rem}.w-full{width:100%}.flex-1{flex:1 1 0%}.flex-none{flex:none}.flex-shrink-0{flex-shrink:0}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.flex-col{flex-direction:column}.flex-nowrap{flex-wrap:nowrap}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-0{gap:0}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:.25rem}.rounded-full{border-radius:9999px}.rounded-l-lg{border-top-left-radius:.875rem;border-bottom-left-radius:.875rem}.rounded-r-lg{border-top-right-radius:.875rem;border-bottom-right-radius:.875rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-l-4{border-left-width:4px}.border-r{border-right-width:1px}.border-dashed{border-style:dashed}.border-blue-300{--tw-border-opacity:1;border-color:rgb(147 197 253/var(--tw-border-opacity,1))}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246/var(--tw-border-opacity,1))}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235/var(--tw-border-opacity,1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219/var(--tw-border-opacity,1))}.border-green-300{--tw-border-opacity:1;border-color:rgb(134 239 172/var(--tw-border-opacity,1))}.border-red-300{--tw-border-opacity:1;border-color:rgb(252 165 165/var(--tw-border-opacity,1))}.border-red-500{--tw-border-opacity:1;border-color:rgb(239 68 68/var(--tw-border-opacity,1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254/var(--tw-bg-opacity,1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255/var(--tw-bg-opacity,1))}.bg-blue-500{--tw-bg-opacity:1;background-color:rgb(59 130 246/var(--tw-bg-opacity,1))}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246/var(--tw-bg-opacity,1))}.bg-gray-200{--tw-bg-opacity:1;background-color:rgb(229 231 235/var(--tw-bg-opacity,1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251/var(--tw-bg-opacity,1))}.bg-green-50{--tw-bg-opacity:1;background-color:rgb(240 253 244/var(--tw-bg-opacity,1))}.bg-green-500{--tw-bg-opacity:1;background-color:rgb(34 197 94/var(--tw-bg-opacity,1))}.bg-red-50{--tw-bg-opacity:1;background-color:rgb(254 242 242/var(--tw-bg-opacity,1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.pb-1{padding-bottom:.25rem}.pr-2{padding-right:.5rem}.pr-6{padding-right:1.5rem}.text-center{text-align:center}.text-right{text-align:right}.font-sans{font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji}.text-base{font-size:.8125rem;line-height:1.25rem}.text-sm{font-size:.6875rem;line-height:1rem}.text-xs{font-size:.5625rem;line-height:.875rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.italic{font-style:italic}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235/var(--tw-text-opacity,1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216/var(--tw-text-opacity,1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175/var(--tw-text-opacity,1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128/var(--tw-text-opacity,1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99/var(--tw-text-opacity,1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81/var(--tw-text-opacity,1))}.text-gray-900{--tw-text-opacity:1;color:rgb(17 24 39/var(--tw-text-opacity,1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38/var(--tw-text-opacity,1))}.text-red-700{--tw-text-opacity:1;color:rgb(185 28 28/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.blur{--tw-blur:blur(8px)}.blur,.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-200{transition-duration:.2s}.hover\\:bg-blue-50:hover{--tw-bg-opacity:1;background-color:rgb(239 246 255/var(--tw-bg-opacity,1))}.hover\\:bg-blue-600:hover{--tw-bg-opacity:1;background-color:rgb(37 99 235/var(--tw-bg-opacity,1))}.hover\\:bg-gray-300:hover{--tw-bg-opacity:1;background-color:rgb(209 213 219/var(--tw-bg-opacity,1))}.hover\\:bg-gray-50:hover{--tw-bg-opacity:1;background-color:rgb(249 250 251/var(--tw-bg-opacity,1))}.hover\\:bg-green-600:hover{--tw-bg-opacity:1;background-color:rgb(22 163 74/var(--tw-bg-opacity,1))}.hover\\:opacity-90:hover{opacity:.9}';
+      style.textContent = '*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }\n\n/*! tailwindcss v3.4.18 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Courier,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.visible{visibility:visible}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.right-2{right:.5rem}.top-0{top:0}.top-2{top:.5rem}.z-10{z-index:10}.z-30{z-index:30}.z-40{z-index:40}.m-0{margin:0}.mb-1{margin-bottom:.25rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.ml-1{margin-left:.25rem}.ml-2{margin-left:.5rem}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-4{margin-top:1rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.table{display:table}.grid{display:grid}.hidden{display:none}.h-6{height:1.5rem}.h-full{height:100%}.w-6{width:1.5rem}.w-full{width:100%}.flex-1{flex:1 1 0%}.flex-none{flex:none}.flex-shrink-0{flex-shrink:0}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.flex-col{flex-direction:column}.flex-nowrap{flex-wrap:nowrap}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-0{gap:0}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:.25rem}.rounded-full{border-radius:9999px}.rounded-l-lg{border-top-left-radius:.875rem;border-bottom-left-radius:.875rem}.rounded-r-lg{border-top-right-radius:.875rem;border-bottom-right-radius:.875rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-l-4{border-left-width:4px}.border-r{border-right-width:1px}.border-dashed{border-style:dashed}.border-blue-300{--tw-border-opacity:1;border-color:rgb(147 197 253/var(--tw-border-opacity,1))}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246/var(--tw-border-opacity,1))}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235/var(--tw-border-opacity,1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219/var(--tw-border-opacity,1))}.border-green-300{--tw-border-opacity:1;border-color:rgb(134 239 172/var(--tw-border-opacity,1))}.border-red-300{--tw-border-opacity:1;border-color:rgb(252 165 165/var(--tw-border-opacity,1))}.border-red-500{--tw-border-opacity:1;border-color:rgb(239 68 68/var(--tw-border-opacity,1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254/var(--tw-bg-opacity,1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255/var(--tw-bg-opacity,1))}.bg-blue-500{--tw-bg-opacity:1;background-color:rgb(59 130 246/var(--tw-bg-opacity,1))}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246/var(--tw-bg-opacity,1))}.bg-gray-200{--tw-bg-opacity:1;background-color:rgb(229 231 235/var(--tw-bg-opacity,1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251/var(--tw-bg-opacity,1))}.bg-green-50{--tw-bg-opacity:1;background-color:rgb(240 253 244/var(--tw-bg-opacity,1))}.bg-green-500{--tw-bg-opacity:1;background-color:rgb(34 197 94/var(--tw-bg-opacity,1))}.bg-red-50{--tw-bg-opacity:1;background-color:rgb(254 242 242/var(--tw-bg-opacity,1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.pb-1{padding-bottom:.25rem}.pr-2{padding-right:.5rem}.pr-6{padding-right:1.5rem}.text-center{text-align:center}.text-right{text-align:right}.font-sans{font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji}.text-base{font-size:.8125rem;line-height:1.25rem}.text-sm{font-size:.6875rem;line-height:1rem}.text-xs{font-size:.5625rem;line-height:.875rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.italic{font-style:italic}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235/var(--tw-text-opacity,1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216/var(--tw-text-opacity,1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175/var(--tw-text-opacity,1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128/var(--tw-text-opacity,1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99/var(--tw-text-opacity,1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81/var(--tw-text-opacity,1))}.text-gray-900{--tw-text-opacity:1;color:rgb(17 24 39/var(--tw-text-opacity,1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38/var(--tw-text-opacity,1))}.text-red-700{--tw-text-opacity:1;color:rgb(185 28 28/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.blur{--tw-blur:blur(8px)}.blur,.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-200{transition-duration:.2s}.hover\\:bg-blue-50:hover{--tw-bg-opacity:1;background-color:rgb(239 246 255/var(--tw-bg-opacity,1))}.hover\\:bg-blue-600:hover{--tw-bg-opacity:1;background-color:rgb(37 99 235/var(--tw-bg-opacity,1))}.hover\\:bg-gray-300:hover{--tw-bg-opacity:1;background-color:rgb(209 213 219/var(--tw-bg-opacity,1))}.hover\\:bg-gray-50:hover{--tw-bg-opacity:1;background-color:rgb(249 250 251/var(--tw-bg-opacity,1))}.hover\\:bg-green-600:hover{--tw-bg-opacity:1;background-color:rgb(22 163 74/var(--tw-bg-opacity,1))}';
       document.head.appendChild(style);
     }
   });
@@ -45078,7 +45078,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
 
   // frontend/index.js
   var frontend_exports = {};
-  function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, showVisualization = true }) {
+  function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, showVisualization = true, onHighlightEvent }) {
     if (!eventsTable || !eventsTable.fields) {
       return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
         "div",
@@ -45324,19 +45324,34 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       } catch (e) {
         console.error("Error getting Order Status:", e);
       }
-      const isScheduled = false;
+      let isScheduled = false;
+      let isDelegated = false;
+      try {
+        if (event && typeof event.getCellValue === "function") {
+          const starttid = event.getCellValue("Starttid");
+          const sluttid = event.getCellValue("Sluttid");
+          const isLunchBreak = event.isLunchBreak === true;
+          const hasStarttid = starttid !== null && starttid !== void 0;
+          const hasSluttid = sluttid !== null && sluttid !== void 0;
+          isDelegated = hasStarttid && hasSluttid && !isLunchBreak;
+        }
+      } catch (e) {
+        console.warn("Error checking Starttid/Sluttid for delegated status:", e);
+      }
       return {
         key: event.id || index,
         event,
         imageUrl,
         visualization,
+        arbetsorder,
         mekanikerNames,
         status,
         statusIcon,
         backgroundColor,
         isUpdating: updatingRecords && updatingRecords.has(event.id),
         isRecentlyUpdated: recentlyUpdatedRecords && recentlyUpdatedRecords.has(event.id),
-        isScheduled
+        isScheduled,
+        isDelegated
       };
     });
     const unscheduledEvents = eventDetails.filter((detail) => !detail.isScheduled);
@@ -45369,6 +45384,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                   imageUrl: detail.imageUrl,
                   visualization: detail.visualization,
                   fordon,
+                  arbetsorder: detail.arbetsorder,
                   mekanikerNames: detail.mekanikerNames,
                   status: detail.status,
                   statusIcon: detail.statusIcon,
@@ -45379,19 +45395,21 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                   orderRecord,
                   onClose,
                   showVisualization,
-                  isScheduled: detail.isScheduled
+                  isScheduled: detail.isScheduled,
+                  isDelegated: detail.isDelegated,
+                  onHighlightEvent
                 },
                 detail.key,
                 false,
                 {
                   fileName: "frontend/index.js",
-                  lineNumber: 411,
+                  lineNumber: 432,
                   columnNumber: 33
                 },
                 this
               )) }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 409,
+                lineNumber: 430,
                 columnNumber: 33
               }, this)
             },
@@ -45399,7 +45417,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             false,
             {
               fileName: "frontend/index.js",
-              lineNumber: 405,
+              lineNumber: 426,
               columnNumber: 29
             },
             this
@@ -45411,6 +45429,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               imageUrl: detail.imageUrl,
               visualization: detail.visualization,
               fordon,
+              arbetsorder: detail.arbetsorder,
               mekanikerNames: detail.mekanikerNames,
               status: detail.status,
               statusIcon: detail.statusIcon,
@@ -45421,32 +45440,34 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               orderRecord,
               onClose,
               showVisualization,
-              isScheduled: detail.isScheduled
+              isScheduled: detail.isScheduled,
+              isDelegated: detail.isDelegated,
+              onHighlightEvent
             },
             `static-${detail.key}`,
             false,
             {
               fileName: "frontend/index.js",
-              lineNumber: 435,
+              lineNumber: 459,
               columnNumber: 29
             },
             this
           ))
         ] }, void 0, true, {
           fileName: "frontend/index.js",
-          lineNumber: 403,
+          lineNumber: 424,
           columnNumber: 21
         }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-500 mt-4 p-4 text-center", children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-2 font-semibold", children: "No Orders found" }, void 0, false, {
           fileName: "frontend/index.js",
-          lineNumber: 457,
+          lineNumber: 484,
           columnNumber: 25
         }, this) }, void 0, false, {
           fileName: "frontend/index.js",
-          lineNumber: 456,
+          lineNumber: 483,
           columnNumber: 21
         }, this) }, void 0, false, {
           fileName: "frontend/index.js",
-          lineNumber: 401,
+          lineNumber: 422,
           columnNumber: 13
         }, this)
       },
@@ -45454,7 +45475,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 371,
+        lineNumber: 392,
         columnNumber: 9
       },
       this
@@ -45507,13 +45528,13 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 522,
+        lineNumber: 549,
         columnNumber: 9
       },
       this
     );
   }
-  function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
+  function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, onHighlightEvent }) {
     const [isExpanded, setIsExpanded] = (0, import_react9.useState)(true);
     const contentRef = (0, import_react9.useRef)(null);
     const [contentHeight, setContentHeight] = (0, import_react9.useState)("2000px");
@@ -45531,7 +45552,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           },
           children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-red-600", children: "Error: Events table not available" }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 607,
+            lineNumber: 634,
             columnNumber: 17
           }, this)
         },
@@ -45539,7 +45560,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         false,
         {
           fileName: "frontend/index.js",
-          lineNumber: 597,
+          lineNumber: 624,
           columnNumber: 13
         },
         this
@@ -45672,7 +45693,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               children: [
                 /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { children: orderNo ? `Order ${orderNo}` : "Order" }, void 0, false, {
                   fileName: "frontend/index.js",
-                  lineNumber: 756,
+                  lineNumber: 783,
                   columnNumber: 17
                 }, this),
                 /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
@@ -45693,7 +45714,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                   false,
                   {
                     fileName: "frontend/index.js",
-                    lineNumber: 757,
+                    lineNumber: 784,
                     columnNumber: 17
                   },
                   this
@@ -45704,7 +45725,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             true,
             {
               fileName: "frontend/index.js",
-              lineNumber: 740,
+              lineNumber: 767,
               columnNumber: 13
             },
             this
@@ -45801,6 +45822,19 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                       } catch (e) {
                         console.error("Error checking if event is scheduled:", e);
                       }
+                      let isDelegated = false;
+                      try {
+                        if (event && typeof event.getCellValue === "function") {
+                          const starttid = event.getCellValue("Starttid");
+                          const sluttid = event.getCellValue("Sluttid");
+                          const isLunchBreak = event.isLunchBreak === true;
+                          const hasStarttid = starttid !== null && starttid !== void 0;
+                          const hasSluttid = sluttid !== null && sluttid !== void 0;
+                          isDelegated = hasStarttid && hasSluttid && !isLunchBreak;
+                        }
+                      } catch (e) {
+                        console.warn("Error checking Starttid/Sluttid for delegated status:", e);
+                      }
                       return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
                         DraggableOrderEvent,
                         {
@@ -45821,13 +45855,15 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                           isScheduled,
                           variant: "left",
                           showVisualization: true,
-                          arbetsorder
+                          arbetsorder,
+                          isDelegated,
+                          onHighlightEvent
                         },
                         event.id || index,
                         false,
                         {
                           fileName: "frontend/index.js",
-                          lineNumber: 879,
+                          lineNumber: 921,
                           columnNumber: 37
                         },
                         this
@@ -45902,6 +45938,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                         console.error("Error getting Order Status:", e);
                       }
                       const isScheduled = true;
+                      const isDelegated = true;
                       return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
                         DraggableOrderEvent,
                         {
@@ -45922,13 +45959,15 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                           isScheduled,
                           variant: "left",
                           showVisualization: true,
-                          arbetsorder
+                          arbetsorder,
+                          isDelegated,
+                          onHighlightEvent
                         },
                         event.id || `scheduled-${index}`,
                         false,
                         {
                           fileName: "frontend/index.js",
-                          lineNumber: 986,
+                          lineNumber: 1033,
                           columnNumber: 37
                         },
                         this
@@ -45936,7 +45975,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                     })
                   ] }, void 0, true, {
                     fileName: "frontend/index.js",
-                    lineNumber: 788,
+                    lineNumber: 815,
                     columnNumber: 29
                   }, this)
                 },
@@ -45944,13 +45983,13 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                 false,
                 {
                   fileName: "frontend/index.js",
-                  lineNumber: 784,
+                  lineNumber: 811,
                   columnNumber: 25
                 },
                 this
               ) : null }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 782,
+                lineNumber: 809,
                 columnNumber: 17
               }, this)
             },
@@ -45958,7 +45997,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             false,
             {
               fileName: "frontend/index.js",
-              lineNumber: 773,
+              lineNumber: 800,
               columnNumber: 13
             },
             this
@@ -45969,13 +46008,13 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       true,
       {
         fileName: "frontend/index.js",
-        lineNumber: 727,
+        lineNumber: 754,
         columnNumber: 9
       },
       this
     );
   }
-  function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
+  function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, onHighlightEvent }) {
     console.log("LeftSideOrderDetailsPanel - orders count:", orders?.length);
     const { setNodeRef: setPanelDropRef, isOver: isPanelDropOver } = useDroppable({
       id: "left-side-panel-drop"
@@ -45998,11 +46037,11 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       console.log("LeftSideOrderDetailsPanel - Missing orderTable or eventsTable");
       return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "left-side-order-details-panel", style: containerStyle, children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-red-600 text-center w-full border border-dashed border-red-300 rounded p-3 bg-red-50", children: "Unable to load order details. Missing table configuration." }, void 0, false, {
         fileName: "frontend/index.js",
-        lineNumber: 1046,
+        lineNumber: 1095,
         columnNumber: 17
       }, this) }, void 0, false, {
         fileName: "frontend/index.js",
-        lineNumber: 1045,
+        lineNumber: 1094,
         columnNumber: 13
       }, this);
     }
@@ -46021,11 +46060,11 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       console.log("LeftSideOrderDetailsPanel - Missing orderField or calendarEvents");
       return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "left-side-order-details-panel", style: containerStyle, children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-sm text-gray-500 text-center py-6 w-full border border-dashed border-gray-300 rounded bg-gray-50", children: "No Orders to assign" }, void 0, false, {
         fileName: "frontend/index.js",
-        lineNumber: 1077,
+        lineNumber: 1126,
         columnNumber: 17
       }, this) }, void 0, false, {
         fileName: "frontend/index.js",
-        lineNumber: 1076,
+        lineNumber: 1125,
         columnNumber: 13
       }, this);
     }
@@ -46073,7 +46112,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         style: containerStyle,
         children: ordersWithUnscheduledEvents.length === 0 ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-sm text-gray-500 text-center py-6 w-full border border-dashed border-gray-300 rounded bg-gray-50", children: "No Orders to assign" }, void 0, false, {
           fileName: "frontend/index.js",
-          lineNumber: 1134,
+          lineNumber: 1183,
           columnNumber: 17
         }, this) : ordersWithUnscheduledEvents.map((order) => {
           const orderNo = orderNoField ? order.getCellValueAsString(orderNoField.name) : order.id;
@@ -46089,13 +46128,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               statusColors,
               statusIcons,
               updatingRecords,
-              recentlyUpdatedRecords
+              recentlyUpdatedRecords,
+              onHighlightEvent
             },
             order.id,
             false,
             {
               fileName: "frontend/index.js",
-              lineNumber: 1141,
+              lineNumber: 1190,
               columnNumber: 25
             },
             this
@@ -46106,13 +46146,13 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 1128,
+        lineNumber: 1177,
         columnNumber: 9
       },
       this
     );
   }
-  function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, showVisualization = true }) {
+  function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, showVisualization = true, onHighlightEvent }) {
     console.log("OrderDetailsPanel - selectedOrderNumbers:", Array.from(selectedOrderNumbers));
     console.log("OrderDetailsPanel - orders count:", orders?.length);
     if (selectedOrderNumbers.size === 0) {
@@ -46185,13 +46225,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                   statusIcons,
                   updatingRecords,
                   recentlyUpdatedRecords,
-                  showVisualization
+                  showVisualization,
+                  onHighlightEvent
                 },
                 order.id,
                 false,
                 {
                   fileName: "frontend/index.js",
-                  lineNumber: 1233,
+                  lineNumber: 1283,
                   columnNumber: 25
                 },
                 this
@@ -46202,7 +46243,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           false,
           {
             fileName: "frontend/index.js",
-            lineNumber: 1219,
+            lineNumber: 1269,
             columnNumber: 13
           },
           this
@@ -46212,7 +46253,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 1210,
+        lineNumber: 1260,
         columnNumber: 9
       },
       this
@@ -46246,42 +46287,42 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "px-4 py-3 border-b-2 border-red-300 bg-red-50 flex-shrink-0", children: [
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("h3", { className: "text-sm font-bold text-red-700", children: "Orders" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1282,
+                lineNumber: 1333,
                 columnNumber: 21
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-red-600 mt-1", children: "\u26A0\uFE0F DEBUG MODE" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1283,
+                lineNumber: 1334,
                 columnNumber: 21
               }, this)
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 1281,
+              lineNumber: 1332,
               columnNumber: 17
             }, this),
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1 flex items-center justify-center p-4", children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-red-600 text-center", children: [
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-2 font-bold text-base", children: "\u26A0\uFE0F Order table not found" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1287,
+                lineNumber: 1338,
                 columnNumber: 25
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-600 mt-2 p-2 bg-gray-100 rounded", children: "Check browser console (F12) for available tables" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1288,
+                lineNumber: 1339,
                 columnNumber: 25
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-400 mt-2", children: "This panel should be visible on the right side" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1291,
+                lineNumber: 1342,
                 columnNumber: 25
               }, this)
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 1286,
+              lineNumber: 1337,
               columnNumber: 21
             }, this) }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1285,
+              lineNumber: 1336,
               columnNumber: 17
             }, this)
           ]
@@ -46290,7 +46331,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         true,
         {
           fileName: "frontend/index.js",
-          lineNumber: 1265,
+          lineNumber: 1316,
           columnNumber: 13
         },
         this
@@ -46317,26 +46358,26 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "px-4 py-3 border-b border-gray-200 bg-blue-50 flex-shrink-0", children: [
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("h3", { className: "text-sm font-semibold text-gray-700", children: "Orders" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1318,
+                lineNumber: 1369,
                 columnNumber: 21
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-500 mt-1", children: "0 orders" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1319,
+                lineNumber: 1370,
                 columnNumber: 21
               }, this)
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 1317,
+              lineNumber: 1368,
               columnNumber: 17
             }, this),
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1 flex items-center justify-center p-4", children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-sm text-blue-600 text-center font-medium", children: "No orders are scheduled for this week." }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1322,
+              lineNumber: 1373,
               columnNumber: 21
             }, this) }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1321,
+              lineNumber: 1372,
               columnNumber: 17
             }, this)
           ]
@@ -46345,7 +46386,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         true,
         {
           fileName: "frontend/index.js",
-          lineNumber: 1302,
+          lineNumber: 1353,
           columnNumber: 13
         },
         this
@@ -46419,7 +46460,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "px-4 py-3 border-b border-gray-200 bg-green-50 sticky top-0 z-40 flex-shrink-0", children: [
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("h3", { className: "text-sm font-semibold text-gray-700", children: "Orders" }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1416,
+              lineNumber: 1467,
               columnNumber: 17
             }, this),
             orderData.length > 0 && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-xs text-gray-500 mt-1", children: [
@@ -46427,34 +46468,34 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               " orders"
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 1418,
+              lineNumber: 1469,
               columnNumber: 21
             }, this)
           ] }, void 0, true, {
             fileName: "frontend/index.js",
-            lineNumber: 1415,
+            lineNumber: 1466,
             columnNumber: 13
           }, this),
           /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1 overflow-y-auto", style: { minHeight: 0 }, children: orderData.length > 0 ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "w-full", children: [
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "px-4 py-2 border-b-2 border-gray-300 bg-gray-100 sticky top-0 z-30 flex items-center gap-2", style: { minHeight: "32px" }, children: [
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "font-semibold text-gray-700", style: { minWidth: "20px" }, children: "No" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1426,
+                lineNumber: 1477,
                 columnNumber: 29
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "font-semibold text-gray-700 flex-1", children: "Order Number" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1429,
+                lineNumber: 1480,
                 columnNumber: 29
               }, this),
               /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-xs font-semibold text-gray-700", style: { minWidth: "50px", textAlign: "right" }, children: "Fordon" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1432,
+                lineNumber: 1483,
                 columnNumber: 29
               }, this)
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 1425,
+              lineNumber: 1476,
               columnNumber: 25
             }, this),
             orderData.map(({ sequentialNumber, orderNo, fordon, record }) => {
@@ -46495,22 +46536,22 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                       "."
                     ] }, void 0, true, {
                       fileName: "frontend/index.js",
-                      lineNumber: 1471,
+                      lineNumber: 1522,
                       columnNumber: 37
                     }, this),
                     /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `font-medium flex-1 ${isSelected ? "text-blue-700" : "text-gray-600"}`, children: orderNo }, void 0, false, {
                       fileName: "frontend/index.js",
-                      lineNumber: 1474,
+                      lineNumber: 1525,
                       columnNumber: 37
                     }, this),
                     /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `text-xs ${isSelected ? "text-blue-600" : "text-gray-500"}`, style: { minWidth: "50px", textAlign: "right" }, children: fordon }, void 0, false, {
                       fileName: "frontend/index.js",
-                      lineNumber: 1477,
+                      lineNumber: 1528,
                       columnNumber: 37
                     }, this),
                     isSelected && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "ml-1 text-blue-600 text-xs", children: "\u2713" }, void 0, false, {
                       fileName: "frontend/index.js",
-                      lineNumber: 1481,
+                      lineNumber: 1532,
                       columnNumber: 41
                     }, this)
                   ]
@@ -46519,7 +46560,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                 true,
                 {
                   fileName: "frontend/index.js",
-                  lineNumber: 1440,
+                  lineNumber: 1491,
                   columnNumber: 33
                 },
                 this
@@ -46527,15 +46568,15 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             })
           ] }, void 0, true, {
             fileName: "frontend/index.js",
-            lineNumber: 1423,
+            lineNumber: 1474,
             columnNumber: 21
           }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "text-sm text-gray-500 p-4 text-center", children: "No order numbers found" }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1488,
+            lineNumber: 1539,
             columnNumber: 21
           }, this) }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1421,
+            lineNumber: 1472,
             columnNumber: 13
           }, this)
         ]
@@ -46544,7 +46585,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       true,
       {
         fileName: "frontend/index.js",
-        lineNumber: 1399,
+        lineNumber: 1450,
         columnNumber: 9
       },
       this
@@ -46566,13 +46607,13 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 1504,
+        lineNumber: 1555,
         columnNumber: 9
       },
       this
     );
   }
-  function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, showVisualization = true, isScheduled = false, variant = "top", customUniqueId = null, arbetsorder = "" }) {
+  function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, showVisualization = true, isScheduled = false, isDelegated = false, variant = "top", customUniqueId = null, arbetsorder = "", onHighlightEvent }) {
     const uniqueId = customUniqueId || `order-detail-${orderNo || "unknown"}-${event.id}`;
     const {
       attributes,
@@ -46591,11 +46632,12 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
     if (isScheduled && !isLeftVariant) {
       return null;
     }
+    const cursorStyle = isDelegated ? "pointer" : shouldMakeDraggable ? isDragging ? "grabbing" : "grab" : "not-allowed";
     const style2 = {
       transform: CSS.Transform.toString(transform),
       transition,
       opacity: isDragging ? 0.5 : isScheduled && isLeftVariant ? 0.7 : 1,
-      cursor: shouldMakeDraggable ? isDragging ? "grabbing" : "grab" : "not-allowed"
+      cursor: cursorStyle
     };
     const imageSize = isLeftVariant ? 80 : 100;
     const containerStyles = isLeftVariant ? {
@@ -46632,6 +46674,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         }),
         onClick: (e) => {
           if (!isDragging) {
+            if (isDelegated && onHighlightEvent && event) {
+              e.stopPropagation();
+              onHighlightEvent(event.id, isLeftVariant);
+              const timeout = isLeftVariant ? 5e3 : 3e3;
+              setTimeout(() => {
+                onHighlightEvent(null, false);
+              }, timeout);
+            }
             if (e.detail === 2 && onClose) {
               e.stopPropagation();
               onClose();
@@ -46640,9 +46690,11 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         },
         children: isLeftVariant ? (
           // Left variant: Show only title
+          // Undelegated sub orders: gray, Delegated sub orders: red
           /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "w-full text-xs", style: {
             fontWeight: !isScheduled ? "700" : "normal",
-            color: !isScheduled ? "#111827" : "#dc2626",
+            color: isDelegated || isScheduled ? "#dc2626" : "#6b7280",
+            // Red for delegated, gray for undelegated
             textAlign: "left",
             whiteSpace: "nowrap",
             overflow: "hidden",
@@ -46654,7 +46706,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             borderLeft: "none"
           }, children: arbetsorder || "Untitled" }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1600,
+            lineNumber: 1665,
             columnNumber: 17
           }, this)
         ) : (
@@ -46671,75 +46723,84 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               false,
               {
                 fileName: "frontend/index.js",
-                lineNumber: 1621,
+                lineNumber: 1686,
                 columnNumber: 29
               },
               this
             ) }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1620,
+              lineNumber: 1685,
               columnNumber: 25
             }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-2 text-xs text-gray-400 italic text-center border border-dashed border-gray-300 rounded", style: { width: `${imageSize}px`, height: `${imageSize}px`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }, children: "No image" }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1628,
+              lineNumber: 1693,
               columnNumber: 25
             }, this),
-            showVisualization && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: visualization ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: isScheduled ? "text-red-600" : "text-gray-500", children: visualization }, void 0, false, {
+            arbetsorder && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", style: { fontWeight: "700" }, children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { style: { color: isDelegated || isScheduled ? "#dc2626" : "#6b7280" }, children: arbetsorder }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1637,
+              lineNumber: 1702,
+              columnNumber: 29
+            }, this) }, void 0, false, {
+              fileName: "frontend/index.js",
+              lineNumber: 1701,
+              columnNumber: 25
+            }, this),
+            showVisualization && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: visualization ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { style: { color: isDelegated || isScheduled ? "#dc2626" : "#6b7280" }, children: visualization }, void 0, false, {
+              fileName: "frontend/index.js",
+              lineNumber: 1710,
               columnNumber: 33
             }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-400 italic", children: "Not set" }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1639,
+              lineNumber: 1712,
               columnNumber: 33
             }, this) }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1635,
+              lineNumber: 1708,
               columnNumber: 25
             }, this),
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: [
-              /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`, children: "REG: " }, void 0, false, {
+              /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "font-semibold", style: { color: isDelegated || isScheduled ? "#dc2626" : "#6b7280" }, children: "REG: " }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1646,
+                lineNumber: 1719,
                 columnNumber: 25
               }, this),
-              fordon ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: isScheduled ? "text-red-600" : "text-gray-500", children: fordon }, void 0, false, {
+              fordon ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { style: { color: isDelegated || isScheduled ? "#dc2626" : "#6b7280" }, children: fordon }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1648,
+                lineNumber: 1721,
                 columnNumber: 29
               }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-400 italic", children: "Not set" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1650,
+                lineNumber: 1723,
                 columnNumber: 29
               }, this)
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 1645,
+              lineNumber: 1718,
               columnNumber: 21
             }, this),
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: [
-              /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`, children: "Namn: " }, void 0, false, {
+              /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "font-semibold", style: { color: isDelegated || isScheduled ? "#dc2626" : "#6b7280" }, children: "Namn: " }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1656,
+                lineNumber: 1729,
                 columnNumber: 25
               }, this),
-              mekanikerNames ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: isScheduled ? "text-red-600" : "text-gray-500", children: mekanikerNames }, void 0, false, {
+              mekanikerNames ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { style: { color: isDelegated || isScheduled ? "#dc2626" : "#6b7280" }, children: mekanikerNames }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1658,
+                lineNumber: 1731,
                 columnNumber: 29
               }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-400 italic", children: "Not set" }, void 0, false, {
                 fileName: "frontend/index.js",
-                lineNumber: 1660,
+                lineNumber: 1733,
                 columnNumber: 29
               }, this)
             ] }, void 0, true, {
               fileName: "frontend/index.js",
-              lineNumber: 1655,
+              lineNumber: 1728,
               columnNumber: 21
             }, this)
           ] }, void 0, true, {
             fileName: "frontend/index.js",
-            lineNumber: 1617,
+            lineNumber: 1682,
             columnNumber: 17
           }, this)
         )
@@ -46748,16 +46809,18 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 1566,
+        lineNumber: 1620,
         columnNumber: 9
       },
       this
     );
   }
-  function StaticOrderEvent({ imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, onClose, showVisualization = true, isScheduled = true }) {
+  function StaticOrderEvent({ event, imageUrl, visualization, fordon, arbetsorder, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, onClose, showVisualization = true, isScheduled = true, isDelegated = false, onHighlightEvent }) {
     if (isUpdating || isRecentlyUpdated) {
       return null;
     }
+    const cursorStyle = isDelegated ? "pointer" : "not-allowed";
+    const opacityStyle = isDelegated ? 1 : 0.7;
     return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
       "div",
       {
@@ -46769,11 +46832,18 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           borderRadius: "8px",
           padding: "8px",
           backgroundColor: "transparent",
-          opacity: 0.7,
-          cursor: "not-allowed",
+          opacity: opacityStyle,
+          cursor: cursorStyle,
           position: "relative"
         },
         onClick: (e) => {
+          if (isDelegated && onHighlightEvent && event) {
+            e.stopPropagation();
+            onHighlightEvent(event.id, false);
+            setTimeout(() => {
+              onHighlightEvent(null, false);
+            }, 3e3);
+          }
           if (e.detail === 2 && onClose) {
             e.stopPropagation();
             onClose();
@@ -46791,70 +46861,79 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             false,
             {
               fileName: "frontend/index.js",
-              lineNumber: 1698,
+              lineNumber: 1787,
               columnNumber: 21
             },
             this
           ) }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1697,
+            lineNumber: 1786,
             columnNumber: 17
           }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-2 text-xs text-gray-400 italic text-center rounded", style: { width: "100px", height: "100px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }, children: "No image" }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1705,
+            lineNumber: 1794,
+            columnNumber: 17
+          }, this),
+          arbetsorder && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", style: { fontWeight: "700" }, children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: isScheduled ? "text-red-600" : "text-gray-500", children: arbetsorder }, void 0, false, {
+            fileName: "frontend/index.js",
+            lineNumber: 1802,
+            columnNumber: 21
+          }, this) }, void 0, false, {
+            fileName: "frontend/index.js",
+            lineNumber: 1801,
             columnNumber: 17
           }, this),
           showVisualization && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: visualization ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: isScheduled ? "text-red-600" : "text-gray-500", children: visualization }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1713,
+            lineNumber: 1809,
             columnNumber: 25
           }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-400 italic", children: "Not set" }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1715,
+            lineNumber: 1811,
             columnNumber: 21
           }, this) }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1711,
+            lineNumber: 1807,
             columnNumber: 13
           }, this),
           /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: [
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`, children: "REG: " }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1721,
+              lineNumber: 1817,
               columnNumber: 17
             }, this),
             fordon ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: isScheduled ? "text-red-600" : "text-gray-500", children: fordon }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1723,
+              lineNumber: 1819,
               columnNumber: 21
             }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-400 italic", children: "Not set" }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1725,
+              lineNumber: 1821,
               columnNumber: 21
             }, this)
           ] }, void 0, true, {
             fileName: "frontend/index.js",
-            lineNumber: 1720,
+            lineNumber: 1816,
             columnNumber: 13
           }, this),
           /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "mb-1 text-xs text-center", children: [
             /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: `font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`, children: "Namn: " }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1730,
+              lineNumber: 1826,
               columnNumber: 17
             }, this),
             mekanikerNames ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: isScheduled ? "text-red-600" : "text-gray-500", children: mekanikerNames }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1732,
+              lineNumber: 1828,
               columnNumber: 21
             }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("span", { className: "text-gray-400 italic", children: "Not set" }, void 0, false, {
               fileName: "frontend/index.js",
-              lineNumber: 1734,
+              lineNumber: 1830,
               columnNumber: 21
             }, this)
           ] }, void 0, true, {
             fileName: "frontend/index.js",
-            lineNumber: 1729,
+            lineNumber: 1825,
             columnNumber: 13
           }, this)
         ]
@@ -46863,13 +46942,15 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       true,
       {
         fileName: "frontend/index.js",
-        lineNumber: 1676,
+        lineNumber: 1753,
         columnNumber: 9
       },
       this
     );
   }
-  function DraggableEvent({ event, top, height, backgroundColor, onExpand, isUpdating, isRecentlyUpdated, status, statusIcon }) {
+  function DraggableEvent({ event, top, height, backgroundColor, onExpand, isUpdating, isRecentlyUpdated, status, statusIcon, highlightedEvent, eventsTable, setUpdatingRecords }) {
+    const isHighlighted = highlightedEvent && highlightedEvent.eventId === event.id;
+    const isFromLeft = highlightedEvent && highlightedEvent.isFromLeft;
     const {
       attributes,
       listeners,
@@ -46888,6 +46969,60 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
     }
     const eventTitle = event.getCellValueAsString("Arbetsorder beskrivning") || "Untitled";
     const bookingOrder = event.getCellValueAsString("Boknings-Order") || "";
+    const isLunchBreak = event.isLunchBreak === true;
+    const starttid = event.getCellValue("Starttid");
+    const sluttid = event.getCellValue("Sluttid");
+    const isDelegated = !!(starttid && sluttid) && !isLunchBreak;
+    const handleEventClick = (e) => {
+      if (isDragging || isLunchBreak || e.target.closest(".undelegate-button")) {
+        return;
+      }
+      expandRecord(event);
+    };
+    const handleUndelegate = async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!eventsTable || !event || isLunchBreak) {
+        return;
+      }
+      if (!isDelegated) {
+        console.log("Event is not delegated, cannot undelegate");
+        return;
+      }
+      try {
+        const starttidField = eventsTable.fields.find(
+          (f) => f.name === "Starttid" || f.name.toLowerCase() === "starttid"
+        );
+        const sluttidField = eventsTable.fields.find(
+          (f) => f.name === "Sluttid" || f.name.toLowerCase() === "sluttid"
+        );
+        if (!starttidField || !sluttidField) {
+          console.error("Starttid or Sluttid fields not found");
+          return;
+        }
+        if (setUpdatingRecords) {
+          setUpdatingRecords((prev) => new Set(prev).add(event.id));
+        }
+        await eventsTable.updateRecordAsync(event.id, {
+          [starttidField.name]: null,
+          [sluttidField.name]: null
+        });
+        console.log("Event undelegated successfully:", event.id);
+      } catch (error) {
+        console.error("Error undelegating event:", error);
+        alert("Failed to undelegate event. Please try again.");
+      } finally {
+        if (setUpdatingRecords) {
+          setTimeout(() => {
+            setUpdatingRecords((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(event.id);
+              return newSet;
+            });
+          }, 500);
+        }
+      }
+    };
     let mechanicName = "";
     try {
       const mekaniker = event.getCellValue("Mekaniker");
@@ -46925,11 +47060,25 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           height: `${height}px`,
           backgroundColor,
           borderRadius: "12px",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1)",
-          border: "1px solid rgba(255, 255, 255, 0.3)",
-          backdropFilter: "blur(1px)"
+          boxShadow: isHighlighted ? isFromLeft ? "0 0 0 10px rgba(239, 68, 68, 0.3), 0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1)" : "0 0 0 3px #3b82f6, 0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1)" : "0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1)",
+          border: isHighlighted ? isFromLeft ? "10px solid #ef4444" : "2px solid #3b82f6" : "1px solid rgba(255, 255, 255, 0.3)",
+          backdropFilter: "blur(1px)",
+          zIndex: isHighlighted ? 1e3 : "auto",
+          transition: "border 0.5s ease, box-shadow 0.5s ease",
+          cursor: isLunchBreak ? "default" : "pointer"
         }),
-        className: "event-block text-white cursor-pointer hover:opacity-90 transition-all duration-200"
+        className: "event-block text-white transition-all duration-200",
+        onClick: handleEventClick,
+        onMouseEnter: (e) => {
+          if (!isLunchBreak) {
+            e.currentTarget.style.opacity = "0.9";
+          }
+        },
+        onMouseLeave: (e) => {
+          if (!isLunchBreak) {
+            e.currentTarget.style.opacity = "1";
+          }
+        }
       }, attributes), listeners), {
         children: /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { style: {
           position: "relative",
@@ -46953,7 +47102,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             width: "100%"
           }, children: eventTitle }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1827,
+            lineNumber: 2022,
             columnNumber: 17
           }, this),
           bookingOrder && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { style: {
@@ -46967,76 +47116,65 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             width: "100%"
           }, children: bookingOrder }, void 0, false, {
             fileName: "frontend/index.js",
-            lineNumber: 1842,
+            lineNumber: 2037,
             columnNumber: 21
           }, this),
-          mechanicName && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { style: {
-            fontSize: "9px",
-            opacity: 0.8,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            width: "100%"
-          }, children: mechanicName }, void 0, false, {
-            fileName: "frontend/index.js",
-            lineNumber: 1858,
-            columnNumber: 21
-          }, this),
-          /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
+          isDelegated && !isLunchBreak && /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
             "div",
             {
+              className: "undelegate-button",
               style: {
                 position: "absolute",
                 top: "4px",
                 right: "4px",
-                width: "16px",
-                height: "16px",
-                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                width: "18px",
+                height: "18px",
+                backgroundColor: "rgba(255, 255, 255, 0.95)",
                 borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
-                fontSize: "8px",
-                fontWeight: "bold",
+                fontSize: "12px",
+                fontWeight: "600",
                 flexShrink: 0,
-                border: "1px solid rgba(0, 0, 0, 0.1)",
-                zIndex: 1e3
+                border: "1.5px solid #6b7280",
+                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.2)",
+                zIndex: 1e3,
+                color: "#6b7280",
+                lineHeight: "1",
+                transition: "all 0.15s ease"
               },
+              onClick: handleUndelegate,
               onMouseDown: (e) => {
                 e.preventDefault();
                 e.stopPropagation();
               },
-              onMouseUp: (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log("Info icon clicked:", event.id, eventTitle);
-                onExpand(event);
+              onMouseEnter: (e) => {
+                e.currentTarget.style.backgroundColor = "#6b7280";
+                e.currentTarget.style.color = "#ffffff";
+                e.currentTarget.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.25)";
               },
-              onPointerDown: (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+              onMouseLeave: (e) => {
+                e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.95)";
+                e.currentTarget.style.color = "#6b7280";
+                e.currentTarget.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.2)";
               },
-              onPointerUp: (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onExpand(event);
-              },
-              title: "Click to view details",
-              children: "\u2139"
+              title: "Click to undelegate (remove time)",
+              children: "\xD7"
             },
             void 0,
             false,
             {
               fileName: "frontend/index.js",
-              lineNumber: 1871,
-              columnNumber: 17
+              lineNumber: 2053,
+              columnNumber: 21
             },
             this
           )
         ] }, void 0, true, {
           fileName: "frontend/index.js",
-          lineNumber: 1815,
+          lineNumber: 2010,
           columnNumber: 13
         }, this)
       }),
@@ -47044,7 +47182,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       false,
       {
         fileName: "frontend/index.js",
-        lineNumber: 1795,
+        lineNumber: 1970,
         columnNumber: 9
       },
       this
@@ -47107,6 +47245,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
     const [recentlyUpdatedRecords, setRecentlyUpdatedRecords] = (0, import_react9.useState)(/* @__PURE__ */ new Set());
     const [topSelectedOrderNumbers, setTopSelectedOrderNumbers] = (0, import_react9.useState)(/* @__PURE__ */ new Set());
     const [sideSelectedOrderNumbers, setSideSelectedOrderNumbers] = (0, import_react9.useState)(/* @__PURE__ */ new Set());
+    const [highlightedEvent, setHighlightedEvent] = (0, import_react9.useState)(null);
+    const handleHighlightEvent = (0, import_react9.useCallback)((eventId, isFromLeft = false) => {
+      if (eventId) {
+        setHighlightedEvent({ eventId, isFromLeft });
+      } else {
+        setHighlightedEvent(null);
+      }
+    }, []);
     const isInitialMount = (0, import_react9.useRef)(true);
     const isSelectingOrder = (0, import_react9.useRef)(false);
     const sensors = useSensors(
@@ -48253,7 +48399,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
     return /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "p-4 font-sans w-full h-full bg-white text-gray-900", style: { width: "100%", height: "100%", overflow: "visible" }, children: [
       /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(CalendarImagesGallery, { events: events2, eventsTable }, void 0, false, {
         fileName: "frontend/index.js",
-        lineNumber: 3559,
+        lineNumber: 3755,
         columnNumber: 13
       }, this),
       /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex items-center gap-2 mb-4 flex-nowrap overflow-x-auto", children: [
@@ -48268,7 +48414,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           false,
           {
             fileName: "frontend/index.js",
-            lineNumber: 3563,
+            lineNumber: 3759,
             columnNumber: 17
           },
           this
@@ -48294,7 +48440,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           false,
           {
             fileName: "frontend/index.js",
-            lineNumber: 3569,
+            lineNumber: 3765,
             columnNumber: 17
           },
           this
@@ -48310,14 +48456,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
           false,
           {
             fileName: "frontend/index.js",
-            lineNumber: 3585,
+            lineNumber: 3781,
             columnNumber: 17
           },
           this
         )
       ] }, void 0, true, {
         fileName: "frontend/index.js",
-        lineNumber: 3562,
+        lineNumber: 3758,
         columnNumber: 13
       }, this),
       displayedDates.length === 0 ? /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(import_jsx_dev_runtime.Fragment, { children: [
@@ -48333,25 +48479,26 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
             statusColors,
             statusIcons,
             updatingRecords,
-            recentlyUpdatedRecords
+            recentlyUpdatedRecords,
+            onHighlightEvent: handleHighlightEvent
           },
           void 0,
           false,
           {
             fileName: "frontend/index.js",
-            lineNumber: 3598,
+            lineNumber: 3794,
             columnNumber: 25
           },
           this
         ),
         /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "flex-1 py-10 text-center text-gray-500 flex items-center justify-center", style: { minWidth: 0 }, children: "Please select Start Date and End Date to view the calendar." }, void 0, false, {
           fileName: "frontend/index.js",
-          lineNumber: 3611,
+          lineNumber: 3808,
           columnNumber: 21
         }, this)
       ] }, void 0, true, {
         fileName: "frontend/index.js",
-        lineNumber: 3595,
+        lineNumber: 3791,
         columnNumber: 17
       }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
         DndContext,
@@ -48379,7 +48526,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               false,
               {
                 fileName: "frontend/index.js",
-                lineNumber: 3624,
+                lineNumber: 3821,
                 columnNumber: 25
               },
               this
@@ -48419,13 +48566,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                           statusColors,
                           statusIcons,
                           updatingRecords,
-                          recentlyUpdatedRecords
+                          recentlyUpdatedRecords,
+                          onHighlightEvent: handleHighlightEvent
                         },
                         void 0,
                         false,
                         {
                           fileName: "frontend/index.js",
-                          lineNumber: 3662,
+                          lineNumber: 3859,
                           columnNumber: 33
                         },
                         this
@@ -48435,7 +48583,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                     false,
                     {
                       fileName: "frontend/index.js",
-                      lineNumber: 3652,
+                      lineNumber: 3849,
                       columnNumber: 29
                     },
                     this
@@ -48452,13 +48600,13 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                       false,
                       {
                         fileName: "frontend/index.js",
-                        lineNumber: 3683,
+                        lineNumber: 3881,
                         columnNumber: 33
                       },
                       this
                     )) }, void 0, false, {
                       fileName: "frontend/index.js",
-                      lineNumber: 3681,
+                      lineNumber: 3879,
                       columnNumber: 25
                     }, this),
                     /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("div", { className: "main-section flex gap-3", children: mechanics.map((mech, mechIndex) => /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(
@@ -48500,7 +48648,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                   false,
                                   {
                                     fileName: "frontend/index.js",
-                                    lineNumber: 3718,
+                                    lineNumber: 3916,
                                     columnNumber: 45
                                   },
                                   this
@@ -48525,14 +48673,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                   false,
                                   {
                                     fileName: "frontend/index.js",
-                                    lineNumber: 3730,
+                                    lineNumber: 3928,
                                     columnNumber: 45
                                   },
                                   this
                                 ),
                                 /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)("h3", { className: "m-0 text-sm font-semibold", style: { margin: 0 }, children: mech.name }, void 0, false, {
                                   fileName: "frontend/index.js",
-                                  lineNumber: 3747,
+                                  lineNumber: 3945,
                                   columnNumber: 41
                                 }, this)
                               ]
@@ -48541,7 +48689,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                             true,
                             {
                               fileName: "frontend/index.js",
-                              lineNumber: 3703,
+                              lineNumber: 3901,
                               columnNumber: 37
                             },
                             this
@@ -48567,7 +48715,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                 false,
                                 {
                                   fileName: "frontend/index.js",
-                                  lineNumber: 3762,
+                                  lineNumber: 3960,
                                   columnNumber: 45
                                 },
                                 this
@@ -48577,7 +48725,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                             false,
                             {
                               fileName: "frontend/index.js",
-                              lineNumber: 3751,
+                              lineNumber: 3949,
                               columnNumber: 37
                             },
                             this
@@ -48600,7 +48748,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                   false,
                                   {
                                     fileName: "frontend/index.js",
-                                    lineNumber: 3779,
+                                    lineNumber: 3977,
                                     columnNumber: 53
                                   },
                                   this
@@ -48646,13 +48794,16 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                       isUpdating: updatingRecords.has(ev.id),
                                       isRecentlyUpdated: recentlyUpdatedRecords.has(ev.id),
                                       status,
-                                      statusIcon
+                                      statusIcon,
+                                      highlightedEvent,
+                                      eventsTable,
+                                      setUpdatingRecords
                                     },
                                     ev.id,
                                     false,
                                     {
                                       fileName: "frontend/index.js",
-                                      lineNumber: 3840,
+                                      lineNumber: 4038,
                                       columnNumber: 53
                                     },
                                     this
@@ -48660,7 +48811,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                                 })
                               ] }, date.toDateString(), true, {
                                 fileName: "frontend/index.js",
-                                lineNumber: 3777,
+                                lineNumber: 3975,
                                 columnNumber: 45
                               }, this))
                             },
@@ -48668,7 +48819,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                             false,
                             {
                               fileName: "frontend/index.js",
-                              lineNumber: 3772,
+                              lineNumber: 3970,
                               columnNumber: 37
                             },
                             this
@@ -48679,22 +48830,22 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                       true,
                       {
                         fileName: "frontend/index.js",
-                        lineNumber: 3696,
+                        lineNumber: 3894,
                         columnNumber: 33
                       },
                       this
                     )) }, void 0, false, {
                       fileName: "frontend/index.js",
-                      lineNumber: 3694,
+                      lineNumber: 3892,
                       columnNumber: 25
                     }, this)
                   ] }, void 0, true, {
                     fileName: "frontend/index.js",
-                    lineNumber: 3678,
+                    lineNumber: 3876,
                     columnNumber: 25
                   }, this) }, void 0, false, {
                     fileName: "frontend/index.js",
-                    lineNumber: 3676,
+                    lineNumber: 3874,
                     columnNumber: 25
                   }, this),
                   (() => {
@@ -48713,7 +48864,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
                       false,
                       {
                         fileName: "frontend/index.js",
-                        lineNumber: 3869,
+                        lineNumber: 4070,
                         columnNumber: 33
                       },
                       this
@@ -48725,7 +48876,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
               true,
               {
                 fileName: "frontend/index.js",
-                lineNumber: 3639,
+                lineNumber: 3836,
                 columnNumber: 21
               },
               this
@@ -48736,14 +48887,14 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
         true,
         {
           fileName: "frontend/index.js",
-          lineNumber: 3616,
+          lineNumber: 3813,
           columnNumber: 17
         },
         this
       )
     ] }, void 0, true, {
       fileName: "frontend/index.js",
-      lineNumber: 3557,
+      lineNumber: 3753,
       columnNumber: 9
     }, this);
   }
@@ -48760,7 +48911,7 @@ performance.now();setTimeout(w,2300>q&&2E3<q?2300-q:500)})])},types:[]});z.ready
       import_jsx_dev_runtime = __toESM(require_jsx_dev_runtime());
       initializeBlock({ interface: () => /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(CalendarInterfaceExtension, {}, void 0, false, {
         fileName: "frontend/index.js",
-        lineNumber: 3884,
+        lineNumber: 4085,
         columnNumber: 36
       }) });
     }

@@ -39,7 +39,7 @@ function StatusIcon({ iconName, size = 20 }) {
 }
 
 // Order Detail Card Component
-function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, showVisualization = true }) {
+function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, showVisualization = true, onHighlightEvent }) {
 
     // Early return if eventsTable is not available
     if (!eventsTable || !eventsTable.fields) {
@@ -342,14 +342,34 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
                                 console.error('Error getting Order Status:', e);
                             }
         
-        // Note: Starttid and Sluttid fields don't exist, so events are not scheduled/unscheduled
-        const isScheduled = false;
+        // Check if this is a delegated sub order (has both Starttid and Sluttid)
+        // Delegated sub orders should have red text color but can still be draggable
+        let isScheduled = false;
+        let isDelegated = false;
+        try {
+            // Safely check for Starttid and Sluttid fields
+            if (event && typeof event.getCellValue === 'function') {
+                const starttid = event.getCellValue('Starttid');
+                const sluttid = event.getCellValue('Sluttid');
+                // Exclude lunch break events (they're virtual events, not sub orders)
+                const isLunchBreak = event.isLunchBreak === true;
+                // Delegated sub orders have both Starttid and Sluttid
+                // Check that values are not null/undefined and are valid dates
+                const hasStarttid = starttid !== null && starttid !== undefined;
+                const hasSluttid = sluttid !== null && sluttid !== undefined;
+                isDelegated = hasStarttid && hasSluttid && !isLunchBreak;
+            }
+        } catch (e) {
+            // Silently handle errors - field might not exist or be accessible
+            console.warn('Error checking Starttid/Sluttid for delegated status:', e);
+        }
 
         return {
             key: event.id || index,
             event,
             imageUrl,
             visualization,
+            arbetsorder,
             mekanikerNames,
             status,
             statusIcon,
@@ -357,6 +377,7 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
             isUpdating: updatingRecords && updatingRecords.has(event.id),
             isRecentlyUpdated: recentlyUpdatedRecords && recentlyUpdatedRecords.has(event.id),
             isScheduled,
+            isDelegated,
         };
     });
 
@@ -414,6 +435,7 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
                                             imageUrl={detail.imageUrl}
                                             visualization={detail.visualization}
                                     fordon={fordon}
+                                            arbetsorder={detail.arbetsorder}
                                             mekanikerNames={detail.mekanikerNames}
                                             status={detail.status}
                                             statusIcon={detail.statusIcon}
@@ -425,6 +447,8 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
                                             onClose={onClose}
                                             showVisualization={showVisualization}
                                             isScheduled={detail.isScheduled}
+                                            isDelegated={detail.isDelegated}
+                                            onHighlightEvent={onHighlightEvent}
                                         />
                                     ))}
                                 </>
@@ -438,6 +462,7 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
                                 imageUrl={detail.imageUrl}
                                 visualization={detail.visualization}
                                 fordon={fordon}
+                                arbetsorder={detail.arbetsorder}
                                 mekanikerNames={detail.mekanikerNames}
                                 status={detail.status}
                                 statusIcon={detail.statusIcon}
@@ -449,6 +474,8 @@ function OrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eve
                                 onClose={onClose}
                                 showVisualization={showVisualization}
                                 isScheduled={detail.isScheduled}
+                                isDelegated={detail.isDelegated}
+                                onHighlightEvent={onHighlightEvent}
                             />
                         ))}
                     </div>
@@ -586,7 +613,7 @@ function CalendarImagesGallery({ events, eventsTable }) {
 }
 
 // Left Side Order Detail Card Component (vertical layout for events, no Visualization)
-function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
+function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEvents, eventsTable, onClose, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, onHighlightEvent }) {
     const [isExpanded, setIsExpanded] = useState(true);
     const contentRef = useRef(null);
     const [contentHeight, setContentHeight] = useState('2000px'); // Large initial value to show content
@@ -875,6 +902,21 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                                     console.error('Error checking if event is scheduled:', e);
                                 }
                                 
+                                // Check if this is a delegated sub order
+                                let isDelegated = false;
+                                try {
+                                    if (event && typeof event.getCellValue === 'function') {
+                                        const starttid = event.getCellValue('Starttid');
+                                        const sluttid = event.getCellValue('Sluttid');
+                                        const isLunchBreak = event.isLunchBreak === true;
+                                        const hasStarttid = starttid !== null && starttid !== undefined;
+                                        const hasSluttid = sluttid !== null && sluttid !== undefined;
+                                        isDelegated = hasStarttid && hasSluttid && !isLunchBreak;
+                                    }
+                                } catch (e) {
+                                    console.warn('Error checking Starttid/Sluttid for delegated status:', e);
+                                }
+                                
                                 return (
                                     <DraggableOrderEvent
                                         key={event.id || index}
@@ -896,6 +938,8 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                                         variant="left"
                                         showVisualization={true}
                                         arbetsorder={arbetsorder}
+                                        isDelegated={isDelegated}
+                                        onHighlightEvent={onHighlightEvent}
                                     />
                                 );
                             })}
@@ -982,6 +1026,9 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                                 // Scheduled events always have isScheduled = true
                                 const isScheduled = true;
                                 
+                                // Check if this is a delegated sub order (scheduled events are delegated)
+                                const isDelegated = true; // Scheduled events are always delegated
+                                
                                 return (
                                     <DraggableOrderEvent
                                         key={event.id || `scheduled-${index}`}
@@ -1003,6 +1050,8 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
                                         variant="left"
                                         showVisualization={true}
                                         arbetsorder={arbetsorder}
+                                        isDelegated={isDelegated}
+                                        onHighlightEvent={onHighlightEvent}
                                     />
                                 );
                             })}
@@ -1016,7 +1065,7 @@ function LeftSideOrderDetailCard({ orderNo, orderRecord, orderTable, calendarEve
 }
 
 // Left Side Order Details Panel Component (vertical layout for events, no Visualization)
-function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords }) {
+function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, onHighlightEvent }) {
     console.log('LeftSideOrderDetailsPanel - orders count:', orders?.length);
     
     // Make the entire panel droppable
@@ -1150,6 +1199,7 @@ function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsT
                             statusIcons={statusIcons}
                             updatingRecords={updatingRecords}
                             recentlyUpdatedRecords={recentlyUpdatedRecords}
+                            onHighlightEvent={onHighlightEvent}
                         />
                     );
                 })
@@ -1159,7 +1209,7 @@ function LeftSideOrderDetailsPanel({ orders, orderTable, calendarEvents, eventsT
 }
 
 // Order Details Panel Component (shows at top)
-function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, showVisualization = true }) {
+function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarEvents, eventsTable, onCloseOrder, statusColors, statusIcons, updatingRecords, recentlyUpdatedRecords, showVisualization = true, onHighlightEvent }) {
     console.log('OrderDetailsPanel - selectedOrderNumbers:', Array.from(selectedOrderNumbers));
     console.log('OrderDetailsPanel - orders count:', orders?.length);
     
@@ -1243,6 +1293,7 @@ function OrderDetailsPanel({ selectedOrderNumbers, orders, orderTable, calendarE
                             updatingRecords={updatingRecords}
                             recentlyUpdatedRecords={recentlyUpdatedRecords}
                             showVisualization={showVisualization}
+                            onHighlightEvent={onHighlightEvent}
                         />
                     );
                 })}
@@ -1510,7 +1561,7 @@ function DroppableCell({ mechanicName, date, hourIndex, hourHeight }) {
 }
 
 // Draggable Order Event Component (for order detail panel)
-function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, showVisualization = true, isScheduled = false, variant = 'top', customUniqueId = null, arbetsorder = '' }) {
+function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, orderNo, orderRecord, onClose, showVisualization = true, isScheduled = false, isDelegated = false, variant = 'top', customUniqueId = null, arbetsorder = '', onHighlightEvent }) {
     // Use useSortable with unique ID that includes both orderNo and event.id
     // Format: "order-detail-{orderNo}-{event.id}" so each event is uniquely identifiable
     const uniqueId = customUniqueId || `order-detail-${orderNo || 'unknown'}-${event.id}`;
@@ -1539,11 +1590,14 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
         return null;
     }
 
+    // For delegated sub orders, make them clickable (pointer cursor) instead of not-allowed
+    const cursorStyle = isDelegated ? 'pointer' : (shouldMakeDraggable ? (isDragging ? 'grabbing' : 'grab') : 'not-allowed');
+    
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : (isScheduled && isLeftVariant ? 0.7 : 1),
-        cursor: shouldMakeDraggable ? (isDragging ? 'grabbing' : 'grab') : 'not-allowed',
+        cursor: cursorStyle,
     };
     const imageSize = isLeftVariant ? 80 : 100;
     const containerStyles = isLeftVariant
@@ -1586,7 +1640,17 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
                 // Only handle click if we're not dragging
                 // The drag sensor with 10px activation distance will prevent clicks from triggering drag
                 if (!isDragging) {
-                    // Don't stop propagation or prevent default - let drag work
+                    // For delegated sub orders, highlight the related event in calendar
+                    if (isDelegated && onHighlightEvent && event) {
+                        e.stopPropagation();
+                        // Pass event ID and whether it's from left side
+                        onHighlightEvent(event.id, isLeftVariant);
+                        // Clear highlight after 5 seconds (for left side) or 3 seconds (for top)
+                        const timeout = isLeftVariant ? 5000 : 3000;
+                        setTimeout(() => {
+                            onHighlightEvent(null, false);
+                        }, timeout);
+                    }
                     // Double click to deselect/close the order detail
                     if (e.detail === 2 && onClose) {
                         e.stopPropagation();
@@ -1597,9 +1661,10 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
         >
             {isLeftVariant ? (
                 // Left variant: Show only title
+                // Undelegated sub orders: gray, Delegated sub orders: red
                 <div className="w-full text-xs" style={{ 
                     fontWeight: !isScheduled ? '700' : 'normal',
-                    color: !isScheduled ? '#111827' : '#dc2626',
+                    color: (isDelegated || isScheduled) ? '#dc2626' : '#6b7280', // Red for delegated, gray for undelegated
                     textAlign: 'left',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
@@ -1630,22 +1695,30 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
                         </div>
                     )}
                     
-                    {/* Visualization - Second line (only if showVisualization is true) */}
+                    {/* Arbetsorder - Second line */}
+                    {/* Undelegated sub orders: gray, Delegated sub orders: red */}
+                    {arbetsorder && (
+                        <div className="mb-1 text-xs text-center" style={{ fontWeight: '700' }}>
+                            <span style={{ color: (isDelegated || isScheduled) ? '#dc2626' : '#6b7280' }}>{arbetsorder}</span>
+                        </div>
+                    )}
+                    
+                    {/* Visualization - Third line (only if showVisualization is true) */}
                     {showVisualization && (
                         <div className="mb-1 text-xs text-center">
                             {visualization ? (
-                                <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{visualization}</span>
+                                <span style={{ color: (isDelegated || isScheduled) ? '#dc2626' : '#6b7280' }}>{visualization}</span>
                             ) : (
                                 <span className="text-gray-400 italic">Not set</span>
                             )}
                         </div>
                     )}
                     
-                    {/* Fordon - Third line (from Orders table) */}
+                    {/* Fordon - Fourth line (from Orders table) */}
                     <div className="mb-1 text-xs text-center">
-                        <span className={`font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`}>REG: </span>
+                        <span className="font-semibold" style={{ color: (isDelegated || isScheduled) ? '#dc2626' : '#6b7280' }}>REG: </span>
                         {fordon ? (
-                            <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{fordon}</span>
+                            <span style={{ color: (isDelegated || isScheduled) ? '#dc2626' : '#6b7280' }}>{fordon}</span>
                         ) : (
                             <span className="text-gray-400 italic">Not set</span>
                         )}
@@ -1653,9 +1726,9 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
                     
                     {/* Mekaniker - Fifth line */}
                     <div className="mb-1 text-xs text-center">
-                        <span className={`font-semibold ${isScheduled ? "text-red-600" : "text-gray-500"}`}>Namn: </span>
+                        <span className="font-semibold" style={{ color: (isDelegated || isScheduled) ? '#dc2626' : '#6b7280' }}>Namn: </span>
                         {mekanikerNames ? (
-                            <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{mekanikerNames}</span>
+                            <span style={{ color: (isDelegated || isScheduled) ? '#dc2626' : '#6b7280' }}>{mekanikerNames}</span>
                         ) : (
                             <span className="text-gray-400 italic">Not set</span>
                         )}
@@ -1667,11 +1740,15 @@ function DraggableOrderEvent({ event, imageUrl, visualization, fordon, mekaniker
 }
 
 // Static (non-draggable) Order Event for already scheduled events
-function StaticOrderEvent({ imageUrl, visualization, fordon, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, onClose, showVisualization = true, isScheduled = true }) {
+function StaticOrderEvent({ event, imageUrl, visualization, fordon, arbetsorder, mekanikerNames, status, statusIcon, backgroundColor, isUpdating, isRecentlyUpdated, onClose, showVisualization = true, isScheduled = true, isDelegated = false, onHighlightEvent }) {
     if (isUpdating || isRecentlyUpdated) {
         return null;
     }
 
+    // For delegated sub orders, make them clickable
+    const cursorStyle = isDelegated ? 'pointer' : 'not-allowed';
+    const opacityStyle = isDelegated ? 1 : 0.7;
+    
     return (
         <div 
             className="flex-shrink-0"
@@ -1682,11 +1759,23 @@ function StaticOrderEvent({ imageUrl, visualization, fordon, mekanikerNames, sta
                 borderRadius: '8px',
                 padding: '8px',
                 backgroundColor: 'transparent',
-                opacity: 0.7,
-                cursor: 'not-allowed',
+                opacity: opacityStyle,
+                cursor: cursorStyle,
                 position: 'relative'
             }}
             onClick={(e) => {
+                // For delegated sub orders, highlight the related event in calendar
+                // StaticOrderEvent is used in top component, but we check if it's delegated
+                if (isDelegated && onHighlightEvent && event) {
+                    e.stopPropagation();
+                    // StaticOrderEvent is used in top component, so isFromLeft = false
+                    onHighlightEvent(event.id, false);
+                    // Clear highlight after 3 seconds for top component
+                    setTimeout(() => {
+                        onHighlightEvent(null, false);
+                    }, 3000);
+                }
+                // Double click to deselect/close the order detail
                 if (e.detail === 2 && onClose) {
                     e.stopPropagation();
                     onClose();
@@ -1704,6 +1793,13 @@ function StaticOrderEvent({ imageUrl, visualization, fordon, mekanikerNames, sta
             ) : (
                 <div className="mb-2 text-xs text-gray-400 italic text-center rounded" style={{ width: '100px', height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     No image
+                </div>
+            )}
+            
+            {/* Arbetsorder - First line (delegated sub orders should have red text) */}
+            {arbetsorder && (
+                <div className="mb-1 text-xs text-center" style={{ fontWeight: '700' }}>
+                    <span className={isScheduled ? "text-red-600" : "text-gray-500"}>{arbetsorder}</span>
                 </div>
             )}
             
@@ -1739,7 +1835,9 @@ function StaticOrderEvent({ imageUrl, visualization, fordon, mekanikerNames, sta
 }
 
 // Draggable Event Component
-function DraggableEvent({ event, top, height, backgroundColor, onExpand, isUpdating, isRecentlyUpdated, status, statusIcon }) {
+function DraggableEvent({ event, top, height, backgroundColor, onExpand, isUpdating, isRecentlyUpdated, status, statusIcon, highlightedEvent, eventsTable, setUpdatingRecords }) {
+    const isHighlighted = highlightedEvent && highlightedEvent.eventId === event.id;
+    const isFromLeft = highlightedEvent && highlightedEvent.isFromLeft;
     const {
         attributes,
         listeners,
@@ -1762,6 +1860,83 @@ function DraggableEvent({ event, top, height, backgroundColor, onExpand, isUpdat
 
     const eventTitle = event.getCellValueAsString('Arbetsorder beskrivning') || 'Untitled';
     const bookingOrder = event.getCellValueAsString('Boknings-Order') || '';
+    
+    // Check if this is a delegated sub order (has both Starttid and Sluttid)
+    // Delegated sub orders should have red text color
+    // Exclude lunch break events (they're virtual events, not sub orders)
+    const isLunchBreak = event.isLunchBreak === true;
+    const starttid = event.getCellValue('Starttid');
+    const sluttid = event.getCellValue('Sluttid');
+    const isDelegated = !!(starttid && sluttid) && !isLunchBreak;
+    
+    // Handle click on event (show details) - only if not dragging
+    // The drag sensor has activationDistance: 10, so clicks (which don't move 10px) won't trigger drag
+    const handleEventClick = (e) => {
+        // Don't trigger if we're dragging, if it's a lunch break, or if click came from the small button
+        if (isDragging || isLunchBreak || e.target.closest('.undelegate-button')) {
+            return;
+        }
+        
+        // Show event details
+        expandRecord(event);
+    };
+    
+    // Handle undelegation (remove Starttid and Sluttid)
+    const handleUndelegate = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!eventsTable || !event || isLunchBreak) {
+            return;
+        }
+        
+        if (!isDelegated) {
+            console.log('Event is not delegated, cannot undelegate');
+            return;
+        }
+        
+        try {
+            // Find Starttid and Sluttid fields
+            const starttidField = eventsTable.fields.find(f => 
+                f.name === 'Starttid' || f.name.toLowerCase() === 'starttid'
+            );
+            const sluttidField = eventsTable.fields.find(f => 
+                f.name === 'Sluttid' || f.name.toLowerCase() === 'sluttid'
+            );
+            
+            if (!starttidField || !sluttidField) {
+                console.error('Starttid or Sluttid fields not found');
+                return;
+            }
+            
+            // Mark as updating
+            if (setUpdatingRecords) {
+                setUpdatingRecords(prev => new Set(prev).add(event.id));
+            }
+            
+            // Update record to remove Starttid and Sluttid
+            await eventsTable.updateRecordAsync(event.id, {
+                [starttidField.name]: null,
+                [sluttidField.name]: null,
+            });
+            
+            console.log('Event undelegated successfully:', event.id);
+        } catch (error) {
+            console.error('Error undelegating event:', error);
+            alert('Failed to undelegate event. Please try again.');
+        } finally {
+            // Remove updating flag after a delay
+            if (setUpdatingRecords) {
+                setTimeout(() => {
+                    setUpdatingRecords(prev => {
+                        const newSet = new Set(prev);
+                        newSet.delete(event.id);
+                        return newSet;
+                    });
+                }, 500);
+            }
+        }
+    };
     
     // Get Mekaniker value - handle different data structures
     let mechanicName = '';
@@ -1803,11 +1978,31 @@ function DraggableEvent({ event, top, height, backgroundColor, onExpand, isUpdat
                 height: `${height}px`,
                 backgroundColor,
                 borderRadius: '12px',
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: isHighlighted 
+                    ? (isFromLeft 
+                        ? '0 0 0 10px rgba(239, 68, 68, 0.3), 0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1)' 
+                        : '0 0 0 3px #3b82f6, 0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1)')
+                    : '0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1)',
+                border: isHighlighted 
+                    ? (isFromLeft ? '10px solid #ef4444' : '2px solid #3b82f6') 
+                    : '1px solid rgba(255, 255, 255, 0.3)',
                 backdropFilter: 'blur(1px)',
+                zIndex: isHighlighted ? 1000 : 'auto',
+                transition: 'border 0.5s ease, box-shadow 0.5s ease',
+                cursor: isLunchBreak ? 'default' : 'pointer',
             }}
-            className="event-block text-white cursor-pointer hover:opacity-90 transition-all duration-200"
+            className="event-block text-white transition-all duration-200"
+            onClick={handleEventClick}
+            onMouseEnter={(e) => {
+                if (!isLunchBreak) {
+                    e.currentTarget.style.opacity = '0.9';
+                }
+            }}
+            onMouseLeave={(e) => {
+                if (!isLunchBreak) {
+                    e.currentTarget.style.opacity = '1';
+                }
+            }}
             {...attributes}
             {...listeners}
         >
@@ -1853,63 +2048,52 @@ function DraggableEvent({ event, top, height, backgroundColor, onExpand, isUpdat
                     </div>
                 )}
                 
-                {/* Mechanic name */}
-                {mechanicName && (
-                    <div style={{
-                        fontSize: '9px',
-                        opacity: 0.8,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        width: '100%'
-                    }}>
-                        {mechanicName}
+                {/* Undelegate button (only show for delegated events) */}
+                {isDelegated && !isLunchBreak && (
+                    <div
+                        className="undelegate-button"
+                        style={{
+                            position: 'absolute',
+                            top: '4px',
+                            right: '4px',
+                            width: '18px',
+                            height: '18px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            flexShrink: 0,
+                            border: '1.5px solid #6b7280',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.2)',
+                            zIndex: 1000,
+                            color: '#6b7280',
+                            lineHeight: '1',
+                            transition: 'all 0.15s ease'
+                        }}
+                        onClick={handleUndelegate}
+                        onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#6b7280';
+                            e.currentTarget.style.color = '#ffffff';
+                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.25)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+                            e.currentTarget.style.color = '#6b7280';
+                            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.2)';
+                        }}
+                        title="Click to undelegate (remove time)"
+                    >
+                        ×
                     </div>
                 )}
-                
-                {/* Clickable info icon */}
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: '4px',
-                        right: '4px',
-                        width: '16px',
-                        height: '16px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        fontSize: '8px',
-                        fontWeight: 'bold',
-                        flexShrink: 0,
-                        border: '1px solid rgba(0, 0, 0, 0.1)',
-                        zIndex: 1000
-                    }}
-                    onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }}
-                    onMouseUp={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('Info icon clicked:', event.id, eventTitle);
-                        onExpand(event);
-                    }}
-                    onPointerDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }}
-                    onPointerUp={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onExpand(event);
-                    }}
-                    title="Click to view details"
-                >
-                    ℹ
-                </div>
             </div>
         </div>
     );
@@ -1991,6 +2175,18 @@ function CalendarInterfaceExtension() {
     // Separate selection states for top and left side panels
     const [topSelectedOrderNumbers, setTopSelectedOrderNumbers] = useState(new Set());
     const [sideSelectedOrderNumbers, setSideSelectedOrderNumbers] = useState(new Set());
+    // Highlighted event in calendar (for clicking delegated sub orders)
+    // Format: { eventId: string, isFromLeft: boolean }
+    const [highlightedEvent, setHighlightedEvent] = useState(null);
+    
+    // Handler for highlighting events
+    const handleHighlightEvent = useCallback((eventId, isFromLeft = false) => {
+        if (eventId) {
+            setHighlightedEvent({ eventId, isFromLeft });
+        } else {
+            setHighlightedEvent(null);
+        }
+    }, []);
     const isInitialMount = useRef(true);
     const isSelectingOrder = useRef(false); // Prevent multiple simultaneous selections
 
@@ -3606,6 +3802,7 @@ function CalendarInterfaceExtension() {
                             statusIcons={statusIcons}
                             updatingRecords={updatingRecords}
                             recentlyUpdatedRecords={recentlyUpdatedRecords}
+                            onHighlightEvent={handleHighlightEvent}
                         />
                     )}
                     <div className="flex-1 py-10 text-center text-gray-500 flex items-center justify-center" style={{ minWidth: 0 }}>
@@ -3669,6 +3866,7 @@ function CalendarInterfaceExtension() {
                                     statusIcons={statusIcons}
                                     updatingRecords={updatingRecords}
                                     recentlyUpdatedRecords={recentlyUpdatedRecords}
+                                    onHighlightEvent={handleHighlightEvent}
                                 />
                             </div>
                         )}
@@ -3848,6 +4046,9 @@ function CalendarInterfaceExtension() {
                                                         isRecentlyUpdated={recentlyUpdatedRecords.has(ev.id)}
                                                         status={status}
                                                         statusIcon={statusIcon}
+                                                        highlightedEvent={highlightedEvent}
+                                                        eventsTable={eventsTable}
+                                                        setUpdatingRecords={setUpdatingRecords}
                                                     />
                                                 );
                                             })}
